@@ -2,3 +2,25 @@
 title: "Summary"
 editor: visual
 ---
+
+# Region
+
+The central region schools districts are located in the following EDRs and Counties;
+
+-   EDR 7E
+    -    Chisago
+    -   Isanti
+    -   Kanabec
+    -   Mille Lacs
+    -   Pine
+-   EDR 7W
+    -   Benton
+    -   Sherburne
+    -   Stearns
+    -   Wright
+-   EDR 5
+    -   Cass
+    -   Crow Wing
+    -   Morrison
+    -   Todd
+    -   Wadena

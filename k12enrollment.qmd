@@ -143,7 +143,7 @@ kable(names(enrollment.original))
 
 In the dataset there are `r comma(nrow(enrollment.original), accuracy = 1)` observations along with `r comma(ncol(enrollment.original), accuracy = 1)` columns. Each observation does not represent a unique, unduplicated individual, but rather a unique status for the individual. For example, one individual can have multiple observations if they changed schools, for each school year, or if their economic status changed in the middle of a school year.
 
-Next we need to create a dataset that only has students who graduated from a high school located in EDR 3. To do that, we will need to join up with other .
+Next we need to create a dataset that only has students who graduated from a high school located in EDR 5, EDR 7E and EDR 7W. To do that, we will need to join up with other .
 
 <br>
 
@@ -192,19 +192,19 @@ Now I should be able to join this dataset with the enrollment data to figure out
 <br>
 
 ```{r join enrollment data with org data}
-enrollment.org.ne <- enrollment.original %>%
+enrollment.org.central <- enrollment.original %>%
   left_join(k12.org.master, by = "K12OrganizationID") %>%
-  filter(edr == "EDR 3 - Arrowhead")
+  filter(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"))
 
-kable(head(enrollment.org.ne))
+kable(head(enrollment.org.central))
 
-kable(names(enrollment.org.ne))
+kable(names(enrollment.org.central))
 
 ```
 
 <br>
 
-The dataset now has `r comma(nrow(enrollment.org.ne))` instances that provide a number of characteristics about an individuals enrollment.
+The dataset now has `r comma(nrow(enrollment.org.central))` instances that provide a number of characteristics about an individuals enrollment.
 
 My goal is to end up with a dataset where each observation (row) represents a unique (unduplicated) individual that's tied to the school from which they graduated. Here's how I will do that.
 
@@ -231,7 +231,7 @@ This "graduates list" will be the list on which we will bind all the other varia
 <br>
 
 ```{r k12enrollment StatusEnd}
-graduates <- enrollment.org.ne %>%
+graduates <- enrollment.org.central %>%
   filter(StatusEnd %in% c(8,9)) %>%
   mutate(grad.year = str_sub(TimeID, 1, 4),
          grad.year = as.integer(grad.year),
@@ -256,7 +256,7 @@ Next we need to create new columns for the variables that will indicate a certai
 ```{r K12Enrollment creating new columns}
 
 # Lets start with economic status indicator
-k12.enr.esi.indicator <- enrollment.org.ne %>%
+k12.enr.esi.indicator <- enrollment.org.central %>%
   select(PersonID, EconomicStatusIndicator) %>%
   group_by(PersonID) %>%
   mutate(economic.status.code = ifelse(EconomicStatusIndicator %in% c(1,2,4,5), 1, 0),
@@ -268,7 +268,7 @@ k12.enr.esi.indicator <- enrollment.org.ne %>%
 
 # PSEO
 
-k12.enr.pseo.indicator <- enrollment.org.ne%>%
+k12.enr.pseo.indicator <- enrollment.org.central %>%
   select(PersonID, PostSecondaryEnrollmentOptionsIndicator, PSEOConcurrentEnrollmentIndicator) %>%
   mutate(PostSecondaryEnrollmentOptionsIndicator = ifelse(PostSecondaryEnrollmentOptionsIndicator == "Y", 1, 0),
          PSEOConcurrentEnrollmentIndicator = ifelse(PSEOConcurrentEnrollmentIndicator == "Y", 1, 0)) %>%
@@ -281,7 +281,7 @@ k12.enr.pseo.indicator <- enrollment.org.ne%>%
 
 # Special Ed status
 
-k12.enr.spced.indicator <- enrollment.org.ne %>%
+k12.enr.spced.indicator <- enrollment.org.central %>%
   select(PersonID, SpecialEdStatus) %>%
   mutate(SpecialEdStatus.code = ifelse(SpecialEdStatus %in% c(4,5,6,7,8,9), 1, 0)) %>%
   group_by(PersonID) %>%
@@ -292,7 +292,7 @@ k12.enr.spced.indicator <- enrollment.org.ne %>%
 
 # Home Primary Language
 
-k12.enr.homeprimlang.indicator <- enrollment.org.ne %>%
+k12.enr.homeprimlang.indicator <- enrollment.org.central %>%
   select(PersonID, HomePrimaryLanguage) %>%
   mutate(HomePrimaryLanguage.code = ifelse(HomePrimaryLanguage == 11, 0, 1)) %>%
   group_by(PersonID) %>%
@@ -303,7 +303,7 @@ k12.enr.homeprimlang.indicator <- enrollment.org.ne %>%
 
 # Race
 
-k12.enr.race <- enrollment.org.ne %>%
+k12.enr.race <- enrollment.org.central %>%
   select(PersonID, RaceEthnicity) %>%
   mutate(RaceEthnicity = ifelse(RaceEthnicity == 0, "Unknown",
                                 ifelse(RaceEthnicity == 1, "AI",
@@ -363,7 +363,7 @@ Below is the percentage of total observations that;
 -   Participated in a PSEO course at some point in the dataset.
 -   Pct non white
 
-As expected, nearly half (49.1%) of the observations are female. Over a third (34.0%) of the observations have been eligible for free or reduced lunch at some point in the dataset. Also, over a third (36.4%) of observations participated in a PSEO course. 0.8% of observations indicated that there was a non-english speaker at home, 0.2% had limited english proficiency and 1.3% indicated that were homeless at some point. Finally, 28% identified as being non-white.
+As expected, nearly half (49.9%) of the observations are female. Nearly a third (31.6%) of the observations have been eligible for free or reduced lunch at some point in the dataset. Also, over a third (36.3%) of observations participated in a PSEO course. Just over 25% are non-white students , 14% are categorized as needing special education, 4% have non-english speakers at home, 1.5% have limited english proficiency and nearly 1% were categorized as homeless at some point between Sophmore and Senior year.
 
 <br>
 
