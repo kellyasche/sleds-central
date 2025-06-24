@@ -1,0 +1,476 @@
+---
+title: "CTEEnrollment"
+editor: visual
+---
+
+```{r library, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(infer)
+```
+
+```{r themes and shapefiles, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         mif = ifelse(is.na(mif), "TC", mif),
+         mif = as.factor(mif),
+         mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
+Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+```
+
+# Data prep
+
+The next dataset is individuals that were enrolled in CTE courses. I'm first going to load the entire dataset, then clean it up, and then I will merge it with my master/NE graduate dataset.
+
+<br>
+
+```{r cte enrollment original}
+cte.enrollment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/CTEEnrollment/CTEEnrollment.csv') %>%
+  mutate(PersonID = as.integer(PersonID)) %>%
+  filter(FiscalYearTimeID != "NULL") %>%
+  mutate(CareerCluster = ifelse(CareerCluster == "26" & CareerClusterName == "Diversified Youth Apprenticeship", "25", CareerCluster),
+         CareerCluster = ifelse(CareerCluster == "NULL", "0", CareerCluster),
+         CareerCluster = str_replace(CareerCluster, "Design", "11"),
+         CareerCluster = as.integer(CareerCluster))
+
+
+career.cluster.codes.names.original <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/CTEEnrollment/career-cluster-codes-names_from SLEDS_March2025.xlsx') %>%
+  mutate(cte.year = ifelse(Introduced > 2020, 2021, Discontinued),
+         cte.year = ifelse(is.na(Introduced) & is.na(Discontinued), 2021, cte.year),
+         cte.year = ifelse(is.na(cte.year), 2020, cte.year),
+         CareerClusterName.new = as_factor(CareerClusterName.new))
+
+
+career.cluster.codes.names.addendum <- data.frame(`CareerCluster` = c(0, 1, 2),
+                                                  CareerClusterName.new = c("NULL", "Agriculture, Food, and Natural Resources", "Architecture & Construction"),
+                                                  Status = c("Retired", "Retired", "Retired"),
+                                                  Introduced = c(2021, 2021, 2021),
+                                                  Discontinued = c(2021, 2021, 2021),
+                                                  cte.year = c(2020, 2020, 2020))
+
+career.cluster.codes.names <- career.cluster.codes.names.original %>%
+  rbind(career.cluster.codes.names.addendum)
+
+cte.enrollment.master <- cte.enrollment.original %>%
+  mutate(year = str_sub(FiscalYearTimeID, 1, 4),
+         year = as.integer(year),
+         cte.year = ifelse(year < 2021, 2020, 2021)) %>%
+  left_join(career.cluster.codes.names[,c(1,2,6)], by = c("CareerCluster", "cte.year")) %>%
+  select(-CareerClusterName, -year, -cte.year) %>%
+  rename(CareerClusterName = CareerClusterName.new)
+
+kable(head(cte.enrollment.master))
+
+kable(names(cte.enrollment.master))
+```
+
+<br>
+
+This dataset provides each CTE course taken by a student. This means that there were `r comma(nrow(cte.enrollment.original), accuracy = 1)` instances of a student taking a CTE course. There are `r comma(ncol(cte.enrollment.original), accuracy = 1)` columns providing the PersonID taking the course, the fiscal year, the K12 organization, along with details about the actual course itself.
+
+There are two goals with this dataset.
+
+1.  Format it so each observation represents a single PersonID along with the total number of CTE courses they took.
+2.  Format it so each observation represents a single PersonID along with the number of CTE courses taken in each CareerCluster.
+
+I'm using careerclusters due to their specificity.
+
+<br>
+
+```{r cteenrollment n total cte courses}
+graduate <- read_csv("Data/SLEDS/Masters/Master-3.csv") %>%
+  select(PersonID)
+
+cte.n.total.courses <- cte.enrollment.master %>%
+  group_by(PersonID) %>%
+  summarise(total.cte.courses.taken = n()) %>%
+  ungroup() %>%
+  right_join(graduate, by = "PersonID") %>%
+  mutate(total.cte.courses.taken = ifelse(is.na(total.cte.courses.taken), 0, total.cte.courses.taken))
+
+kable(head(cte.n.total.courses))
+
+kable(names(cte.n.total.courses))
+```
+
+<br>
+
+A total of `r cte.n.total.courses %>% filter(total.cte.courses.taken > 0) %>% nrow() %>% scales::comma(accuracy = 1)` individuals took at least one CTE course in the dataset.
+
+Next I'm going to create a dataset that calculates the number of CTE courses each individual has taken by CareerCluster.
+
+<br>
+
+```{r cteenrollment by careercluster}
+cte.n.careercluster <- cte.enrollment.master %>%
+  group_by(PersonID, CareerClusterName) %>%
+  summarise(cte.n.careercluster = n()) %>%
+  ungroup() %>%
+  right_join(graduate, by = "PersonID") %>%
+  complete(PersonID, CareerClusterName, fill = list(cte.n.careercluster = 0)) %>%
+  drop_na(CareerClusterName) %>%
+  mutate(CareerClusterName,
+         CareerClusterName = str_replace(CareerClusterName, "Arts, A/V Technology, & Communication", "Arts, A/V Technology & Communication")) %>%
+  spread(key = CareerClusterName, value = cte.n.careercluster) %>%
+  select(PersonID, 2, 4:18, 20:ncol(.))
+
+kable(head(cte.n.careercluster))
+
+kable(names(cte.n.careercluster))
+```
+
+<br>
+
+There seems to be a minor coding error in the careercluster column. For one particular class, it was consistently labeled "Information Technology" even though the field requires a number value. In addition, "information Technology" doesn't seem to match the course due to the following information;
+
+Program Course Name: Family and Consumer Science Course title: Apparrel CareerCluster: Design CareerClusterName: 6 (which should be a letter value, not a code).
+
+Due to this information, I recoded anything that was "Information Technology" for that particular course as a "6".
+
+In addition, there were some errors in careercluster 26, which is supposed to be "Administrative only" but had a number of "Youth Apprenticeships" in it that I recoded to CareerCluster 25.
+
+After doing this, the dataset has all individuals/graduates with a column for each CTE course CareerCluster containing the number of courses they took within that CareerCluster. I will summarise below to see how many students took courses within each CareerCluster.
+
+Now lets join the CTE enrollment data with the master dataset.
+
+<br>
+
+```{r join cte enrollment with master}
+master.3 <- read_csv("Data/SLEDS/Masters/Master-3.csv")
+
+master.4 <- master.3 %>%
+  left_join(cte.n.total.courses, by = "PersonID") %>%
+  left_join(cte.n.careercluster, by = "PersonID")
+
+cteenrollment.master <- master.3 %>%
+  select(PersonID) %>%
+  left_join(cte.n.total.courses, by = "PersonID") %>%
+  left_join(cte.n.careercluster, by = "PersonID")
+
+write_csv(cteenrollment.master, "Data/SLEDS/Masters/cteenrollment_master.csv")
+
+kable(head(master.4))
+
+kable(names(master.4))
+```
+
+<br>
+
+After joining the CTE enrollment data with the master dataset we continue to have `r master.4 %>% nrow() %>% comma(accuracy = 1)` with an updated number of `r master.4 %>% ncol() %>% comma(accuracy = 1)` columns.
+
+<br>
+
+# Summary of CTE enrollment data
+
+<br>
+
+## Summary - Number of CTE courses taken by a student
+
+<br>
+
+We'll start with summarising the number of cte courses the observations have taken.
+
+The tables below show that the average number of CTE courses taken by all PersonID in the master dataset is 4.06 with a standard deviation of +/-3.72. This is a high standard deviation meaning there are values quite far from the mean.
+
+The second row of the table shows the average number of CTE courses taken by individuals who took at least one CTE course. The average jumps up a bit to 4.84 with a standard deviation of 3.56.
+
+<br>
+
+```{r summarise n CTE courses taken, echo=FALSE}
+cte.n.courses.summary.total <- master.4 %>%
+  summarise(mean = mean(total.cte.courses.taken),
+            median = median(total.cte.courses.taken),
+            sd = sd(total.cte.courses.taken),
+            n = comma(n(), accuracy = 1),
+            min = min(total.cte.courses.taken),
+            max = max(total.cte.courses.taken)) %>%
+  mutate(population = "All graduates",
+         mean = comma(mean, accuracy = .01),
+         sd = comma(sd, accuracy = .01))
+
+cte.n.courses.summary.ctestudents <- master.4 %>%
+  filter(total.cte.courses.taken > 0) %>%
+  summarise(mean = mean(total.cte.courses.taken),
+            median = median(total.cte.courses.taken),
+            sd = sd(total.cte.courses.taken),
+            n = comma(n(), accuracy = 1),
+            min = min(total.cte.courses.taken),
+            max = max(total.cte.courses.taken)) %>%
+  mutate(population = "Only graduates with CTE courses > 0",
+         mean = comma(mean, accuracy = .01),
+         sd = comma(sd, accuracy = .01))
+  
+cte.n.courses.summary.total.ctestudents <- cte.n.courses.summary.total %>%
+  rbind(cte.n.courses.summary.ctestudents) %>%
+  select(population, n, mean, median, sd, min, max)
+
+datatable(cte.n.courses.summary.total.ctestudents, class = "cell-border stripe", filter = "top")
+
+```
+
+<br>
+
+Below is a chart showing the distribution of CTE courses taken by individuals. This shows that a a large majority of students take 10 courses or less.
+
+<br>
+
+```{r summarise n CTE courses taken distribution, echo=FALSE}
+master.4.hist <- master.4 %>%
+  mutate(key = seq(n())) %>%
+  select(key, total.cte.courses.taken)
+
+cte.n.courses.taken.dist.plot <- ggplot(master.4.hist, aes(total.cte.courses.taken)) +
+  geom_histogram_interactive(aes(data_id = key, tooltip = paste("N = ", comma(..count.., accuracy = 1), "\nPercent: ", percent(..count.. / sum(..count..), accuracy = .1)))) +
+  labs(x="", y = "", color="", title = "Histogram - N CTE courses")+
+  scale_y_continuous(labels=scales::comma)+
+  theme_line+
+  theme(legend.position = "bottom",
+        text = element_text(size = 16))
+
+  girafe(ggobj = cte.n.courses.taken.dist.plot, width_svg = 10) %>%
+    girafe_options(opts_selection(type = "none"),
+                   opts_toolbar(saveaspng = FALSE),
+                   opts_sizing(rescale = FALSE))
+
+
+```
+
+<br>
+
+Up next is to see if the percentage of students taking a CTE course varies significantly by RUCA group.
+
+There is a significant difference in whether a student has taken at least one CTE course and their high school county RUCA category. Although 84% of all graduates took at least one CTE course, that percentage is highest in urban/town/rural mix counties with 85%.
+
+Of those students that took at least 1 CTE course, the average number of CTE courses taken ranged from 5.1 in our entirely urban districts to 4.6 in town/rural mix districts.
+
+<br>
+
+::: panel-tabset
+## RUCA Table
+
+```{r taken at least one cte course table ruca, echo=FALSE}
+cte.yes.ruca <- master.4 %>%
+  mutate(cte.yes = ifelse(total.cte.courses.taken > 0, "Yes", "No")) %>%
+  tabyl(Dem_Desc, cte.yes) %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1)
+
+cte.n.ruca <- master.4 %>%
+  filter(total.cte.courses.taken > 0 ) %>%
+  group_by(Dem_Desc) %>%
+  summarise(mean = comma(mean(total.cte.courses.taken), accuracy = .1),
+            median = comma(median(total.cte.courses.taken), accuracy = 1),
+            sd = comma(sd(total.cte.courses.taken), accuracy = .1),
+            n = comma(n(), accuracy = 1),
+            min = comma(min(total.cte.courses.taken), accuracy = 1),
+            max = comma(max(total.cte.courses.taken), accuracy = 1)) %>%
+  ungroup()
+
+datatable(cte.yes.ruca, class = "cell-border stripe", filter = "top")
+
+tags$br()
+
+datatable(cte.n.ruca, class = "cell-border stripe", filter = "top")
+
+
+```
+
+## RUCA Cross-tabs
+
+```{r taken at least 1 cte course ruca cross tabs}
+cte.yes.no.ruca <- master.4 %>%
+  mutate(cte.yes = ifelse(total.cte.courses.taken > 0, "Yes", "No")) 
+
+CrossTable(cte.yes.no.ruca$Dem_Desc, cte.yes.no.ruca$cte.yes, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+:::
+
+<br>
+
+## Summary - CareerCluster of CTE courses taken
+
+Let's dig into the breadth of CTE course concentrations a graduate would take by looking at the proportion of graduates that took at least one course within a concentration.
+
+The table below shows that a third of all graduates took a CTE course in Transportation, Distribution & Logistics, and Human Services, followed by 27% in Manufacturing, and 25% in each Agriculture, Food and Natural Resources.
+
+<br>
+
+```{r cte concentration grad prop}
+cte.cf.prop <- master.4 %>%
+  gather(key = "CareerCluster", value = "n.courses", `ACTE-SPED`:`Youth Apprenticeship`) %>%
+  mutate(cte.cf.taken = ifelse(n.courses > 0, "Yes", "No")) %>%
+  tabyl(CareerCluster, cte.cf.taken) %>%
+  mutate(pct.taken.cf = Yes / (Yes + No)) %>% 
+  arrange(desc(pct.taken.cf))
+
+datatable(cte.cf.prop, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(scrollX = TRUE)) %>%
+  formatCurrency(2:3, "", digits = 0) %>%
+  formatPercentage(4)
+
+```
+
+<br>
+
+Now we will take a look at the breakdown of the number of times a CTE courses has been taken within a CareerCluster for each PersonID. I expect there to be a lot of variation in this data since different schools might focus on different types of CTE offerings depending on the local employment makeup.
+
+First, lets look at the concentrations of courses taken across CareerClusters.
+
+Not surprisingly, Transportation, Distribution & Logistics was the careercluster with the highest percentage of courses taken with 20.6%. This was followed by manfacturing with 12.4% and architecture and construction with 11.2% of CTE courses taken in that CareerCluster.
+
+<br>
+
+```{r cte CareerClusters concentration, echo=FALSE}
+cte.cf.concentration.total <- master.4 %>%
+  select(PersonID,  `ACTE-SPED`:`Youth Apprenticeship`) %>%
+  gather(key = "CareerCluster", value = "n.courses", 2:ncol(.)) %>%
+  group_by(CareerCluster) %>%
+  summarise(n = sum(n.courses)) %>%
+  ungroup() %>%
+  mutate(pct = percent(n / sum(n), accuracy = .1)) %>%
+  arrange(CareerCluster)
+
+  datatable(cte.cf.concentration.total, class = "cell-border stripe", filter = "top", rownames = FALSE)
+
+```
+
+<br>
+
+Lets see how this looks broken down by county.
+
+The county maps do show some differences in percentages across career clusters. Agriculture, food and natural resources had higher percentages taken in the western and central counties. Manufacturing was taken at a higher percentage in the northern and southern counties. Human services and transportation, distribution & logistics was pretty standard across all.
+
+<br>
+
+```{r cte CareerClusters concentration  by county, echo=FALSE}
+cte.cf.concentration.county <- master.4 %>%
+  select(PersonID, county.name, countyfp,  `ACTE-SPED`:`Youth Apprenticeship`) %>%
+  gather(key = "CareerCluster", value = "n.courses",  `ACTE-SPED`:`Youth Apprenticeship`) %>%
+  group_by(county.name, countyfp, CareerCluster) %>%
+  summarise(n = sum(n.courses)) %>%
+  ungroup() %>%
+  group_by(county.name, countyfp) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  rename(CareerClusterName = CareerCluster) %>%
+  left_join(mn_counties[,c(5,7)], by = "countyfp")
+
+cte.cf.concentration.county.map <- ggplot(data = filter(cte.cf.concentration.county, pct > .05)) +
+  facet_wrap(~CareerClusterName, ncol = 2,
+             labeller = label_wrap_gen(15)) +
+  geom_sf_interactive(color = "grey85", aes(geometry = geometry, fill = pct, data_id = countyfp, tooltip = paste(county.name, "\nCareerCluster: ", CareerClusterName, "\nPercent of courses taken in this CareerCluster: ", percent(pct, accuracy = .1), sep = ""))) +
+  theme_sf+
+  scale_fill_fermenter(palette = "PuBu", direction = 1, labels = scales::percent) +
+  labs(title = str_wrap("Percent of CTE courses taken within each CareerCluster by county", 39)) +
+  theme(legend.box.margin = margin(0, 0, 0, 0),
+        text = element_text(size = 16),
+        strip.text = element_text(size = 8))
+
+girafe(ggobj = cte.cf.concentration.county.map, height_svg = 20) %>%
+  girafe_options(opts_sizing(rescale = FALSE))
+
+
+```
+
+```{r write master}
+write_csv(master.4, "Data/SLEDS/Masters/Master-4.csv")
+```
