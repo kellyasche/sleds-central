@@ -216,7 +216,7 @@ We will summarize the CTE demographics data by rural-ness and region to see if t
 
 First, lets see what percentage of the graduates by cte demographics categories.
 
-The table below shows that of the total graduates from Northeast high schools, nearly a third (30%) were a CTE concentrator or completor, while 27% were just a participant and 43% took no CTE courses at all.
+The table below shows that of the total graduates from Central high schools, 40% were a CTE concentrator or completor, while 30% were just a participant and 30% took no CTE courses at all.
 
 <br>
 
@@ -233,7 +233,7 @@ datatable(cte.dem.summary.total, class = "cell-border stripe", filter = "top", r
 
 <br>
 
-The cross-tabs show a significant difference between the percentage of students by categorization and RUCA categories. Our The more rural the district, the higher the percentages of the graduates that are either concentrators or completors, or took at least one CTE course.
+The cross-tabs show a significant difference between the percentage of students by categorization and RUCA categories. The largest difference is entirely urban schools where 34% of the graduates had no CTE.
 
 <br>
 
@@ -322,11 +322,7 @@ CrossTable(master.5$county.name, master.5$cte.achievement, expected = TRUE, prop
 
 The next thing to check is to determine whether there is a significant difference by year.
 
-Interestingly, these are going in opposite directions. CTE concentrators or completors has been setadily decreasing since 2008 - from 50% to 21%.
-
-CTE participants has increased a bit going from 19% to 32%.
-
-The percentage of graduating taking no CTE courses has increased, going from 31% to 47%.
+Oddly, something happens with the 2020 data. The percentage of students with No CTE drops by half from 2020 to 2023.
 
 <br>
 

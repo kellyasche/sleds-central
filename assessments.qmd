@@ -1,0 +1,570 @@
+---
+title: "Assessments"
+editor: visual
+---
+
+```{r library, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(infer)
+```
+
+```{r themes and shapefiles, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         mif = ifelse(is.na(mif), "TC", mif),
+         mif = as.factor(mif),
+         mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
+Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+```
+
+# Prep data
+
+Okay, lets check out assessments. This is the entire assessment dataset, which I will first clean up and then join it with our master/Central graduate dataset.
+
+<br>
+
+```{r ipeds original}
+assessments.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/Assessments/K12Assessment.csv')  %>%
+  mutate(PersonID = as.integer(PersonID),
+         TestName = as.factor(TestName),
+         Subject = as.factor(Subject),
+         AchievementLevel = as.factor(AchievementLevel)) 
+
+kable(head(assessments.original))
+
+kable(names(assessments.original))
+
+```
+
+<br>
+
+We have `r comma(assessments.original %>% nrow(), accuracy = 1)` rows and `r comma(assessments.original %>% ncol(), accuracy = 1)` columns in this dataset. Here are the descriptions for each of the columns.
+
+-   K12AsstTimeID: Day, month, and year the assessment took place.
+-   TestName: Name of the test taken. There are 12 different tests in the dataset -
+    -   ACCESS: English proficiency,
+    -   ALTACCESS: English proficiency for special education or meet requirements
+    -   MCA-II & MCA-III: Minnesota Comprehsensive Assessments (series 2 and 3)
+    -   MOD-II, MOD-III: Modified Comprehensive Assessment, used only until 2014
+    -   MTAS & MTAS-III: Minnesota Test of Academic Skills
+    -   MTELL: an alternate assessment for students learning English (like the MTAS or MOD). MTELL was only administered from 2007-2010 during the series-II of MCAs.
+    -   SOLOM: Minnesota Student Oral Language Observation Matrix
+    -   TEAE: one of two assessments that Minnesota used to meet the requirements to test ELs in all four domains of language (the other was SOLOM). TEAE was used 2002 until we changed to ACCESS in 2012. SOLOM was used 2004 until we changed to ACCESS in 2012.
+-   Subject: Classifies each test that is given to a student based on the areas measured. There are 8 factors;
+    -   A: Aural (listening) - ACCESS & ALTACCESS only
+    -   C: Composite - ACCESS & ALTACCESS only
+    -   L: Listening/Speaking
+    -   M: Math
+    -   O: Oral - ACCESS & ALTACCESS only
+    -   R: Reading
+    -   S: Science
+    -   W: Writing
+-   GradeTested: Grade student was enrolled in when performing assessment.
+-   AchievementLevel: Used to count the number of students in each achievement level by group such as race, gender, and ethnicity. It must be calculated from other students at a similar graden and subject for a specific year.
+    -   ACCESS students are graded on a language proficiency scale of 1 through 6.
+    -   ALT-ACCESS students are graded using a P1 through P3 and A1 through A3 scale.
+    -   There are 4 different levels for the MCA test
+        -   D: Does not meet standards
+        -   E: Exceeds standards
+        -   M: Meets Standards
+        -   P: Partially meets standards
+    -   SOLOM tests are 1-5 scale with 5 being the highest
+    -   TEAE tests are 1-5 scale with 5 being the highest.
+
+There are two ways in which we are going to code our graduates.
+
+The first is to identify whether a student has been identified as an English learner. This means filtering students that have taken the ACCESS, ALT-ACCESS, MTELL, MTAS, TEAE, MOD-II, MOD-III, or SOLOM at least once in their career.
+
+The second is be determining their highest achievement level in each subject of the MCA tests within the dataset. The dataset provides each instance of a test for each student so many are students are listed numerous times - once for each time they took a test.
+
+Lets do this in two separate files and then join each with the master file.
+
+Starting with identifying the EL students.
+
+<br>
+
+```{r identifying EL students}
+el <- assessments.original %>%
+  filter(!TestName %in% c("MCA-II", "MCA-III")) %>%
+  distinct(PersonID, .keep_all = TRUE) %>%
+  select(PersonID) %>%
+  mutate(english.learner = 1)
+
+kable(head(el))
+
+kable(names(el))
+
+```
+
+<br>
+
+This dataset identified `r comma(el %>% nrow(), accuracy = 1)` individuals who were identified as an english learner at least one time in the original dataset.
+
+Now we will determine the highest achievement level for each subject for each student.
+
+<br>
+
+```{r mca highest achievement}
+mca <- assessments.original %>%
+  filter(TestName %in% c("MCA-II", "MCA-III")) %>%
+  filter(AchievementLevel != "NULL") %>%
+  droplevels() %>%
+  mutate(AchievementLevelCode = ifelse(AchievementLevel == "D", 1,
+                                       ifelse(AchievementLevel == "P", 2,
+                                              ifelse(AchievementLevel == "M", 3, 4))))
+
+mca.highest <- mca %>%
+  group_by(PersonID, Subject) %>%
+  filter(AchievementLevelCode == max(AchievementLevelCode)) %>%
+  ungroup() %>%
+  select(PersonID, Subject, AchievementLevelCode) %>%
+  mutate(mca.subject = paste("MCA.", Subject, sep = "")) %>%
+  select(PersonID, mca.subject, AchievementLevelCode) %>%
+  mutate(id = seq(n())) %>%
+  spread(key = mca.subject, value = AchievementLevelCode) %>%
+  group_by(PersonID) %>%
+  fill(MCA.M, .direction = c("downup")) %>%
+  fill(MCA.R, .direction = "downup") %>%
+  fill(MCA.S, .direction = "downup") %>%
+  distinct(PersonID, .keep_all = TRUE) %>%
+  select(-id)
+  
+kable(head(mca.highest))
+
+kable(names(mca.highest))
+
+```
+
+<br>
+
+This dataset has `r comma(mca.highest %>% nrow(), accuracy = 1)` rows and `r comma(mca.highest %>% ncol(), accuracy = 1)` columns. In this dataset, I have recoded the AchievementLevel so that 1 = Do not meet standards, 2 = Partially meets standards, 3 = Meets standards, and 4 = Exceeds standards. I will summarize this column in the summary section below.
+
+Now it's time to join the datasets.
+
+<br>
+
+```{r join with master}
+master.7 <- read_csv("Data/SLEDS/Masters/Master-5.csv") %>%
+  mutate(PersonID = as.integer(PersonID)) %>%
+  left_join(el, by = "PersonID") %>%
+  left_join(mca.highest, by = "PersonID") %>%
+  mutate(english.learner = ifelse(is.na(english.learner), 0, english.learner))
+
+assessments.master <- read_csv("Data/SLEDS/Masters/Master-5.csv") %>%
+  select(PersonID) %>%
+  mutate(PersonID = as.integer(PersonID)) %>%
+  left_join(el, by = "PersonID") %>%
+  left_join(mca.highest, by = "PersonID") %>%
+  mutate(english.learner = ifelse(is.na(english.learner), 0, english.learner))
+
+write_csv(assessments.master, "Data/SLEDS/Masters/assessments_master.csv")
+```
+
+<br>
+
+# Summary of English Learners
+
+Let's start by summarizing the english learners in the total dataset.
+
+In the master dataset 6.7% of the individuals were identified as English Learners at some point in the original data.
+
+<br>
+
+```{r english learners summary total}
+el.summary.total <- master.7 %>%
+  summarize(total = n(),
+            english.learner = sum(english.learner)) %>%
+  mutate(pct.english.learner = english.learner / total)
+
+datatable(el.summary.total, 
+          class = "cell-border stripe", 
+          filter = "top", 
+          rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 0:2)))) %>%
+  formatPercentage(3, 2) %>%
+  formatCurrency(1:2, "", digits = 0)
+  
+```
+
+<br>
+
+Let's now see if there are any significant differences by RUCA category.
+
+The cross-tabs provides a very low p-value indicating that there are significant differences in the percentage of individuals in the dataset categorized as English learners.
+
+Urban/town/rural mix districts had the highest percentage of graduates categorized as an English learner with 7.6%, this is followed by town/rural mix districts with 5.6% of graduates and 5.0% for entirely urban graduates.
+
+<br>
+
+::: panel-tabset
+## RUCA Table
+
+```{r english learners summary ruca}
+el.summary.ruca <- master.7 %>%
+  group_by(Dem_Desc) %>%
+  summarize(n = n(),
+            english.learner = sum(english.learner)) %>%
+  ungroup() %>%
+  mutate(pct.english.learner = english.learner / n)
+
+
+datatable(el.summary.ruca, 
+          class = "cell-border stripe", 
+          filter = "top", 
+          rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 0:3)))) %>%
+  formatPercentage(4, 2) %>%
+  formatCurrency(2:3, "", digits = 0)
+```
+
+## RUCA Cross-tabs
+
+```{r english learners cross tabs ruca}
+CrossTable(master.7$Dem_Desc, master.7$english.learner, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+:::
+
+<br>
+
+# Summary of MCA
+
+Let's see what the MCA breakdown is by subject.
+
+Math: 70% either met or exceeded the standard.
+
+Reading: 80% either met or exceeded the standard
+
+Science: Nearly 60% either met or exceeded standard.
+
+<br>
+
+```{r mca achievement total}
+mca.highest.summary.total <- master.7 %>%
+  select(PersonID, MCA.M, MCA.R, MCA.S) %>%
+  gather(key = "subject", value = "achievement", 2:4) %>%
+  mutate(achievement = ifelse(achievement == 1, "D",
+                              ifelse(achievement == 2, "P",
+                                     ifelse(achievement == 3, "M",
+                                            ifelse(achievement == 4, "E", achievement)))),
+         achievement = fct_relevel(achievement, "D", "P", "M", "E")) %>%
+  group_by(subject, achievement) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(subject) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = as.character(seq(n())))
+
+mca.highest.total.plot <- ggplot(mca.highest.summary.total, aes(subject, pct, fill = achievement, group = achievement)) +
+    geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(subject, "\nGrade: ", achievement, "\nNumber of students with this grade: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(position = position_dodge(width = .9), aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Student grades within subject for MCA tests")+
+    scale_y_continuous(labels=scales::percent) +
+    theme_bar+
+    scale_fill_manual(values= brewer.pal(n = 5, "RdYlBu"),
+                       guide = guide_legend(ncol = 3)) +
+    theme(legend.position = "bottom",
+          text = element_text(size = 16),
+          axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = mca.highest.total.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+
+
+```
+
+<br>
+
+From here we will break down the data and see if there are significant differences between RUCA categories and EDRs. We will start with RUCA categories.
+
+<br>
+
+## MCA - Math
+
+We will start with analyzing math and RUCA categories.
+
+The p-value from the cross-tabs indicate that there is a relationship between RUCA categories and the grades received in the MCA-Math test.
+
+Entirely urban: 74% met or exceeded
+
+Town/rural mix: 67% met or exceeded
+
+Urban/town/rural mix: 71% met or exceeded
+
+<br>
+
+::: panel-tabset
+## RUCA Table
+
+```{r mca math summary ruca}
+mca.highest.summary.ruca <- master.7 %>%
+  select(Dem_Desc, MCA.M) %>%
+  mutate(MCA.M = ifelse(MCA.M == 1, "D",
+                              ifelse(MCA.M == 2, "P",
+                                     ifelse(MCA.M == 3, "M",
+                                            ifelse(MCA.M == 4, "E", MCA.M)))),
+         MCA.M = fct_relevel(MCA.M, "D", "P", "M", "E")) %>%
+  group_by(Dem_Desc, MCA.M) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(Dem_Desc) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = as.character(seq(n())))
+
+mca.highest.ruca.plot <- ggplot(mca.highest.summary.ruca, aes(Dem_Desc, pct, fill = MCA.M, group = MCA.M)) +
+    geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste("MCA - Math", "\nGrade: ", MCA.M, "\nNumber of students with this grade: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(position = position_dodge(width = .9), aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Student grades within RUCA category for MCA - Math")+
+    scale_y_continuous(labels=scales::percent)+
+    theme_bar+
+    scale_fill_manual(values= brewer.pal(n = 5, "RdYlBu"),
+                       guide = guide_legend(ncol = 3)) +
+    theme(legend.position = "bottom",
+          text = element_text(size = 16),
+          axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = mca.highest.ruca.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+```
+
+## RUCA Cross-tabs
+
+```{r mca math cross tabs}
+CrossTable(master.7$Dem_Desc, master.7$MCA.M, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+## MCA - Reading
+
+Next lets analyze reading and RUCA categories.
+
+The p-value from the cross-tabs indicate that there is a relationship between RUCA categories and the grades received in the MCA-Reading test. Hoewever, I'm seeing every little difference here.
+
+Entirely urban: 83%
+
+Town/rural mix: 77%
+
+Urban/town/rural mix: 80%
+
+<br>
+
+::: panel-tabset
+## RUCA Table
+
+```{r mca read summary ruca}
+mca.highest.reading.summary.ruca <- master.7 %>%
+  select(Dem_Desc, MCA.R) %>%
+  mutate(MCA.R = ifelse(MCA.R == 1, "D",
+                              ifelse(MCA.R == 2, "P",
+                                     ifelse(MCA.R == 3, "M",
+                                            ifelse(MCA.R == 4, "E", MCA.R)))),
+         MCA.R = fct_relevel(MCA.R, "D", "P", "M", "E")) %>%
+  group_by(Dem_Desc, MCA.R) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(Dem_Desc) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = as.character(seq(n())))
+
+mca.highest.reading.ruca.plot <- ggplot(mca.highest.reading.summary.ruca, aes(Dem_Desc, pct, fill = MCA.R, group = MCA.R)) +
+    geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste("MCA - Math", "\nGrade: ", MCA.R, "\nNumber of students with this grade: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(position = position_dodge(width = .9), aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Student grades within RUCA category for MCA - Reading")+
+    scale_y_continuous(labels=scales::percent)+
+    theme_bar+
+    scale_fill_manual(values= brewer.pal(n = 5, "RdYlBu"),
+                       guide = guide_legend(ncol = 3)) +
+    theme(legend.position = "bottom",
+          text = element_text(size = 16),
+          axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = mca.highest.reading.ruca.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+```
+
+## RUCA Cross-tabs
+
+```{r mca reading cross tabs}
+CrossTable(master.7$Dem_Desc, master.7$MCA.R, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+:::
+
+<br>
+
+## MCA - Science
+
+Next lets analyze science and RUCA categories.
+
+The p-value from the cross-tabs indicate that there is a relationship between RUCA categories and the grades received in the MCA-Science test.
+
+The largest different is the town/rural mix districts where 65% of graduates have exceeded or met standards for science compared to 60% for entirely rural and 58% for urban/town/rural mix.
+
+Entirely urban: 56%
+
+Town/rural mix: 49%
+
+Urban/town/rural mix: 53%
+
+<br>
+
+::: panel-tabset
+## RUCA Table
+
+```{r mca science summary ruca}
+mca.highest.science.summary.ruca <- master.7 %>%
+  select(Dem_Desc, MCA.S) %>%
+  mutate(MCA.S = ifelse(MCA.S == 1, "D",
+                              ifelse(MCA.S == 2, "P",
+                                     ifelse(MCA.S == 3, "M",
+                                            ifelse(MCA.S == 4, "E", MCA.S)))),
+         MCA.S = fct_relevel(MCA.S, "D", "P", "M", "E")) %>%
+  group_by(Dem_Desc, MCA.S) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(Dem_Desc) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = as.character(seq(n())))
+
+mca.highest.science.ruca.plot <- ggplot(mca.highest.science.summary.ruca, aes(Dem_Desc, pct, fill = MCA.S, group = MCA.S)) +
+    geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste("MCA - Math", "\nGrade: ", MCA.S, "\nNumber of students with this grade: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(position = position_dodge(width = .9), aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Student grades within RUCA category for MCA - science")+
+    scale_y_continuous(labels=scales::percent)+
+    theme_bar+
+    scale_fill_manual(values= brewer.pal(n = 5, "RdYlBu"),
+                       guide = guide_legend(ncol = 3)) +
+    theme(legend.position = "bottom",
+          text = element_text(size = 16),
+          axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = mca.highest.science.ruca.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+```
+
+## RUCA Cross-tabs
+
+```{r mca science cross tabs}
+CrossTable(master.7$Dem_Desc, master.7$MCA.S, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+:::
+
+<br>
+
+```{r write master}
+
+write_csv(master.7, "Data/SLEDS/Masters/Master-7.csv")
+```
