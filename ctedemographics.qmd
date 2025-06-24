@@ -1,0 +1,359 @@
+---
+title: "CTEDemographics"
+editor: visual
+---
+
+```{r library, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(infer)
+```
+
+```{r themes and shapefiles, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         mif = ifelse(is.na(mif), "TC", mif),
+         mif = as.factor(mif),
+         mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
+Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+```
+
+# Data prep
+
+Now I'm going to prep the CTE demographics dataset to join with the master. I will first load the entire CTE demographics dataset, clean it up, and then join with my master/NE graduate dataset.
+
+<br>
+
+```{r cte demographics original}
+cte.demographics.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/CTEDemographics/CTEDemographic.csv')  %>%
+  mutate(PersonID = as.integer(PersonID)) 
+
+kable(head(cte.demographics.original))
+
+kable(names(cte.demographics.original))
+
+```
+
+<br>
+
+The original dataset provides whether the student was a basic participant, basic concentrator, basic completor, and/or a centrentrator 150 when taking a CTE course. It looks like each observation is unique by grade of the student. This means that one PersonID can have multiple observations.
+
+In order to determine how I want to organize this data so that each observation represents the full characteristics of each PersonID I need to understand how these values are defined.
+
+-   Basic Participant: Any grade 9-12 student who successfully completes one or more state-approved CTE course(s).
+-   Basic Concentrator: this is the old standard for years and required the student complete 240 hours. Any student successfully enrolled in a single CTE field for more than 240 hours (successful is defined as passing grade).
+-   Basic Completor: any concentrator who attains academic and technical knowledge and skills and graduates from high school.
+-   Concentrator 150: This is the new standard - Any grade 9-12 student who successfully completes 150+ course hours (or more) as part of a state-approved secondary CTE program, within one career field.
+
+Judging by these definitions, it seems that we will want three categories;
+
+1.  Those that participated in a CTE course but were not a concentrator or a completor, and
+2.  Those that participated in a CTE course and graduated as a concentrator.
+3.  Those that did not participate in a CTE course.
+
+So essentially, filtering this dataset to provide the "highest level achieved" in terms of CTE coursework. We will focus on filtering this dataset to the highest level achieved and will then join with the graduate list which will have all the individuals that did not participate in any CTE courses.
+
+<br>
+
+```{r cte concentrator}
+graduate <- read_csv("Data/SLEDS/Masters/Master-4.csv") %>%
+  select(PersonID)
+
+cte.concentrator.cat <- cte.demographics.original %>%
+  gather(key = "cte.achievement", value = "yes.or.no", 4:7) %>%
+  filter(yes.or.no != "Null") %>%
+  filter(yes.or.no != "NULL") %>%
+  filter(yes.or.no != "N") %>%
+  mutate(cte.achievement = as.factor(cte.achievement),
+         yes.or.no = as.factor(yes.or.no),
+         cte.achievement.code = ifelse(cte.achievement == "BasicParticipant", 0, 1)) %>%
+  select(PersonID, cte.achievement, cte.achievement.code) %>%
+  group_by(PersonID) %>%
+  summarise(cte.achievement.code = sum(cte.achievement.code)) %>%
+  ungroup() %>%
+  mutate(cte.achievement = ifelse(cte.achievement.code == 0, "CTE Participant", "CTE Concentrator or Completor")) %>%
+  select(PersonID, cte.achievement) %>%
+  right_join(graduate, by = "PersonID") %>%
+  mutate(cte.achievement = ifelse(is.na(cte.achievement), "No CTE", cte.achievement))
+
+kable(head(cte.concentrator.cat))
+
+kable(names(cte.concentrator.cat))
+```
+
+<br>
+
+When joined with the master file, there were `r comma(cte.concentrator.cat %>% filter(cte.achievement != "No CTE") %>% nrow(), accuracy = 1)` that were either a CTE participant or concentrator. This is below the \~34,000 that took at least one CTE course according to the CTE enrollment dataset. This could mean that there roughly 5,000 students that took a CTE course but did not graduate.
+
+Lets join this dataset with the master to confirm this thought.
+
+<br>
+
+```{r cte concentrator join master}
+master.5 <- read_csv("Data/SLEDS/Masters/Master-4.csv") %>%
+  left_join(cte.concentrator.cat, by = "PersonID")
+
+ctedemographics.master <- read_csv("Data/SLEDS/Masters/Master-4.csv") %>%
+  select(PersonID) %>%
+  left_join(cte.concentrator.cat, by = "PersonID")
+
+write_csv(ctedemographics.master, "Data/SLEDS/Masters/ctedemographics_master.csv")
+
+kable(head(master.5))
+
+kable(names(master.5))
+
+```
+
+<br>
+
+After joining with the master dataset, we have `r comma(master.5 %>% nrow(), accuracy = 1)` rows and `r comma(master.5 %>% ncol(), accuracy = 1)` columns.
+
+<br>
+
+# Summary of CTE demographics
+
+We will summarize the CTE demographics data by rural-ness and region to see if there's any significant differences.
+
+First, lets see what percentage of the graduates by cte demographics categories.
+
+The table below shows that of the total graduates from Northeast high schools, nearly a third (30%) were a CTE concentrator or completor, while 27% were just a participant and 43% took no CTE courses at all.
+
+<br>
+
+```{r summary cte demographics total}
+cte.dem.summary.total <- master.5 %>%
+  mutate(cte.achievement = as.factor(cte.achievement)) %>%
+  tabyl(cte.achievement)
+
+datatable(cte.dem.summary.total, class = "cell-border stripe", filter = "top", rownames = FALSE) %>%
+  formatPercentage(3) %>%
+  formatCurrency(2, "", digits = 0)
+
+```
+
+<br>
+
+The cross-tabs show a significant difference between the percentage of students by categorization and RUCA categories. Our The more rural the district, the higher the percentages of the graduates that are either concentrators or completors, or took at least one CTE course.
+
+<br>
+
+::: panel-tabset
+### RUCA Table
+
+```{r summary cte demographics ruca table}
+cte.dem.summary.ruca.table <- master.5 %>%
+  mutate(cte.achievement = as.factor(cte.achievement)) %>%
+  tabyl(Dem_Desc, cte.achievement) %>%
+  adorn_percentages("row")
+
+datatable(cte.dem.summary.ruca.table, class = "cell-border stripe", filter = "top", rownames = FALSE) %>%
+  formatPercentage(2:4) 
+```
+
+### RUCA Cross-tabs
+
+```{r summary cte demographics ruca crosstabs}
+
+CrossTable(master.5$Dem_Desc, master.5$cte.achievement, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+Lets take a look at the county map.
+
+The cross tabulations show that there is a statistically significant difference in the percent of graduates in each CTE category by county.
+
+<br>
+
+::: panel-tabset
+## County Map
+
+```{r summary cte demographics county map}
+cte.dem.summary.county.map <- master.5 %>%
+  mutate(cte.achievement = as.factor(cte.achievement)) %>%
+  tabyl(county.name, cte.achievement) %>%
+  adorn_percentages("row") %>%
+  gather(key = "cte.category", value = "pct", 2:4) %>%
+  left_join(counties.regions[,c(1,2)], by = c("county.name" = "Name")) %>%
+  left_join(mn_counties[,c(5,7)], by = "countyfp")
+
+cte.dem.summary.county.map.plot<- ggplot(cte.dem.summary.county.map) +
+  facet_wrap(~cte.category, ncol = 2) +
+  geom_sf_interactive(color = "grey85", aes(geometry = geometry, fill = pct, data_id = countyfp, tooltip = paste(county.name, "\nCTE achievement category: ", cte.category, "\nPercent of graduates: ", percent(pct, accuracy = .1), sep = ""))) +
+  theme_sf+
+  scale_fill_fermenter(palette = "PuBu", direction = 1, labels = scales::percent) +
+  labs(title = "Percent of graduates in each county location of high school by\nCTE achievement\n") +
+  theme(legend.box.margin = margin(50, 0, 0, -100),
+        text = element_text(size = 18),
+        plot.title.position = "plot")
+
+girafe(ggobj = cte.dem.summary.county.map.plot, height_svg = 10, width_svg = 10) %>%
+  girafe_options(opts_sizing(rescale = FALSE))
+
+
+```
+
+## County Table
+
+```{r summary cte demographics county table}
+cte.dem.summary.county.table <- master.5 %>%
+  mutate(cte.achievement = as.factor(cte.achievement)) %>%
+  tabyl(county.name, cte.achievement) %>%
+  adorn_percentages("row")
+
+datatable(cte.dem.summary.county.table, class = "cell-border stripe", filter = "top", rownames = FALSE) %>%
+  formatPercentage(2:4) 
+```
+
+### County Cross-tabs
+
+```{r summary cte demographics county crosstabs}
+
+CrossTable(master.5$county.name, master.5$cte.achievement, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+#  {.unnumbered .unlisted .toc-ignore .tabset}
+
+<br>
+
+The next thing to check is to determine whether there is a significant difference by year.
+
+Interestingly, these are going in opposite directions. CTE concentrators or completors has been setadily decreasing since 2008 - from 50% to 21%.
+
+CTE participants has increased a bit going from 19% to 32%.
+
+The percentage of graduating taking no CTE courses has increased, going from 31% to 47%.
+
+<br>
+
+::: panel-tabset
+## Year table
+
+```{r summary cte demographics year table}
+cte.dem.summary.year.table <- master.5 %>%
+  mutate(cte.achievement = as.factor(cte.achievement)) %>%
+  tabyl(grad.year, cte.achievement) %>%
+  adorn_percentages("row")
+
+datatable(cte.dem.summary.year.table, class = "cell-border stripe", filter = "top", rownames = FALSE) %>%
+  formatPercentage(2:4) 
+```
+
+## Year cross-tab
+
+```{r summary cte demographics year crosstabs}
+
+CrossTable(master.5$grad.year, master.5$cte.achievement, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+```{r master 5}
+write_csv(master.5, "Data/SLEDS/Masters/Master-5.csv")
+```
