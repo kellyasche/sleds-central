@@ -1,0 +1,293 @@
+---
+title: "AP"
+editor: visual
+---
+
+```{r library, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(infer)
+```
+
+```{r themes and shapefiles, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         mif = ifelse(is.na(mif), "TC", mif),
+         mif = as.factor(mif),
+         mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
+Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+```
+
+# Data prep
+
+The next dataset to merge with the master is the enrollment in AP courses. I'm first going to load the entire AP dataset, clean it up, and then merge it with my master/NE graduate dataset.
+
+<br>
+
+```{r ap original data}
+ap.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/AP/AdvancedPlacementSATPSAT_AP.csv') %>%
+  mutate(PersonID = as.integer(PersonID)) %>%
+  drop_na(PersonID)
+
+kable(head(ap.original))
+
+kable(names(ap.original))
+
+```
+
+<br>
+
+The AP dataset has `r comma(nrow(ap.original), accuracy = 1)` observations and `r comma(ncol(ap.original), accuracy = 1)` columns. Each observation represents an AP exam taken so this means that a PersonID can be listed multiple times if the individual took multiple AP exams. The ExamGrade is on a 1 - 5 scale with the highest scores being better. According to Meredith at OHE, colleges give credit if the score is 3 or higher.
+
+I'm a bit torn here. There seems to be three approaches to how I can utilize this data in the model.
+
+1.  I could either just create a category of whether an individual took an AP exam and not care what the grade was.
+2.  I could only use individuals who scored 3 or higher.
+3.  I could keep all the data and change it so that each observation represents a PersonID and new columns created for each AP exam and their score.
+
+For now, I think I'm going to just utilize option 1 - whether they took an AP exam or not.
+
+<br>
+
+```{r ap took exam}
+ap.tookexam <- ap.original %>%
+  distinct(PersonID) %>%
+  mutate(ap.exam = 1)
+
+kable(head(ap.tookexam))
+
+
+kable(names(ap.tookexam))
+
+```
+
+<br>
+
+The updated AP dataset shows that `r comma(nrow(ap.tookexam), accuracy = 1)` took at least one AP exam. Now it's time to merge it with the master list. For the PersonID that didn't take an AP exam, they will receive a value of 0 in that column.
+
+<br>
+
+```{r ap join with master}
+master.3 <- read_csv("Data/SLEDS/Masters/master-2.csv") %>%
+  left_join(ap.tookexam, by = "PersonID") %>%
+  mutate(ap.exam = ifelse(is.na(ap.exam), 0, ap.exam))
+
+ap.master <- read_csv("Data/SLEDS/Masters/master-2.csv") %>%
+  select(PersonID) %>%
+  left_join(ap.tookexam, by = "PersonID") %>%
+  mutate(ap.exam = ifelse(is.na(ap.exam), 0, ap.exam))
+
+write_csv(ap.master, "Data/SLEDS/Masters/ap.master.csv")
+
+kable(head(master.3))
+
+kable(names(master.3))
+```
+
+<br>
+
+The updated master spreadsheet continues to have `r comma(nrow(master.3), accuracy = 1)` observations and now has `r comma(ncol(master.3), accuracy = 1)` columns.
+
+<br>
+
+# Summary of AP data
+
+Similar to ACT, lets check on whether the rates of students taking an AP exam differ across regions, RUCA groups or counties.
+
+From the table below we can see that out of the total observations in our dataset, 18.5% have taken an AP exam.
+
+<br>
+
+```{r table ap summary total, echo=FALSE}
+ap.summary.total <- master.3 %>%
+  select(PersonID, ap.exam) %>%
+  mutate(ap.exam = ifelse(ap.exam == 0, "Did not take AP exam", "Took AP exam")) %>%
+  tabyl(ap.exam) %>%
+  mutate(percent = scales::percent(percent, accuracy = .1))
+
+datatable(ap.summary.total, class = "cell-border stripe", filter = "top", rownames = FALSE)
+```
+
+<br>
+
+Now lets check to see if there are any statistically significant differences by RUCA category.
+
+Interestingly, there was significant difference between the percentage of students who took an AP exam by their RUCA categories. Although, nearly 18.5% of all students took the AP exam, only 12.5% from town/rural mix districts took the exam compared to 19.2% from the urban/town/rural districts and 23.0% from the entirely urban districts.
+
+<br>
+
+::: panel-tabset
+## RUCA Table
+
+```{r table ap exam ruca, echo=FALSE}
+ap.summary.ruca <- master.3 %>%
+  select(Dem_Desc, ap.exam) %>%
+  mutate(ap.exam = ifelse(ap.exam == 0, "Did not take AP exam", "Took AP exam")) %>%
+  tabyl(Dem_Desc, ap.exam) %>%
+  mutate(percent.took.exam = `Took AP exam` / (`Did not take AP exam` + `Took AP exam`),
+         percent.took.exam = scales::percent(percent.took.exam, accuracy = .1))
+
+datatable(ap.summary.ruca, class = "cell-border stripe", filter = "top", rownames = FALSE)
+  
+```
+
+## RUCA Cross-tabs
+
+```{r cross tabs ap exam ruca}
+ap.crosstabs.ruca <- master.3 %>%
+  select(Dem_Desc, ap.exam) %>%
+  mutate(ap.exam = ifelse(ap.exam == 0, "Did not take AP exam", "Took AP exam")) 
+
+CrossTable(ap.crosstabs.ruca$Dem_Desc, ap.crosstabs.ruca$ap.exam, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+There is significant variation in the percent of students who've taken an AP exam across counties. It ranges from 28.6% in Sherburne to 1.0% in Wadena County.
+
+<br>
+
+::: panel-tabset
+## County map
+
+```{r map ap exam county, echo=FALSE}
+ap.summary.county <- master.3 %>%
+  select(county.name, ap.exam) %>%
+  mutate(ap.exam = ifelse(ap.exam == 0, "Did not take AP exam", "Took AP exam")) %>%
+  tabyl(county.name, ap.exam) %>%
+  mutate(percent.took.exam = `Took AP exam` / (`Did not take AP exam` + `Took AP exam`)) %>%
+  left_join(counties.regions, by = c("county.name" = "Name")) %>%
+  right_join(mn_counties[,c(5,7)], by = "countyfp")
+
+ap.summary.county.map <- ggplot(ap.summary.county) +
+  geom_sf_interactive(color = "grey85", aes(geometry = geometry, fill = percent.took.exam, data_id = countyfp, tooltip = paste(county.name, "\nNumber of students who took exam: ", comma(`Took AP exam`, accuracy = 1), "\nPercent of students who took AP exam: ", percent(percent.took.exam, accuracy = .1), sep = ""))) +
+  theme_sf+
+  scale_fill_fermenter(palette = "PuBu", direction = 1, labels = scales::percent) +
+  labs(title = "Percent of students who took AP exam by county") +
+  theme(legend.box.margin = margin(50, 0, 0, -100),
+        text = element_text(size = 18))
+
+girafe(ggobj = ap.summary.county.map, height_svg = 10, width_svg = 10) %>%
+  girafe_options(opts_sizing(rescale = FALSE))
+
+```
+
+## County Cross-tabs
+
+```{r cross tabs ap exam county}
+ap.crosstabs.county <- master.3 %>%
+  select(county.name, ap.exam) %>%
+  mutate(ap.exam = ifelse(ap.exam == 0, "Did not take AP exam", "Took AP exam")) 
+
+CrossTable(ap.crosstabs.county$county.name, ap.crosstabs.county$ap.exam, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+```{r write master, include=FALSE}
+write_csv(master.3, "Data/SLEDS/Masters/Master-3.csv")
+
+```
