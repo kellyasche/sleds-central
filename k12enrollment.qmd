@@ -1,0 +1,403 @@
+---
+title: "K12Enrollment"
+editor: visual
+---
+
+```{r library, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(infer)
+```
+
+```{r themes and shapefiles, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         mif = ifelse(is.na(mif), "TC", mif),
+         mif = as.factor(mif),
+         mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
+Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+
+k12.county.codes <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12-county-codes.csv")
+
+
+
+```
+
+# Data prep
+
+This dataset is of all the individuals that have graduated from a high school in Central Minnesota.
+
+<br>
+
+```{r import original dataset}
+enrollment.original <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/K12 Enrollment/K12Enrollment.csv")  %>%
+  mutate(PersonID = as.integer(PersonID),
+         K12OrganizationID = as.integer(K12OrganizationID)) %>%
+  drop_na(PersonID)
+
+kable(head(enrollment.original))
+
+kable(names(enrollment.original))
+```
+
+<br>
+
+In the dataset there are `r comma(nrow(enrollment.original), accuracy = 1)` observations along with `r comma(ncol(enrollment.original), accuracy = 1)` columns. Each observation does not represent a unique, unduplicated individual, but rather a unique status for the individual. For example, one individual can have multiple observations if they changed schools, for each school year, or if their economic status changed in the middle of a school year.
+
+Next we need to create a dataset that only has students who graduated from a high school located in EDR 3. To do that, we will need to join up with other .
+
+<br>
+
+```{r k12org original data}
+k12.org.original <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12Organization.csv") %>%
+  distinct(K12OrganizationID, .keep_all = TRUE) %>%
+  drop_na(K12OrganizationID) %>%
+  mutate(K12OrganizationID = as.integer(K12OrganizationID)) %>%
+  group_by(NCESID) %>%
+  fill(SiteCountyCode, .direction = "downup") %>%
+  ungroup()
+  
+kable(head(k12.org.original))
+
+kable(names(k12.org.original))
+```
+
+<br>
+
+This dataset provides each school institution as of June 29, 2024. This isn't a list of each school but rather a list of each K12OrganizationID. Each school will have multiple K12OrganizationID. I'm not sure why and this would be something to ask Meredith.
+
+My goal is to join my standardized region and county code data with this document which will then be joined to the master enrollment document. Unfortunatley the main data does not include county name but rather their own code for county. So I will join their codes with the county names and then use my counties.regions data to bring together the remaining regions.
+
+<br>
+
+```{r k12org joining county and regional data}
+k12.org.master <- k12.org.original %>%
+  select(K12OrganizationID, SiteCountyCode, OrganizationName) %>%
+  left_join(k12.county.codes[,c(1,2)], by = c("SiteCountyCode" = "county.code")) %>%
+  rename(county.name = 4) %>%
+  mutate(county.name = str_replace(county.name, " County", "")) %>%
+  select(K12OrganizationID, OrganizationName, county.name) %>%
+  mutate(county.name = str_replace(county.name, "Saint Louis", "St. Louis")) %>%
+  left_join(counties.regions, by = c("county.name" = "Name")) %>%
+  select(-Dem_RUCA, -planning.region, -mif)
+
+kable(head(k12.org.master))
+
+kable(names(k12.org.master))
+```
+
+<br>
+
+Now I should be able to join this dataset with the enrollment data to figure out what EDR they are from and then filter any rows that are not associated with a school district located in EDR 3.
+
+<br>
+
+```{r join enrollment data with org data}
+enrollment.org.ne <- enrollment.original %>%
+  left_join(k12.org.master, by = "K12OrganizationID") %>%
+  filter(edr == "EDR 3 - Arrowhead")
+
+kable(head(enrollment.org.ne))
+
+kable(names(enrollment.org.ne))
+
+```
+
+<br>
+
+The dataset now has `r comma(nrow(enrollment.org.ne))` instances that provide a number of characteristics about an individuals enrollment.
+
+My goal is to end up with a dataset where each observation (row) represents a unique (unduplicated) individual that's tied to the school from which they graduated. Here's how I will do that.
+
+-   PersonID: change to integer
+-   K12OrganizationID: change to integer.
+-   K12EnrTimeID: Change so it's only the year
+-   Grade: eliminate - unimportant since we are mostly concerned about whether they graduated.
+-   EconomicStatusIndicator: I will change this to two categories. Whether they were ever eligible for reduce priced or free meal will be coded as 1 (eligible = codes 1, 2, 4, 5) at any point in the dataset. The remaining will be coded as 0.
+-   FederalRaceIndicator: eliminate - I'm going to use the RaceEthnicity column instead.
+-   PSEO columns: I'm most concerned about whether they participated in PSEO or not. A new column will be created indicated whether there was a "Y" coded for either the "PSEOConcurrentEnrollmentIndicator" or "PostSecondaryEnrollmentOptionsIndicator" columns at any point in the dataset. The two original columns will be eliminated.
+-   StatusEnd: I will only include individuals that have StatusEnd coded as an 8 or 9.
+-   Gender: included and not changed.
+-   SpecialEdStatus: I will split this into two categories. The first is that a student did not require special education services (codes 1-2) at any point in the dataset. The other category will be that they require special education (codes 4 - 9) at any point in the dataset.
+-   Limited English: keep with no changes.
+-   Primary language: I'm going to create two categories. One being that English is the primary language while the other will be that English is NOT the primary language at any point in the dataset.
+-   Homeless: Keep with no changes.
+
+We first need to create a list of all individuals with the StatusEnd code of 8 or 9 (graduated). In addition, we need to remove any student that graduated before 2008. This is because we will not have their full Sophmore - Senior records which is especially important when attempting to identify whether the number of CTE courses taken predicts migration.
+
+The other element I want to add is a pre-covid and post-covid variable. All individuals whose grad year is before 2020 will be labeled pre-covid and all others wil lbe post-covid.
+
+This "graduates list" will be the list on which we will bind all the other variables.
+
+<br>
+
+```{r k12enrollment StatusEnd}
+graduates <- enrollment.org.ne %>%
+  filter(StatusEnd %in% c(8,9)) %>%
+  mutate(grad.year = str_sub(TimeID, 1, 4),
+         grad.year = as.integer(grad.year),
+         grad.year.covid = ifelse(grad.year > 2019, "Post-covid grad", "Pre-covid grad")) %>%
+  select(PersonID, K12OrganizationID, OrganizationName, grad.year, grad.year.covid, Gender, LimitedEnglishProficiencyIndicator, HomelessIndicator, county.name, countyfp, Dem_Desc, edr) %>%
+  distinct(PersonID, .keep_all = TRUE) %>%
+  filter(grad.year > 2007) 
+
+```
+
+<br>
+
+Next we need to create new columns for the variables that will indicate a certain status has been met at any point in the dataset for each PersonID. For example, we want a column that indicates a PersonID was enrolled in PSEO at some point in the dataset. The variables that need a new column created are;
+
+-   EconomicStatusIndicator
+-   PostSecondaryEnrollmentOptionsIndicator & PSEOConcurrentEnrollmentIndicator
+-   SpecialEdStatus
+-   HomeprimaryLanguage
+
+<br>
+
+```{r K12Enrollment creating new columns}
+
+# Lets start with economic status indicator
+k12.enr.esi.indicator <- enrollment.org.ne %>%
+  select(PersonID, EconomicStatusIndicator) %>%
+  group_by(PersonID) %>%
+  mutate(economic.status.code = ifelse(EconomicStatusIndicator %in% c(1,2,4,5), 1, 0),
+         economic.status.code.sum = sum(economic.status.code)) %>%
+  ungroup() %>%
+  distinct(PersonID, .keep_all = TRUE) %>%
+  mutate(economic.status = ifelse(economic.status.code.sum > 0, 1, 0)) %>%
+  select(PersonID, economic.status)
+
+# PSEO
+
+k12.enr.pseo.indicator <- enrollment.org.ne%>%
+  select(PersonID, PostSecondaryEnrollmentOptionsIndicator, PSEOConcurrentEnrollmentIndicator) %>%
+  mutate(PostSecondaryEnrollmentOptionsIndicator = ifelse(PostSecondaryEnrollmentOptionsIndicator == "Y", 1, 0),
+         PSEOConcurrentEnrollmentIndicator = ifelse(PSEOConcurrentEnrollmentIndicator == "Y", 1, 0)) %>%
+  gather(key = "pseo.type", value = "indicator", 2:3) %>%
+  group_by(PersonID) %>%
+  summarise(pseo = sum(indicator)) %>%
+  mutate(pseo.participant = ifelse(pseo > 0, 1, 0)) %>%
+  ungroup() %>%
+  select(PersonID, pseo.participant)
+
+# Special Ed status
+
+k12.enr.spced.indicator <- enrollment.org.ne %>%
+  select(PersonID, SpecialEdStatus) %>%
+  mutate(SpecialEdStatus.code = ifelse(SpecialEdStatus %in% c(4,5,6,7,8,9), 1, 0)) %>%
+  group_by(PersonID) %>%
+  summarise(SpecialEdStatus.sum = sum(SpecialEdStatus.code)) %>%
+  ungroup() %>%
+  mutate(SpecialEdStatus = ifelse(SpecialEdStatus.sum > 0, 1, 0)) %>%
+  select(PersonID, SpecialEdStatus)
+
+# Home Primary Language
+
+k12.enr.homeprimlang.indicator <- enrollment.org.ne %>%
+  select(PersonID, HomePrimaryLanguage) %>%
+  mutate(HomePrimaryLanguage.code = ifelse(HomePrimaryLanguage == 11, 0, 1)) %>%
+  group_by(PersonID) %>%
+  summarise(HomePrimaryLanguage.sum = sum(HomePrimaryLanguage.code)) %>%
+  ungroup() %>%
+  mutate(non.english.home = ifelse(HomePrimaryLanguage.sum > 0, 1, 0)) %>%
+  select(PersonID, non.english.home)
+
+# Race
+
+k12.enr.race <- enrollment.org.ne %>%
+  select(PersonID, RaceEthnicity) %>%
+  mutate(RaceEthnicity = ifelse(RaceEthnicity == 0, "Unknown",
+                                ifelse(RaceEthnicity == 1, "AI",
+                                       ifelse(RaceEthnicity == 2, "Asian/PI",
+                                              ifelse(RaceEthnicity == 3, "Hispanic",
+                                                     ifelse(RaceEthnicity == 4, "Black", "White"))))),
+         RaceEthnicity = as.factor(RaceEthnicity)) %>%
+  distinct(PersonID, RaceEthnicity) %>%
+  mutate(code = ifelse(RaceEthnicity == "Unknown", 0, 1)) %>%
+  group_by(PersonID) %>%
+  filter(code == max(code)) %>%
+  ungroup %>%
+  distinct(PersonID, .keep_all = TRUE) %>%
+  select(PersonID, RaceEthnicity)
+
+```
+
+<br>
+
+Now we can combine the list of graduates with the status indicators.
+
+<br>
+
+```{r k12enrollment combining all data}
+
+k12.enrollment.master <- graduates %>%
+  left_join(k12.enr.esi.indicator, by = "PersonID") %>%
+  left_join(k12.enr.pseo.indicator, by = "PersonID") %>%
+  left_join(k12.enr.spced.indicator, by = "PersonID") %>%
+  left_join(k12.enr.homeprimlang.indicator, by = "PersonID") %>%
+  left_join(k12.enr.race, by = "PersonID") %>%
+  select(PersonID, K12OrganizationID, OrganizationName, county.name, countyfp, Dem_Desc, edr, grad.year, grad.year.covid, Gender, LimitedEnglishProficiencyIndicator, HomelessIndicator, economic.status, pseo.participant, SpecialEdStatus, non.english.home, RaceEthnicity)
+
+kable(head(k12.enrollment.master))
+
+kable(names(k12.enrollment.master)) 
+
+
+write_csv(k12.enrollment.master, "Data/SLEDS/K12 Enrollment/K12Enrollment-master.csv")
+```
+
+<br>
+
+The prepped enrollment data has `r comma(nrow(k12.enrollment.master), accuracy = 1)` observations and `r comma(ncol(k12.enrollment.master), accuracy = 1)` columns.
+
+<br>
+
+# Summary of K12Enrollment data
+
+Below is the percentage of total observations that;
+
+-   Were eligible for free or reduced lunch at some point in the dataset
+-   Are Female
+-   Have been homeless at some point in the dataset
+-   Had limited english proficiency at some point in the dataset
+-   Had non english speakders in home at some point in the dataset
+-   Participated in a PSEO course at some point in the dataset.
+-   Pct non white
+
+As expected, nearly half (49.1%) of the observations are female. Over a third (34.0%) of the observations have been eligible for free or reduced lunch at some point in the dataset. Also, over a third (36.4%) of observations participated in a PSEO course. 0.8% of observations indicated that there was a non-english speaker at home, 0.2% had limited english proficiency and 1.3% indicated that were homeless at some point. Finally, 28% identified as being non-white.
+
+<br>
+
+```{r prep k12enrollment summary, include=FALSE}
+k12.enr.pct.total <- k12.enrollment.master %>%
+  mutate(Gender = ifelse(Gender == "F", 1, 0),
+         LimitedEnglishProficiencyIndicator = ifelse(LimitedEnglishProficiencyIndicator == "Y", 1, 0),
+         HomelessIndicator = ifelse(HomelessIndicator == "Y", 1, 0),
+         RaceEthnicity = ifelse(RaceEthnicity == "White", 0, 1)) %>%
+  rename(Female = 10,
+         `Limited English Proficiency` = 11,
+         Homeless = 12,
+         `Free or reduced lunch` = 13,
+         `PSEO participant` = 14,
+         `Special Ed` = 15,
+         `Non-english in home` = 16,
+         `Non-white` = 17) %>%
+  gather(key = "indicator", value = "value", Female:`Non-white`) %>%
+  group_by(indicator) %>%
+  summarise(confirmed.indicator = sum(value, na.rm = TRUE),
+            total.observations = n()) %>%
+  ungroup() %>%
+  mutate(pct = scales::percent(confirmed.indicator / total.observations, accuracy = .1))
+
+```
+
+```{r table k12enrollment summary, echo=FALSE}
+datatable(k12.enr.pct.total, class = "cell-border stripe", filter = "top", rownames = FALSE)
+
+```
+
+<br>
+
+```{r write final}
+write_csv(k12.enrollment.master, "Data/SLEDS/Masters/k12_enrollment.csv")
+
+```

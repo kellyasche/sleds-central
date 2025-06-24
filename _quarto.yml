@@ -1,0 +1,62 @@
+project:
+  type: website
+  output-dir: docs
+
+
+website:
+  title: "Pathways taken after high school - Central"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Summary
+      - text: Data Prep and Summaries
+        icon: fa-gear
+        menu:
+          - text: K12Enrollment
+            href: k12enrollment.qmd
+          - text: K12Orgs
+            href: k12orgs.qmd
+          - text: ACT
+            href: act.qmd
+          - text: AP
+            href: ap.qmd
+          - text: CTEEnrollment
+            href: cteenrollment.qmd
+          - text: CTEDemographics
+            href: ctedemographics.qmd
+          - text: Assessments
+            href: assessments.qmd
+          - text: SAT
+            href: sat.qmd
+          - text: National Student Clearinghouse - Enrollment
+            href: nscenrollment.qmd
+          - text: National Student Clearinghouse - Completions
+            href: nsccompletions.qmd
+          - text: Employment states each year
+            href: emp_states_each_year.qmd
+          - text: Unemployment
+            href: unemployment.qmd
+          - text: Average wages
+            href: avgwages.qmd
+      - text: Analysis
+        icon: fa-gear
+        menu:
+          - text: Categorizing range schools
+            href: analysis_categorizing_range_schools.qmd
+          - text: Multiple Correspondence Analysis
+            href: analysis_mca.qmd
+          - text: Dependent Variable States
+            href: analysis_dep_var_states.qmd
+          - text: Local Employment Cross-tabs
+            href: analysis_local_employment_ct.qmd
+          - text: Local Employment CART Analysis
+            href: analysis_local_employment_CART.qmd
+          - text: Post-secondary pathways
+            href: analysis_post_secondary_pathways.qmd
+        
+
+
+format:
+  html:
+    theme: cosmo
+    toc: true
