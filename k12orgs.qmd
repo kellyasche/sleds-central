@@ -1,0 +1,547 @@
+---
+title: "K12Orgs"
+editor: visual
+---
+
+```{r library, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(infer)
+```
+
+```{r themes and shapefiles, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         mif = ifelse(is.na(mif), "TC", mif),
+         mif = as.factor(mif),
+         mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
+Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+
+k12.county.codes <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12-county-codes.csv")
+```
+
+# Data prep
+
+This dataset is of all the individuals that have graduated from a high school in Northeast Minnesota. While preparing the K12Enrollment data, I already joined the organizational data and created a dataset that has all the individuals that graduated from a school located in EDR 3.
+
+<br>
+
+```{r k12org master}
+original <- read_csv("Data/SLEDS/Masters/k12_enrollment.csv")
+
+kable(head(original))
+
+kable(names(original))
+
+
+```
+
+<br>
+
+The one metric that wasn't included when I joined the enrollment data with the organizational data is the number of years they attended a school in the Northeast region.
+
+<br>
+
+```{r enrollment joined with n years attended}
+enrollment.original <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/K12 Enrollment/K12Enrollment.csv")  %>%
+  mutate(PersonID = as.integer(PersonID),
+         K12OrganizationID = as.integer(K12OrganizationID)) %>%
+  drop_na(PersonID)
+
+k12.org.original <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12Organization.csv") %>%
+  distinct(K12OrganizationID, .keep_all = TRUE) %>%
+  drop_na(K12OrganizationID) %>%
+  mutate(K12OrganizationID = as.integer(K12OrganizationID))
+
+k12.org.master <- k12.org.original %>%
+  select(K12OrganizationID, SiteCountyCode, OrganizationName, DistrictID, SchoolNumber) %>%
+  left_join(k12.county.codes[,c(1,2)], by = c("SiteCountyCode" = "county.code")) %>%
+  rename(county.name = 4) %>%
+  mutate(county.name = str_replace(county.name, " County", "")) %>%
+  select(K12OrganizationID, OrganizationName, county.name) %>%
+  mutate(county.name = str_replace(county.name, "Saint Louis", "St. Louis")) %>%
+  left_join(counties.regions, by = c("county.name" = "Name")) %>%
+  select(-Dem_RUCA, -planning.region, -mif, -edr.simple)
+
+enrollment.org.central <- enrollment.original %>%
+  left_join(k12.org.master, by = "K12OrganizationID") %>%
+  filter(edr == "EDR 3 - Arrowhead")
+
+n.years <- original %>%
+  select(PersonID, grad.year, K12OrganizationID) %>%
+  rename(grad.org.id = K12OrganizationID) %>%
+  left_join(enrollment.original[,c(1,2,3,4)], by = "PersonID") %>%
+  left_join(k12.org.original[,c(1,2,3,7)], by = "K12OrganizationID") %>%
+  mutate(year = str_sub(TimeID, 1, 4)) %>%
+  distinct(PersonID, year, .keep_all = TRUE) %>%
+  group_by(PersonID) %>%
+  summarize(n.years.attended = n()) %>%
+  ungroup()
+
+master <- original %>%
+  left_join(n.years, by = "PersonID")
+
+kable(head(master))
+
+kable(names(master))
+```
+
+<br>
+
+# Summary of K12Org
+
+Lets summarize the graduates to see their high schools rural-ness and location. In addition, now that we have joined the graduates and high school location together, we can see if there are any statistically significant differences in the percentage of students based on the demographic information (female, free or reduced free lunch, etc...).
+
+## Summary of high school location
+
+Lets breakdown the graduates by which regions they graduated from.
+
+A majority of students graduated from a county labeled as urban/town/rural mix, while 21% graduated from a town/rural mix, and 19% from an entirely urban county.
+
+<br>
+
+```{r prep k12orgs summary, include=FALSE}
+k12.org.summary.ruca <- master %>%
+  tabyl(Dem_Desc) %>%
+  select(Dem_Desc, n, percent) %>%
+  mutate(percent = scales::percent(percent, accuracy = .1))
+
+k12.org.summary.edr <- master %>%
+  tabyl(edr) %>%
+  select(edr, n, percent) %>%
+  mutate(percent = scales::percent(percent, accuracy = .1)) %>%
+  filter(edr != "Minnesota")
+```
+
+```{r table k12orgs ruca summary, echo=FALSE}
+datatable(k12.org.summary.ruca, class = "cell-border stripe", filter = "top")
+
+```
+
+<br>
+
+Below is a map with the percentages of graduates graduating from high schools located within each county. The schools with the highest percent of graduates/observations are located in Wright and Steans with nearly 20% each. The rest of the counties have 10% or less of the share of the dataset.
+
+<br>
+
+```{r map k12orgs summary county, echo=FALSE}
+
+k12.org.summary.county <- master %>%
+  tabyl(county.name) %>%
+  left_join(counties.regions, by = c("county.name" = "Name")) %>%
+  right_join(mn_counties[,c(5,7)], by = "countyfp")
+
+k12.org.summary.county.map <- ggplot(k12.org.summary.county) +
+  geom_sf_interactive(color = "grey85", aes(geometry = geometry, fill = percent, data_id = countyfp, tooltip = paste(county.name, "\nNumber of observations: ", comma(n, accuracy = 1), "\nPercent of total observations: ", percent(percent, accuracy = .1), sep = ""))) +
+  theme_sf+
+  scale_fill_fermenter(palette = "PuBu", direction = 1, labels = scales::percent) +
+  labs(title = "Percent of high school graduates by\ncounty location of school",
+       subtitle = "The highest percentage of graduates were from\nSt. Louis County schools.") +
+  theme(legend.box.margin = margin(50, 0, 0, -50),
+        text = element_text(size = 16))
+
+girafe(ggobj = k12.org.summary.county.map) %>%
+  girafe_options(opts_sizing(rescale = FALSE))
+
+```
+
+<br>
+
+## Summary of student demographics
+
+The following analysis looks to see if there are any statistical differences due to rural-ness and geographic location of the high school for the following graduate demographics;
+
+-   Were eligible for free or reduced lunch at some point in the dataset
+-   Are Female
+-   Have been homeless at some point in the dataset
+-   Had limited english proficiency at some point in the dataset
+-   Had non english speakders in home at some point in the dataset
+-   Participated in a PSEO course at some point in the dataset.
+
+Lets start with the cross-tabs based on RUCA categories.
+
+The cross-tabs below indicate that there are 4 demographic variables that have proportions statistically different across RUCA categories. Each of the variables are indicated with an asterisk.
+
+-   Free or reduced lunch: a statistically significant higher percentage of graduates from high schools in entirely rural mix counties receive free or reduced lunch.
+-   Homeless: as a school district becomes more urban, the percentage of it's graduates indicating they experienced homeslessness at some point increases significantly.
+-   PSEO: a siginficantly lower percentage of graduates from entirely rural districts participated in a PSEO program.
+
+::: panel-tabset
+### RUCA Free or Reduced Lunch
+
+Although 31.6% of the total number of graduates in the data set receive free or reduced lunch, graduates from town/rural mix schools had significantly higher percentage with 44.3%.
+
+<br>
+
+```{r cross-tabs free and reduced lunch ruca}
+CrossTable(master$Dem_Desc, master$economic.status, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+
+<br>
+
+```{r chart free and reduced lunch ruca}
+k12.dem.free.lunch.ruca <- master %>%
+  group_by(Dem_Desc) %>%
+  summarise(n = n(),
+           free.lunch = sum(economic.status)) %>%
+  ungroup() %>%
+  mutate(pct = free.lunch / n,
+         total.pct = sum(free.lunch) / sum(n),
+         data_id = as.character(seq(n()))) 
+
+k12.dem.free.lunch.ruca.plot <- ggplot(k12.dem.free.lunch.ruca, aes(Dem_Desc, pct, fill = Dem_Desc)) +
+  geom_hline(yintercept = k12.dem.free.lunch.ruca$total.pct, color = "black") +
+  geom_col_interactive(size = 5, aes(data_id = data_id, tooltip = paste(Dem_Desc, "\nTotal graduates: ", comma(n, accuracy = 1), "\nGraduates received free or reduced lunch: ", comma(free.lunch, accuracy = 1), "\nPercent of total graduates: ", percent(pct, accuracy = .1), sep = ""))) +
+  annotate(geom = "text",
+           x = 3,
+           y = .361,
+           label = "All graduates\npercent, 31.6%",
+           size = 5) +
+  labs(x="", y = "", color="", fill = "", title = "Percent of graduates receiving free or reduced lunch")+
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, size = 5) +
+  scale_y_continuous(labels=scales::percent)+
+  theme_line+
+  scale_fill_manual(values= color.ruca,
+                     guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "none",
+        text = element_text(size = 16))
+
+  girafe(ggobj = k12.dem.free.lunch.ruca.plot) %>%
+    girafe_options(opts_selection(type = "none"),
+                   opts_toolbar(saveaspng = FALSE),
+                   opts_sizing(rescale = FALSE))
+
+
+```
+
+<br>
+
+### RUCA Female
+
+No significance.
+
+<br>
+
+```{r cross-tabs female ruca}
+CrossTable(master$Dem_Desc, master$Gender, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+
+<br>
+
+### RUCA Homeless
+
+Town/rural mix schools had a significantly higher percentage of individuals indicating they were homeless at 1%.
+
+<br>
+
+```{r cross-tabs homeless ruca}
+CrossTable(master$Dem_Desc, master$HomelessIndicator, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+
+<br>
+
+### RUCA Limited English
+
+The urban/town/rural mix has significantly higher percentage of graduates categorized as having limited english proficiency with 2.2%.
+
+<br>
+
+```{r cross-tabs limited english ruca}
+CrossTable(master$Dem_Desc, master$LimitedEnglishProficiencyIndicator, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+
+<br>
+
+### RUCA non-english in home
+
+Similar to above, the urban/town/rural mix graduates had significantly higher percentage of individuals indicating that someone in their home was a non-english speaker with 5.1%.
+
+<br>
+
+```{r cross-tabs non english at home ruca}
+CrossTable(master$Dem_Desc, master$non.english.home, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+
+<br>
+
+```{r chart non-english at home ruca}
+k12.non.english.home.ruca <- master %>%
+  group_by(Dem_Desc) %>%
+  summarise(n = n(),
+            non.english = sum(non.english.home)) %>%
+  ungroup() %>%
+  mutate(pct = non.english / n,
+         total.pct = sum(non.english) / sum(n),
+         data_id = seq(n()))
+  
+k12.non.english.home.ruca.plot <- ggplot(k12.non.english.home.ruca, aes(Dem_Desc, pct, fill = Dem_Desc)) +
+  geom_hline(yintercept = k12.non.english.home.ruca$total.pct, color = "black") +
+  geom_col_interactive(size = 5, aes(data_id = data_id, tooltip = paste(Dem_Desc, "\nTotal graduates: ", comma(n, accuracy = 1), "\nGraduates with non-english speaker at home: ", comma(non.english, accuracy = 1), "\nPercent of total graduates: ", percent(pct, accuracy = .1), sep = ""))) +
+  annotate(geom = "text",
+           x = 3,
+           y = .039,
+           label = "All graduates\npercent, 3.9%",
+           size = 5) +
+  labs(x="", y = "", fill = "", color="", title = "Percent of graduates with non-english speaker at home")+
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, size = 5) +
+  scale_y_continuous(labels=scales::percent)+
+  theme_line+
+  scale_fill_manual(values= color.ruca,
+                     guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "none",
+        text = element_text(size = 16))
+
+  girafe(ggobj = k12.non.english.home.ruca.plot) %>%
+    girafe_options(opts_selection(type = "none"),
+                   opts_toolbar(saveaspng = FALSE),
+                   opts_sizing(rescale = FALSE))
+
+
+```
+
+<br>
+
+### RUCA PSEO
+
+Although 44.8% of all graduates participating in PSEO, there was a significantly lower percentage in town/rural schools (42.5%).
+
+<br>
+
+```{r cross-tabs PSEO ruca}
+CrossTable(master$Dem_Desc, master$pseo.participant, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+
+<br>
+
+```{r chart pseo ruca}
+k12.pseo.ruca<- master %>%
+  drop_na(pseo.participant) %>%
+  group_by(Dem_Desc) %>%
+  summarise(n = n(),
+            pseo.participant = sum(pseo.participant, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(pct = pseo.participant / n,
+         total.pct = sum(pseo.participant) / sum(n),
+         data_id = seq(n()))
+  
+k12.pseo.ruca.plot <- ggplot(k12.pseo.ruca, aes(Dem_Desc, pct, fill = Dem_Desc)) +
+  geom_hline(yintercept = k12.pseo.ruca$total.pct, color = "black") +
+  geom_col_interactive(size = 5, aes(data_id = data_id, tooltip = paste(Dem_Desc, "\nTotal graduates: ", comma(n, accuracy = 1), "\nGraduates participated in PSEO: ", comma(pseo.participant, accuracy = 1), "\nPercent of total graduates: ", percent(pct, accuracy = .1), sep = ""))) +
+  annotate(geom = "text",
+           x = 1,
+           y = .5,
+           label = "All graduates\npercent, 44.8%",
+           size = 5) +
+  labs(x="", y = "", color="", fill = "", title = "Percent of graduates participated in PSEO")+
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, size = 5) +
+  scale_y_continuous(labels=scales::percent)+
+  theme_line+
+  scale_fill_manual(values= color.ruca,
+                     guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 16))
+
+  girafe(ggobj = k12.pseo.ruca.plot) %>%
+    girafe_options(opts_selection(type = "none"),
+                   opts_toolbar(saveaspng = FALSE),
+                   opts_sizing(rescale = FALSE))
+
+
+```
+
+<br>
+:::
+
+# Summary of years attended
+
+First, lets see the distribution of the number of years attending a Northeast High School within this dataset.
+
+A large majority of students (\~30,000 students) attended a Central MN High School for 3 years. A few attended for longer than that, which is largely due to students who attended a CTE course after they graduated for special training.
+
+<br>
+
+```{r n years attending distribution}
+n.years.distribution.map <- ggplot(master, aes(n.years.attended)) +
+    geom_histogram() +
+    labs(x="", y = "", color="", title = "Distribution of the number of years attending a\nSouthwest MN High School in dataset")+
+    scale_y_continuous(labels=scales::comma)+
+  theme_bar + 
+    theme(legend.position = "none",
+          text = element_text(size = 16))
+
+
+girafe(ggobj = n.years.distribution.map) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+
+```
+
+<br>
+
+Next, we will look at the summary statistics for the entire dataset.
+
+As expected, the median is 3 years while the average was just a bit higher with 3.05 years.
+
+<br>
+
+```{r years attended summary statisics}
+n.years.attended.summary.total <- master %>%
+  summarise(n = comma(n(), accuracy = 1),
+            mean = comma(mean(n.years.attended), accuracy = .01),
+            median = comma(median(n.years.attended), accuracy = 1),
+            standard.deviation = comma(sd(n.years.attended), accuracy = 0.01)) 
+
+datatable(n.years.attended.summary.total,
+          options = list(
+            columnDefs = list(list(className = "dt-center", targets = 1:4))
+          ))
+```
+
+<br>
+
+Next we will check to see if there are any significant differences by using the t-test for the mean by RUCA groups as well as a summary for each of the RUCA groups.
+
+The ANOVA table indicates that there is a statistically significant difference in the average number of years students attended a Central MN High School but it's really minor.
+
+<br>
+
+::: panel-tabset
+## Summary table - RUCA
+
+```{r n years attended summary ruca}
+n.years.attended.summary.ruca <- master %>%
+  group_by(Dem_Desc) %>%
+  summarise(n = comma(n(), accuracy = 1),
+            mean = comma(mean(n.years.attended), accuracy = .01),
+            median = comma(median(n.years.attended), accuracy = 1),
+            sd = comma(sd(n.years.attended), accuracy = .01)) %>%
+  ungroup()
+
+datatable(n.years.attended.summary.ruca, class = "cell-border stripe", filter = "top", rownames = FALSE, options = list(
+  columnDefs = list(list(className = "dt-center", targets = 1:4))
+))
+
+```
+
+## ANOVA - RUCA
+
+```{r n years attended t test average ruca}
+summary <- aov(n.years.attended ~ Dem_Desc, data = master)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+:::
+
+<br>
+
+```{r write master, include=FALSE}
+write_csv(master, "Data/SLEDS/Masters/Master-1.csv")
+
+
+k12_org <- master %>%
+  select(PersonID, OrganizationName, county.name, countyfp, Dem_Desc, edr, n.years.attended)
+
+write_csv(k12_org, "Data/SLEDS/Masters/k12_org.csv")
+```
