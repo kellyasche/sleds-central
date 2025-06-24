@@ -8,7 +8,7 @@ editor: visual
 The central region schools districts are located in the following EDRs and Counties;
 
 -   EDR 7E
-    -    Chisago
+    -   Chisago
     -   Isanti
     -   Kanabec
     -   Mille Lacs

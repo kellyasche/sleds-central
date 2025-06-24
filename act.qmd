@@ -1,0 +1,268 @@
+---
+title: "ACT"
+editor: visual
+---
+
+```{r library, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(infer)
+```
+
+```{r themes and shapefiles, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         mif = ifelse(is.na(mif), "TC", mif),
+         mif = as.factor(mif),
+         mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
+Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+```
+
+# Data Prep
+
+Next up is to join the ACT data. I'll first load the entire ACT dataset, clean it up, and then join with my master/NE graduate dataset to finalize.
+
+<br>
+
+```{r act original data}
+act.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/ACT/ACT.csv') %>%
+  mutate(PersonID = as.integer(PersonID))
+
+kable(head(act.original))
+
+kable(names(act.original))
+```
+
+<br>
+
+There are `r comma(nrow(act.original), accuracy = 1)` observations in the dataset. Each observation is an ACT test taken by a student in Central Minnesota. The unique feature here is the time it was taken. This means that a student could have taken the ACT twice and their PersonID would show up as two observations.
+
+Out of the scores provided, I'm just going to use the composite score. Since an individual may have taken the test multiple times I will only use the highest composite score for each individual. This is how colleges do it as well.
+
+<br>
+
+```{r act highest composite score}
+act.highest.comp <- act.original %>%
+  select(PersonID, ACTCompositeScore) %>%
+  mutate(PersonID = as.integer(PersonID)) %>%
+  group_by(PersonID) %>%
+  filter(ACTCompositeScore == max(ACTCompositeScore)) %>%
+  ungroup() %>%
+  distinct(PersonID, .keep_all = TRUE)
+
+kable(head(act.highest.comp))
+
+kable(names(act.highest.comp))
+```
+
+<br>
+
+After filtering for only the highest ACT composite score for each PersonID, the dataset contains `r comma(nrow(act.highest.comp), accuracy = 1)` observations.
+
+Now we will join it up with the master.
+
+<br>
+
+```{r act join with master}
+master.2 <- read_csv("Data/SLEDS/Masters/master-1.csv") %>%
+  left_join(act.highest.comp, by = "PersonID")
+
+act.master <- read_csv("Data/SLEDS/Masters/master-1.csv") %>%
+  select(PersonID) %>%
+  left_join(act.highest.comp, by = "PersonID")
+
+kable(head(master.2))
+
+kable(names(master.2))
+
+```
+
+<br>
+
+The updated master dataset contains `r comma(nrow(master.2), accuracy = 1)` observations with `r comma(ncol(master.2), accuracy = 1)` columns.
+
+<br>
+
+# Summary of ACT data
+
+First, lets see what percentage of observations took the ACT and what the average composite score was.
+
+The table below shows that nearly two-thirds of graduates from Central Minnesota have taken the ACT at some point in the dataset.
+
+<br>
+
+```{r table act summary pct total, echo=FALSE}
+act.pct.taken <- master.2 %>%
+  mutate(act.taken = ifelse(is.na(ACTCompositeScore), "ACT not taken", "ACT taken")) %>%
+  tabyl(act.taken) %>%
+  mutate(percent = scales::percent(percent, accuracy = .1)) %>%
+  rename(`n observations` = 2,
+         `% of total observations` = 3)
+
+datatable(act.pct.taken, class = "cell-border stripe", filter = "top", rownames = FALSE)
+
+```
+
+<br>
+
+Next lets see if the ACT taken rate differs across RUCA, regions and counties.
+
+The cross-tabs for the percentage of students who have taken the ACT by RUCA category has a p-value of less than .01, indicating that RUCA category is related. Graduates from town/rural mix districts had the lowest percentage of individuals who didn't take the ACT with 54.5%, followed by urban/town/rural mix with 63.6% and entirely urban with 69.0%.
+
+<br>
+
+::: panel-tabset
+## RUCA Table
+
+```{r prep act taken summary by ruca, echo=FALSE}
+act.taken.ruca <- master.2 %>%
+  mutate(act.taken = ifelse(is.na(ACTCompositeScore), "ACT not taken", "ACT taken")) %>%
+  tabyl(Dem_Desc, act.taken) %>%
+  mutate(`Percent ACT taken` = scales::percent(`ACT taken` / (`ACT not taken` + `ACT taken`), accuracy = .1))
+  
+datatable(act.taken.ruca, class = "cell-border stripe", filter = "top", rownames = FALSE)
+```
+
+## RUCA Cross-tabs
+
+```{r cross tabs ACT ruca}
+
+act.taken.ruca.cross.tabs <- master.2 %>%
+  mutate(act.taken = ifelse(is.na(ACTCompositeScore), "ACT not taken", "ACT taken"))
+
+CrossTable(act.taken.ruca.cross.tabs$Dem_Desc, act.taken.ruca.cross.tabs$act.taken, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+Finally, here's a look at the percentages by county. The largest percentage comes from Itasca County with only 52.9% of graduates taking the ACT. The highest was in Cook County with 67.6%.
+
+<br>
+
+```{r prep act taken summary by county, echo=FALSE}
+act.taken.county <- master.2 %>%
+  mutate(act.taken = ifelse(is.na(ACTCompositeScore), "ACT not taken", "ACT taken")) %>%
+  tabyl(county.name, act.taken) %>%
+  mutate(`Percent ACT taken` =`ACT taken` / (`ACT not taken` + `ACT taken`), accuracy = .1) %>%
+  left_join(counties.regions[,c(1,2)], by = c("county.name" = "Name")) %>%
+  left_join(mn_counties[,c(5,7)], by = c("countyfp"))
+
+act.taken.county.map <- ggplot(act.taken.county) +
+  geom_sf_interactive(color = "grey85", aes(geometry = geometry, fill = `Percent ACT taken`, data_id = countyfp, tooltip = paste(county.name, "\nNumber of students taken the ACT: ", comma(`ACT taken`, accuracy = 1), "\nPercent of students in the county taken ACT: ", percent(`Percent ACT taken`, accuracy = .1), sep = ""))) +
+  theme_sf+
+  scale_fill_fermenter(palette = "PuBu", direction = 1, labels = scales::percent) +
+  labs(title = "Percent of students taken ACT in county location of high school") +
+  theme(legend.box.margin = margin(-150, 0, 0, -100),
+        text = element_text(size = 16))
+
+girafe(ggobj = act.taken.county.map) %>%
+  girafe_options(opts_sizing(rescale = FALSE))
+  
+```
+
+```{r write master, include=FALSE}
+write_csv(master.2, "Data/SLEDS/Masters/Master-2.csv")
+
+write_csv(act.master, "Data/SLEDS/Masters/act.master.csv")
+```
