@@ -1,0 +1,1187 @@
+---
+title: "National Student Clearinghouse - Enrollment"
+editor: visual
+---
+
+```{r library, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(infer)
+```
+
+```{r themes and shapefiles, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         mif = ifelse(is.na(mif), "TC", mif),
+         mif = as.factor(mif),
+         mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
+Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+```
+
+# Data Prep
+
+Okay, lets check out the National Student Clearinghouse enrollment data. I will first import the entire dataset, clean it up, and then merge it with the master / Central graduate dataset.
+
+<br>
+
+```{r nsc enrollment originals}
+nsc.enrollment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/NSCEnrollment/NSC_Enrollments.csv') %>%
+  mutate(PersonID = as.integer(PersonID),
+         OPEID = str_pad(OPEID, width = 8, side = "left", pad = "0"),
+         OPEID.6 = str_sub(OPEID, 1, 6)) %>%
+  drop_na(PersonID) %>%
+  drop_na(OPEID)
+  
+kable(head(nsc.enrollment.original))
+
+kable(names(nsc.enrollment.original))
+```
+
+<br>
+
+The dataset has `r comma(nsc.enrollment.original %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.original %>% ncol(), accuracy = 1)` columns. Here are the columns and their definitions.
+
+-   EnrollmentBeginTimeID: Begin date for the student's period of attendance.
+-   EnrollmentEndTimeID: End date for the student's period of attendance.
+-   OPEID: Office of Postsecondary Education (OPE)/FICE code of the college that the student attended (Foreign Key to IPEDSCharacteristics).
+-   InstitutionName: Name of institution
+-   EnrollmentStatus: The last enrollment status reported for the student. This field will have 'N/A' or "NULL" if the reporting college has not defined the student's enrollment status as directory information. Here are the code definitions;
+    -   F: Full-time
+    -   Q: Three-quarter time
+    -   H: Half-time
+    -   L: Less than half-time
+    -   A: Leave of absence
+    -   W: Withdrawn
+    -   D: Deceased
+
+Essentially, this dataset provides semester-based information - each observation is a semester/single period with the institutional information and beginning and end time of that single period (usually a semester). For example, if an individual attended South Dakota State University, attended in a "typical" fashion (fall and spring semesters), and graduated in 4 years, there would be 8 observations for that PersonID - one observation per semester.
+
+There are a few pieces of information that I want to consolidate from this dataset;
+
+1.  Did the PersonID in the master dataset attend a college - yes or no?
+2.  Did the PersonID attend college during high school (PSEO), immediately after graduation or wait?
+3.  Did the PersonID attend multiple colleges - yes or no?
+4.  What type of college did the PersonID attend first?
+5.  Did the PersonID attend a public, private not-for-profit, or private or, for-profit college(s)?
+6.  At any point during their college career, did the PersonID attend a college(s) inside or outside of the Southwest Region or outside the EDR of their high school?
+
+I was going to include the length of time that a PersonID attended college, but due to differences in how institutions report enrollment periods, it didn't seem like it would be a great indicator.
+
+The pieces of information missing in the original dataset is location and type of institution attended.To do this we will need to join the original dataset with an IPEDS dataset using opeid.
+
+The IPEDS data and the NSC data will only match using the first 6 digits of the IPEDS OPEID values. So I will change that in the NSC data. Then I can join.
+
+<br>
+
+```{r prep ipeds}
+ipeds.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/IPEDS/IPEDS.csv') 
+
+ipeds.sector <- ipeds.original %>%
+  filter(!is.na(OPEID)) %>%
+  mutate(OPEID = str_pad(OPEID, width = 8, side = "left", pad = "0"),
+         OPEID.6 = str_sub(OPEID, 1, 6)) %>%
+  select(Unitid, OPEID.6, City, State, FIPS, GeographicRegion, CountyCode, InstitutionSector, InstitutionName)  %>%
+  mutate(CountyCode = str_pad(CountyCode, width = 5, side = "left", pad = "0"))
+
+nsc.enrollment.ipeds<- nsc.enrollment.original %>%
+  left_join(ipeds.sector, by = "OPEID.6") %>%
+  drop_na(Unitid) %>%
+  mutate(EnrollmentStatus = as_factor(EnrollmentStatus))
+
+kable(head(nsc.enrollment.ipeds))
+
+kable(names(nsc.enrollment.ipeds))
+```
+
+<br>
+
+After joining these we now have `r comma(nsc.enrollment.ipeds %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.ipeds %>% ncol(), accuracy = 1)` columns. This is a few less than the original enrollment document due to a few OPEIDs not aligning. But overall, the data now has the institution sector that the individual attended as well as location.
+
+First, we will create a dataset with a column confirming their post-secondary attendance for each unique PersonID in the nsc.enrollment.ipeds.
+
+<br>
+
+```{r nsc attended}
+nsc.enrollment.confirm <- nsc.enrollment.ipeds %>%
+  filter(!EnrollmentStatus %in% c("A", "W", "D")) %>%
+  distinct(PersonID) %>%
+  mutate(attended.ps = "Yes")
+
+kable(head(nsc.enrollment.confirm))
+
+kable(names(nsc.enrollment.confirm))
+```
+
+<br>
+
+There are `r comma(nsc.enrollment.confirm %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.confirm %>% ncol(), accuracy = 1)` columns in the dataset. The columns provide the unique PersonID along with a newly created column confirming that they attended post-secondary education.
+
+Next we will extract the first month and year each PersonID attended a post-secondary institution which will help us figure out how long after high school graduation did they wait until they attended a post-secondary institution.
+
+<br>
+
+```{r nsc first month and year attending}
+nsc.enrollment.first.attend <- nsc.enrollment.ipeds %>%
+  mutate(first.year = as.integer(str_sub(EnrollmentBeginTimeID, 1,4)),
+         first.month = as.integer(str_sub(EnrollmentBeginTimeID, 5,6)),
+         first.day = as.integer(str_sub(EnrollmentBeginTimeID, 7, 8))) %>%
+  group_by(PersonID) %>%
+  filter(first.year == min(first.year)) %>%
+  mutate(n = n()) %>%
+  ungroup() %>%
+  group_by(PersonID) %>%
+  filter(first.month == min(first.month)) %>%
+  ungroup() %>%
+  group_by(PersonID) %>%
+  filter(first.day == min(first.day)) %>%
+  ungroup() %>%
+  distinct(PersonID, .keep_all = TRUE) %>%
+  mutate(first.month = str_pad(first.month, width = 2, side = "left", pad = "0"),
+         first.day = str_pad(first.day, width = 2, side = "left", pad = "0"),
+         first.attend.ps = paste(first.year, first.month, first.day, sep = "")) %>%
+  select(PersonID, first.attend.ps)
+
+kable(head(nsc.enrollment.first.attend))
+
+kable(names(nsc.enrollment.first.attend))
+```
+
+<br>
+
+This dataset has `r comma(nsc.enrollment.first.attend %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.first.attend %>% ncol(), accuracy = 1)` columns. Essentially, this dataset provides each unique PersonID with the earliest begin time for post-secondary education.
+
+Next we will determine how many different institiutions the PersonID attended during their post-secondary career.
+
+<br>
+
+```{r nsc n institutions}
+nsc.enrollment.n.institutions <- nsc.enrollment.ipeds %>%
+  group_by(PersonID) %>%
+  distinct(OPEID.6, .keep_all = TRUE) %>%
+  ungroup() %>%
+  group_by(PersonID) %>%
+  summarize(n.institutions = n()) %>%
+  ungroup()
+
+kable(head(nsc.enrollment.n.institutions))
+
+kable(names(nsc.enrollment.n.institutions))
+```
+
+<br>
+
+As expected, we have `r comma(nsc.enrollment.n.institutions %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.n.institutions %>% ncol(), accuracy = 1)` columns. Each PersonID in the dataset has the number of unique post-secondary institutions they attended.
+
+Next, we will create a dataset indicating the type of college the PersonID attended first. I will use the IPEDS sector data. Here are the definitions of the institution sector;
+
+-   0 - Administrative Unit\
+-   1 - Public, 4-year or above\
+-   2 - Private not-for-profit, 4-year or above\
+-   3 - Private for-profit, 4-year or above\
+-   4 - Public, 2-year\
+-   5 - Private not-for-profit, 2-year\
+-   6 - Private for-profit, 2-year\
+-   7 - Public, less-than 2-year\
+-   8 - Private not-for-profit, less-than 2-year\
+-   9 - Private for-profit, less-than 2-year\
+-   99 - Sector unknown (not active)
+
+<br>
+
+```{r nsc first institution type}
+nsc.enrollment.first.institution <- nsc.enrollment.ipeds %>%
+  mutate(EnrollmentBeginTimeID = ymd(EnrollmentBeginTimeID)) %>%
+  group_by(PersonID) %>%
+  filter(EnrollmentBeginTimeID == min(EnrollmentBeginTimeID)) %>%
+  ungroup() %>%
+  distinct(PersonID, .keep_all = TRUE) %>%
+  select(PersonID, InstitutionSector) %>%
+  rename(first.InstitutionSector = InstitutionSector)
+
+kable(head(nsc.enrollment.first.institution))
+
+kable(names(nsc.enrollment.first.institution))
+```
+
+<br>
+
+As expected, we have `r comma(nsc.enrollment.first.institution %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.first.institution %>% ncol(), accrucay = 1)` columns. This dataset now provides the sector of the first post-secondary institution they attended immediately after college.
+
+Next we will determine thy type(s) of college(s) they attended during their post-secondary career. To do this we will first create a dataset with columns for each institution sector and a confirmation indicator on whether the PersonID attended that particular sector at some point in their career. I will then create a new category indicating that attended more than one type of institution sector. Once completed, I will be left with a dataset that has a column for each unique PersonID and what sector they attended, as well as a newly created code for "attended more than 1 type of sector".
+
+<br>
+
+```{r nsc enrollment institution type attended}
+grad.list <- read_csv("Data/SLEDS/Masters/Master-8.csv") %>%
+  select(PersonID)
+
+nsc.enrollment.institution.types <- nsc.enrollment.ipeds %>%
+  distinct(PersonID, InstitutionSector) %>%
+  mutate(attended = 1) %>%
+  complete(PersonID, InstitutionSector, fill = list(attended = 0)) %>%
+  mutate(label = paste("ps.sector.", InstitutionSector, sep = "")) %>%
+  select(PersonID, label, attended) %>%
+  spread(label, attended) %>%
+  right_join(grad.list, by = "PersonID") %>%
+  gather(key = "key", value = "value", 2:10) %>%
+  mutate(value = ifelse(is.na(value), 0, value)) %>%
+  spread(key, value)
+
+kable(head(nsc.enrollment.institution.types))
+
+kable(names(nsc.enrollment.institution.types))
+```
+
+<br>
+
+As expected, we have `r comma(nsc.enrollment.institution.types %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.institution.types %>% ncol(), accuracy = 1)` columns. This dataset provides each unique PersonID with the institution sector they attended using the codes listed above. For PersonID's that attended multiple sectors, they were coded as "10".
+
+Next we will determine whether they attended a post-secondary institution inside or outside of the planning region, outside their EDR, or outside of Minnesota. Since many of the PersonID in the dataset have attended multiple institutions, we will categorize it in the following way in order to capture the combinations of attendance;
+
+-   Attended inside region only (planning region, EDR, RUCA, State)
+-   Attended inside and outside region (planning region, EDR, RUCA, state)
+-   Attended outside region only (planning region, EDR, RUCA, state)
+
+In order to do this we will need to combine our planning region and EDR joining documents with the nsc.enrollment.ipeds dataset. I need to remember that the way I arranged the regions are going to be different than the official planning region. We will also need to join the master dataset with it to determine the location of the PersonID's high school graduation location. Lastly, we will need to join up the RUCA categories for counties outside of Minnesota. Then we can start the categorization process.
+
+<br>
+
+```{r nsc enrollment location}
+dem.desc.county <- read_csv("Data/Join docs/Master-ruca-county.csv")
+
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
+grad.location <- read_csv("Data/SLEDS/Masters/Master-8.csv") %>%
+  select(PersonID, edr, Dem_Desc) %>%
+  rename(grad.edr = 2,
+         grad.ruca = 3) %>%
+  mutate(grad.pr = "Central")
+
+nsc.enrollment.location.join <- nsc.enrollment.ipeds %>%
+  select(PersonID, InstitutionName, CountyCode) %>%
+  left_join(dem.desc.county, by = c("CountyCode" = "State-County FIPS Code")) %>%
+  left_join(grad.location, by = "PersonID") %>%
+  drop_na(grad.ruca) %>%
+  mutate(countyfp = str_sub(CountyCode, 3, 5),
+         statefp = str_sub(CountyCode, 1, 2)) %>%
+  left_join(counties.regions.1[,c(1,5,10,9)], by = c("countyfp", "statefp")) %>%
+  rename(ps.Dem_Desc = 4,
+         ps.countyfp = 8,
+         ps.statefp = 9,
+         ps.edr = 10,
+         ps.pr = 11) 
+
+kable(head(nsc.enrollment.location.join))
+
+kable(names(nsc.enrollment.location.join))
+```
+
+<br>
+
+This joined dataset gives us `r comma(nsc.enrollment.location.join %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.location.join %>% ncol, accuracy = 1)` columns. The columns beginning with "ps" are the ruca category and regions of the post-secondary institution attended. The columns beginning with "grad" are the ruca category and regions of the highschool from which the PersonID graduated.
+
+One thing that's important is to realize that joining the nsc.enrollment dataset with the Central graduates dataset means we will have some NAs. Some of the students listed in the nsc.enrollment dataset aren't in the Central graduates dataset since they may have graduated before 2008 or didn't actually meet the criteria in the Central graduates dataset. Therefore, as we move forward, I will need to make sure to remove those NAs.
+
+From here we can start creating new columns beginning with the RUCA category. to create this column we will gather each PersonID to examine whether or they attended a post-secondary institution in the same RUCA category, or if they attended multiple post-secondary insitutions with one institution in the same category and another not the same.
+
+<br>
+
+```{r nsc enrollment same ruca}
+nsc.enrollment.same.ruca <- nsc.enrollment.location.join %>% 
+  mutate(ps.in.same.ruca = ifelse(ps.Dem_Desc == grad.ruca, "In same RUCA", "Outside RUCA")) %>%
+  select(PersonID, ps.Dem_Desc, grad.ruca, ps.in.same.ruca) %>%
+  select(PersonID, ps.in.same.ruca) %>%
+  distinct(PersonID, ps.in.same.ruca) %>%
+  mutate(code = ifelse(ps.in.same.ruca == "In same RUCA", 1, 2)) %>%
+  group_by(PersonID) %>%
+  summarize(code = sum(code)) %>%
+  ungroup() %>%
+  mutate(ps.in.same.ruca = ifelse(code == 1, "In same RUCA",
+                                  ifelse(code == 2, "Outside RUCA", "Inside and outside same RUCA"))) %>%
+  select(PersonID, ps.in.same.ruca)
+
+kable(head(nsc.enrollment.same.ruca))
+
+kable(names(nsc.enrollment.same.ruca))
+
+```
+
+<br>
+
+So there are fewer observations in this dataset than previous subsets. Why? This is due to dropping and PersonID that wasn't in the Central graduate dataset. I did not do that for the previous subsets. However, those previous subsets will be filtered down once we join it with the master dataset.
+
+This dataset provides the PersonID and whether they attended a post secondary institution in a location with the same, outside, or both outside and inside (if attended multiple post-secondary institutions) RUCA categories of their high school from which they graduated. There are `r comma(nsc.enrollment.same.ruca %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.same.ruca %>% ncol(), accuracy = 1)` columns.
+
+Up next we will create a dataset indicating whether a PersonID that graduated from a Central MN high school attended a post-secondary insitution in their high school's EDR.
+
+<br>
+
+```{r nsc enrollment same edr}
+nsc.enrollment.same.edr <- nsc.enrollment.location.join %>%
+  mutate(ps.in.same.edr = ifelse(ps.edr == grad.edr, "In same EDR", "Outside EDR"),
+         ps.in.same.edr = ifelse(is.na(ps.in.same.edr), "Outside EDR", ps.in.same.edr)) %>%
+  select(PersonID, ps.edr, grad.edr, ps.in.same.edr) %>%
+  select(PersonID, ps.in.same.edr) %>%
+  distinct(PersonID, ps.in.same.edr) %>%
+  mutate(code = ifelse(ps.in.same.edr == "In same EDR", 1, 2)) %>%
+  group_by(PersonID) %>%
+  summarize(code = sum(code)) %>%
+  ungroup() %>%
+  mutate(ps.in.same.edr = ifelse(code == 1, "In same EDR",
+                                  ifelse(code == 2, "Outside EDR", "Inside and outside same EDR"))) %>%
+  select(PersonID, ps.in.same.edr)
+
+kable(head(nsc.enrollment.same.edr))
+
+kable(names(nsc.enrollment.same.edr))
+```
+
+<br>
+
+As expected there are `r comma(nsc.enrollment.same.edr %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.same.edr %>% ncol(), accuracy = 1)` columns.
+
+Next we will determine which Central MN graduates attended a post-secondary institution in the same project region (Central project region).
+
+<br>
+
+```{r nsc enrollment same pr}
+nsc.enrollment.same.pr <- nsc.enrollment.location.join %>%
+  mutate(ps.in.same.pr = ifelse(ps.pr == grad.pr, "In same PR", "Outside PR"),
+         ps.in.same.pr = ifelse(is.na(ps.in.same.pr), "Outside PR", ps.in.same.pr)) %>%
+  select(PersonID, ps.pr, grad.pr, ps.in.same.pr) %>%
+  select(PersonID, ps.in.same.pr) %>%
+  distinct(PersonID, ps.in.same.pr) %>%
+  mutate(code = ifelse(ps.in.same.pr == "In same PR", 1, 2)) %>%
+  group_by(PersonID) %>%
+  summarize(code = sum(code)) %>%
+  ungroup() %>%
+  mutate(ps.in.same.pr = ifelse(code == 1, "In same PR",
+                                  ifelse(code == 2, "Outside PR", "Inside and outside same PR"))) %>%
+  select(PersonID, ps.in.same.pr)
+
+kable(head(nsc.enrollment.same.pr))
+
+kable(names(nsc.enrollment.same.pr))
+```
+
+<br>
+
+As expected, there are `r comma(nsc.enrollment.same.pr %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.same.pr %>% ncol(), accuracy = 1)` columns. This dataset provides whether the post-secondary institution(s) attended were in the same planning region as the high school from which they graduates, outside of the planning region, or both (attended multiple institutions).
+
+Next we want to see how many of the students leave the state to attend post-secondary education.
+
+<br>
+
+```{r nsc enrollment in MN}
+nsc.enrollment.in.MN <- nsc.enrollment.location.join %>%
+  mutate(ps.in.MN = ifelse(ps.statefp == "27", "In MN", "Outside MN")) %>%
+  select(PersonID, ps.in.MN) %>%
+  distinct(PersonID, ps.in.MN) %>%
+  mutate(code = ifelse(ps.in.MN == "In MN", 1, 2)) %>%
+  group_by(PersonID) %>%
+  summarize(code = sum(code)) %>%
+  ungroup() %>%
+  mutate(ps.in.MN = ifelse(code == 1, "In MN",
+                                  ifelse(code == 2, "Outside MN", "Inside and outside MN"))) %>%
+  select(PersonID, ps.in.MN)
+
+kable(head(nsc.enrollment.in.MN))
+
+kable(names(nsc.enrollment.in.MN))
+```
+
+<br>
+
+As expected we have `r comma(nsc.enrollment.in.MN %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.in.MN %>% ncol(), accuracy = 1)` columns. This dataset provides each distinct PersonID with whether they attended post secondary institutions inside MN, outside MN, or both.
+
+Okay, now it's time to join all of these with the master dataset. I will also create a new column that confirms whether they attended a college immediately (within the first year) after graduating high school.
+
+<br>
+
+```{r join with master}
+master <- read_csv("Data/SLEDS/Masters/Master-8.csv") %>%
+  mutate(PersonID = as.numeric(PersonID)) 
+
+master.9 <- master %>%
+  left_join(nsc.enrollment.confirm, by = "PersonID") %>%
+  mutate(attended.ps = ifelse(is.na(attended.ps), "No", attended.ps)) %>%
+  left_join(nsc.enrollment.first.attend, by = "PersonID") %>%
+  mutate(attended.ps.first.year = as.integer(str_sub(first.attend.ps, 1, 4)),
+         attended.ps.years.hsgrad = attended.ps.first.year - grad.year,
+         attended.ps.within.first.year.hsgrad = ifelse(attended.ps.years.hsgrad < 2, "Yes", "No")) %>%
+  left_join(nsc.enrollment.n.institutions, by = "PersonID") %>%
+  left_join(nsc.enrollment.first.institution, by = "PersonID") %>%
+  left_join(nsc.enrollment.institution.types, by = "PersonID") %>%
+  left_join(nsc.enrollment.same.ruca, by = "PersonID") %>%
+  left_join(nsc.enrollment.same.edr, by = "PersonID") %>%
+  left_join(nsc.enrollment.same.pr, by = "PersonID") %>%
+  left_join(nsc.enrollment.in.MN, by = "PersonID") %>%
+  mutate(n.institutions = ifelse(is.na(n.institutions), 0, n.institutions),
+         attended.ps.years.hsgrad = ifelse(attended.ps.years.hsgrad == -14, -1, attended.ps.years.hsgrad))
+
+nscenrollment.master <- read_csv("Data/SLEDS/Masters/Master-1.csv") %>%
+  select(PersonID, grad.year) %>%
+  left_join(nsc.enrollment.confirm, by = "PersonID") %>%
+  mutate(attended.ps = ifelse(is.na(attended.ps), "No", attended.ps)) %>%
+  left_join(nsc.enrollment.first.attend, by = "PersonID") %>%
+  mutate(attended.ps.first.year = as.integer(str_sub(first.attend.ps, 1, 4)),
+         attended.ps.years.hsgrad = attended.ps.first.year - grad.year,
+         attended.ps.within.first.year.hsgrad = ifelse(attended.ps.years.hsgrad < 2, "Yes", "No")) %>%
+  left_join(nsc.enrollment.n.institutions, by = "PersonID") %>%
+  left_join(nsc.enrollment.first.institution, by = "PersonID") %>%
+  left_join(nsc.enrollment.institution.types, by = "PersonID") %>%
+  left_join(nsc.enrollment.same.ruca, by = "PersonID") %>%
+  left_join(nsc.enrollment.same.edr, by = "PersonID") %>%
+  left_join(nsc.enrollment.same.pr, by = "PersonID") %>%
+  left_join(nsc.enrollment.in.MN, by = "PersonID") %>%
+  mutate(n.institutions = ifelse(is.na(n.institutions), 0, n.institutions)) %>%
+  select(-grad.year) 
+
+write_csv(nscenrollment.master, "Data/SLEDS/Masters/nscenrollment_master.csv")
+
+kable(head(master.9))
+
+kable(names(master.9))
+```
+
+<br>
+
+As expected, we have the same number of rows as the original master dataset - `r comma(master.9 %>% nrow(), accrucay = 1)` rows. Here are the explanations of all the new columns added to the master dataset.
+
+-   attended.ps - this is a confirmation that the PersonID attended a post-secondary institution at some point after graduating high school.
+-   attended.ps.years.hsgrad - the number of years after graduation that a PersonID attended a post-secondary education. In some cases, the value is negative indicating that the PersonID attended a post-secondary institution before graduating high school.
+-   attended.ps.within.first.year.hsgrad - did the PersonID attend a post-secondary education institution within 1 year or less from graduating high school.
+-   n.institutions - how many post-secondary institutions the PersonID attended
+-   first.InstitutionSector - the sector of the first post-secondary institution attended.
+-   InstitutionSector - The sector of the post-secondary institution attended (could be multiple)
+-   ps.in.same.ruca - did the PersonID attend a post-secondary institution in the same RUCA category as their high school
+-   ps.in.same.edr - did the PersonID attend a post-secondary institution in the same economic development region as high school
+-   ps.in.same.pr - did the PersonID attend a post-secondary institution in the same planning region as high school
+-   ps.in.MN = did the PersonID attend a post-secondary institution in Minnesota.
+
+<br>
+
+# Summary of students attending post-secondary
+
+Lets summarize the percentage of students that attended a post-secondary institution and compare across RUCA categories.
+
+Below is the percentage of students that attended a post-secondary institution from the entire dataset. 67% of the PersonIDs in the dataset attended a post-secondary institution at some point between 2007 and 2024.
+
+<br>
+
+```{r attending post secondary total}
+attending.ps.pct.total <- master.9 %>%
+  group_by(attended.ps) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  mutate(pct = n / sum(n)) 
+
+datatable(attending.ps.pct.total, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 1:2)))) %>%
+  formatCurrency(2, "", digits = 0) %>%
+  formatPercentage(3)
+```
+
+<br>
+
+Now lets check to see if this percentage is statistically significantly different by RUCA group.
+
+The crosstabs do inidcate that there is a statistically significant difference in the percentage of graduates that attend a post-secondary institution by high school RUCA category. The town/rural mix graduates attend post-secondary at a significantly lower rate than entirely urban and urban/town/rural mix graduates - 63.7%, compared to 70.7% and 67.7%, respectively.
+
+<br>
+
+::: panel-tabset
+## Chart - RUCA
+
+```{r chart attending post secondary ruca}
+attending.ps.pct.ruca <- master.9 %>%
+  group_by(Dem_Desc, attended.ps) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(Dem_Desc) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = as.character(seq(n())))
+
+attending.ps.pct.ruca.plot <- ggplot(attending.ps.pct.ruca, aes(Dem_Desc, pct, fill = attended.ps, group = attended.ps)) +
+    geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(Dem_Desc, "\nAttended a post-secondary intitution: ", attended.ps, "\nNumber: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(aes(label = percent(pct, accuracy = .1),), position = position_dodge(width = .9), show.legend = FALSE, color = "white", size = 5) +
+    labs(x="", y = "", color="", title = "Attended a post-secondary institution")+
+    scale_y_continuous(labels=scales::percent)+
+    scale_x_discrete(guide = guide_axis(n.dodge = 1)) +
+    theme_bar+
+    scale_fill_manual(values = brewer.pal(n = 5, "RdYlBu"),
+                       guide = guide_legend(ncol = 3)) +
+    theme(legend.position = "bottom",
+          text = element_text(size = 16))
+
+
+girafe(ggobj = attending.ps.pct.ruca.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+
+```
+
+## Cross-tabs - RUCA
+
+```{r crosstabs attending post secondary ruca}
+CrossTable(master.9$Dem_Desc, master.9$attended.ps, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+:::
+
+<br>
+
+# Summary of years between graduation and attending post-secondary
+
+Now lets take a look at the number of years between high school graduation and attending post-secondary. We will begin with the total number of students before diving into differences across RUCA categories and regions.
+
+A huge majority of students that attended a post secondary institution waited less than 1 year after graduating high school (85%)
+
+<br>
+
+::: panel-tabset
+## Summary Stats
+
+```{r summary stats years between graduation and ps total}
+years.between.grad.ps.total <- master.9 %>%
+  filter(attended.ps == "Yes") %>%
+  select(PersonID, first.attend.ps, attended.ps.first.year, attended.ps.within.first.year.hsgrad, attended.ps.years.hsgrad, grad.year) %>%
+  summarize(`Number attended post-secondary` = comma(n()),
+            `Mean years` = mean(attended.ps.years.hsgrad),
+            `Median years` = median(attended.ps.years.hsgrad),
+            `Max years` = max(attended.ps.years.hsgrad),
+            `Min years` = min(attended.ps.years.hsgrad),
+            `Standard deviation` = sd(attended.ps.years.hsgrad)) 
+
+datatable(years.between.grad.ps.total, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 0:5)))) %>%
+  formatCurrency(2, "", digits = 3) %>%
+  formatCurrency(6, "", digits = 4)
+
+
+```
+
+## Distribution
+
+```{r distribution years between graduation and ps total}
+years.between.grad.ps.dist.total <- master.9 %>%
+  filter(attended.ps == "Yes") %>%
+  mutate(attended.ps.years.hsgrad.bins = cut(attended.ps.years.hsgrad,
+                                             breaks = c(-1.1, .1, 1, 2, 3, 100),
+                                             labels = c("Less than one year", "1 year", "2 years", "3 years", "4 years or more")),
+         data_id = as.character(seq(n()))) %>%
+  group_by(attended.ps.years.hsgrad.bins) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  mutate(pct = n / sum(n),
+         data_id = as.character(seq(n())))
+  
+
+years.between.grad.ps.dist.total.plot <- ggplot(years.between.grad.ps.dist.total, aes(attended.ps.years.hsgrad.bins, pct)) +
+    geom_col_interactive(aes(data_id = data_id, tooltip = paste("\nNumber of years between high school graduation and attending post secondary: ", attended.ps.years.hsgrad.bins, "\nNumber of students: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color =  "black", size = 5) +
+    labs(x="", y = "", color="", title = "Percent of students and the number of years between high school and attending post secondary")+
+    scale_y_continuous(labels=scales::percent)+
+    scale_x_discrete(guide = guide_axis(n.dodge = 1)) +
+    theme_bar+
+  theme(legend.position = "none",
+          text = element_text(size = 16),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+girafe(ggobj = years.between.grad.ps.dist.total.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+
+
+```
+:::
+
+<br>
+
+Next lets check to see if there are any differences in the numbers of years between high school and attending post secondary by RUCA category.
+
+The ANOVA table indicates there are significant differences between the means across RUCA categories with a very low p-value. However, in the TukeyHSD test, it only shows that the statistically significant difference exists between urban/town/rural mix and town/rural mix districts.
+
+It says that graduates from urban/town/rural districts wait to attend post-secondary institution .04 years less longer than town/rural mix districts.
+
+<br>
+
+::: panel-tabset
+## RUCA - Table
+
+```{r table years between hs and ps ruca}
+years.between.grad.ps.table.ruca <- master.9 %>%
+  filter(attended.ps == "Yes") %>%
+  group_by(Dem_Desc) %>%
+  summarize(`Number of students` = n(),
+            `Mean` = mean(attended.ps.years.hsgrad),
+            `Median` = median(attended.ps.years.hsgrad),
+            `Max` = max(attended.ps.years.hsgrad),
+            `Min` = min(attended.ps.years.hsgrad),
+            `Standard deviation` = sd(attended.ps.years.hsgrad)) %>%
+  ungroup()
+
+datatable(years.between.grad.ps.table.ruca, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 1:6)))) %>%
+  formatCurrency(2, "", digits = 0) %>%
+  formatCurrency(3, "", digits = 2) %>%
+  formatCurrency(7, "", digits = 4) 
+
+```
+
+## RUCA - Cross-tabs
+
+```{r anova years between hs and ps ruca}
+years.between.grad.ps.anova.ruca <- master.9 %>%
+  filter(attended.ps == "Yes")
+
+years.between.grad.ps.anova.ruca.summary <- aov(attended.ps.years.hsgrad ~ Dem_Desc, data = years.between.grad.ps.anova.ruca)
+
+summary(years.between.grad.ps.anova.ruca.summary)
+
+TukeyHSD(years.between.grad.ps.anova.ruca.summary)
+```
+:::
+
+<br>
+
+# Summary of number of colleges attended {.tabset}
+
+Next we will summarize the number of colleges attended by producing the summary statistics and distribution.
+
+The table and distribution chart below show that a large majority (60.3%) of individuals attended only one post secondary institutions followed by 26.7% attending two.
+
+<br>
+
+::: panel-tabset
+## Summary Stats
+
+```{r summary stats number of colleges total}
+n.colleges.total <- master.9 %>%
+  filter(attended.ps == "Yes") %>%
+  summarize(`Number` = n(),
+            `Mean` = mean(n.institutions),
+            `Median` = median(n.institutions),
+            `Max` = max(n.institutions),
+            `Min` = min(n.institutions),
+            `Standard deviation` = sd(n.institutions))
+
+datatable(n.colleges.total, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 1:5)))) %>%
+  formatCurrency(2, "", digits = 2) %>%
+  formatCurrency(6, "", digits = 2)
+
+```
+
+## Distribution
+
+```{r distribution n colleges}
+n.colleges.dist.total <- master.9 %>%
+  filter(attended.ps == "Yes") %>%
+  mutate(n.institutions.bins = cut(n.institutions,
+                               breaks = c(0, 1, 2, 3, 4, 20),
+                               labels = c("One", "Two", "Three", "Four", "More than 4"))) %>%
+  group_by(n.institutions) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  mutate(pct = n / sum(n),
+         data_id = as.character(seq(n())))
+
+
+n.colleges.dist.total.plot <- ggplot(n.colleges.dist.total, aes(n.institutions, pct)) +
+  geom_col_interactive(aes(data_id = data_id, tooltip = paste("Number of institutions attended: ", comma(n.institutions, accuracy = 1), "\nNumber of students: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+  labs(x="", y = "", color="", title = "Percent of students by number of post secondary institutions attended")+
+    scale_y_continuous(labels=scales::percent)+
+    theme_bar+
+    theme(legend.position = "none",
+          text = element_text(size = 16))
+
+
+girafe(ggobj = n.colleges.dist.total.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+      
+
+
+```
+:::
+
+<br>
+
+I'm not sure it's all that important knowing whether there are differences in the percentage of students and the number of institutions they've attended across RUCA categories or regions. So we will skip that analysis for now.
+
+<br>
+
+# Summary of types of first college attended
+
+I think this will be very interesting - we want to see what they breakdown is of students attending different types of colleges. We will start by summarizing the total dataset before looking at differences across RUCA categories and regions.
+
+The chart below provides the percentage of students in the entire dataset that attended each institution sector. By far, a huge majority attend either a public 4-year (44%) or public 2-year (37.8%).
+
+<br>
+
+```{r total college types}
+sectors <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/NSC/IPEDS/institution-sectors.xlsx')
+
+college.type.summary.total <- master.9 %>%
+  filter(attended.ps == "Yes") %>%
+  group_by(first.InstitutionSector) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  mutate(pct = n / sum(n)) %>%
+  left_join(sectors, by = c("first.InstitutionSector" = "Code")) %>%
+  mutate(data_id = as.character(seq(n())))
+
+college.type.summary.total.plot <- ggplot(college.type.summary.total, aes(x = fct_rev(fct_reorder(Sector, pct)), pct)) +
+    geom_col_interactive(aes(data_id = data_id, tooltip = paste("College sector: ", Sector, "\nNumber of students in college sector: ", comma(n, accuracy = 1), "\nPercent of students in college sector: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Percent of students first college sector")+
+    scale_y_continuous(labels=scales::percent)+
+    scale_x_discrete(guide = guide_axis(n.dodge = 1)) +
+    theme_bar+
+    theme(legend.position = "none",
+          text = element_text(size = 18),
+          axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+girafe(ggobj = college.type.summary.total.plot, width_svg = 10, height_svg = 6) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+  
+```
+
+<br>
+
+Next we will check to see if those percentages are significantly different by RUCA category of the graduates high school.
+
+The crosstabs indicate that there is a significant difference in the percentage of students attending different institution sectors depending on the RUCA category of their high school. The p-value was near zero.
+
+The primary difference is the graduates from town/rural mix districts attend 2-year colleges at a higher percentage and attend public, 4-year colleges at a lower level.
+
+<br>
+
+::: panel-tabset
+## Chart - RUCA
+
+```{r chart first college sector ruca}
+first.college.sector.ruca <- master.9 %>%
+  filter(attended.ps == "Yes") %>%
+  group_by(Dem_Desc, first.InstitutionSector) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(Dem_Desc) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  left_join(sectors, by = c("first.InstitutionSector" = "Code")) %>%
+  mutate(data_id = as.character(seq(n()))) %>%
+  mutate(total.pct = n / sum(n))
+
+first.college.sector.ruca.plot <- ggplot(first.college.sector.ruca, aes(fct_rev(fct_reorder(Sector, pct)), pct, fill = Dem_Desc, group = Dem_Desc)) +
+    geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(Dem_Desc, "\nInstitution sector: ", Sector, "\nNumber of graduates attending: ", comma(n, accuracy = 1), "\nPercent of students attending: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(position = position_dodge(width = .9), aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Percent of students and first college attended\nby RUCA category")+
+    scale_y_continuous(labels=scales::percent)+
+    theme_bar+
+    scale_fill_manual(values= color.ruca,
+                       guide = guide_legend(ncol = 3)) +
+    theme(legend.position = "bottom",
+          text = element_text(size = 16),
+          axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+girafe(ggobj = first.college.sector.ruca.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+
+```
+
+## Cross-tabs - RUCA
+
+```{r crosstabs first college sector ruca}
+first.college.sector.ct.1.ruca <- master.9 %>%
+  filter(attended.ps == "Yes") %>%
+  select(Dem_Desc, first.InstitutionSector) %>%
+  left_join(sectors, by = c("first.InstitutionSector" = "Code")) %>%
+  filter(Sector %in% c("Public, 4-year or above", "Public, 2-year", "Private not-for-profit, 4-year or above", "Private for-profit, 4-year or above")) %>%
+  mutate(Sector = as_factor(Sector))
+
+CrossTable(first.college.sector.ct.1.ruca$Dem_Desc, first.college.sector.ct.1.ruca$first.InstitutionSector, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+:::
+
+<br>
+
+# Summary of attending college with same RUCA category
+
+Up next is determining how many students attended a post-secondary institution located in a county with the same RUCA category as their high school. First we will look at the percentages of the total dataset and then we will break it up.
+
+The chart below shows that 41.1% of students graduating from a Central MN high school attended a post secondary institution that was located in a county with the same RUCA category as their high school.
+
+<br>
+
+```{r chart institution same RUCA}
+ps.same.ruca.total <- master.9 %>%
+  filter(attended.ps == "Yes") %>%
+  group_by(ps.in.same.ruca) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  mutate(pct = n / sum(n),
+         data_id = as.character(seq(n())))
+
+ps.same.ruca.total.plot <- ggplot(ps.same.ruca.total, aes(fct_rev(fct_reorder(ps.in.same.ruca, pct)), pct)) +
+    geom_col_interactive(aes(data_id = data_id, tooltip = paste("Location of post-secondary institution: ", ps.in.same.ruca, "\nNumber of students: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Percent of students attending post secondary in RUCA category")+
+    scale_y_continuous(labels=scales::percent)+
+    scale_x_discrete(guide = guide_axis(n.dodge = 1)) +
+    theme_bar+
+    theme(legend.position = "none",
+          text = element_text(size = 18))
+
+
+girafe(ggobj = ps.same.ruca.total.plot, width_svg = 10, height_svg = 6) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+
+```
+
+<br>
+
+Next, lets check to see if the type of RUCA category they graduated from is related to whether the college they attend is in the same or different RUCA category.
+
+The crosstabs indicate that there is a relationship in the location of the individuals high school graduation and the RUCA category of their post-secondary institution(s). The p-value was 0.
+
+In a bit of a surprise, the individuals that graduated from an entirely urban district had a significantly lower percentage that graduated from a post-secondary institution that was also entirely urban.
+
+<br>
+
+::: panel-tabset
+## Chart - RUCA
+
+```{r chart same ruca}
+ps.same.ruca.ruca <- master.9 %>%
+  filter(attended.ps == "Yes") %>%
+  group_by(Dem_Desc, ps.in.same.ruca) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  complete(ps.in.same.ruca, Dem_Desc) %>%
+  mutate(n = ifelse(is.na(n), 0, n)) %>%
+  group_by(Dem_Desc) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = as.character(seq(n())))
+
+ps.same.ruca.ruca.plot <- ggplot(ps.same.ruca.ruca, aes(ps.in.same.ruca, pct, group = Dem_Desc, fill = Dem_Desc)) +
+    geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste("RUCA category comparison between high school and college: ", "\nNumber of students: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(position = position_dodge(width = .9), aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Percent of students attending post-secondary of same RUCA\ncategory by RUCA category of high school")+
+    scale_y_continuous(labels=scales::percent)+
+    theme_bar+
+    scale_fill_manual(values= color.ruca,
+                       guide = guide_legend(ncol = 3),
+                      breaks = c("Entirely urban", "Town/rural mix", "Urban/town/rural mix")) +
+    theme(legend.position = "bottom",
+          text = element_text(size = 16),
+          axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = ps.same.ruca.ruca.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+
+```
+
+## Cross-tabs - RUCA
+
+```{r crosstabs same ruca}
+ps.same.ruca.ct.ruca <- master.9 %>%
+  filter(attended.ps == "Yes")
+
+CrossTable(ps.same.ruca.ct.ruca$Dem_Desc, ps.same.ruca.ct.ruca$ps.in.same.ruca, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+# Summary of attending college in same planning region as high school
+
+Now we want to see how many students attend a college that is located in the same planning region as their high school.
+
+The chart below shows that nearly 64% of students graduating from Central MN High schools leave the region to attend post secondary education.
+
+<br>
+
+```{r attend same pr total}
+ps.same.pr.total <- master.9 %>%
+  filter(attended.ps == "Yes") %>%
+  group_by(ps.in.same.pr) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  mutate(pct = n / sum(n),
+         data_id = as.character(seq(n())))
+
+ps.same.pr.total.plot <- ggplot(ps.same.pr.total, aes(fct_rev(fct_reorder(ps.in.same.pr, pct)), pct)) +
+    geom_col_interactive(aes(data_id = data_id, tooltip = paste("College planning region location: ", ps.in.same.pr, "\nNumber of students: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Percent of students attending college within\nsame planning region")+
+    scale_y_continuous(labels=scales::percent)+
+    theme_bar+
+    theme(legend.position = "none",
+          text = element_text(size = 16),
+          axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = ps.same.pr.total.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+
+
+```
+
+<br>
+
+# Summary of attending college in Minnesota
+
+Now we want to see how many students stay or leave Minnesota to attend college.
+
+The chart below shows that 71% of students graduating from Central MN high schools attend a post secondary institution in Minnesota.
+
+<br>
+
+```{r attend college MN total}
+ps.in.MN.total <- master.9 %>%
+  filter(attended.ps == "Yes") %>%
+  group_by(ps.in.MN) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  mutate(pct = n / sum(n),
+         data_id = as.character(seq(n())))
+
+ps.in.MN.total.plot <- ggplot(ps.in.MN.total, aes(fct_rev(fct_reorder(ps.in.MN, pct)), pct)) +
+    geom_col_interactive(aes(data_id = data_id, tooltip = paste("College planning region location: ", ps.in.MN, "\nNumber of students: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Percent of students attending college in\nMinnesota")+
+    scale_y_continuous(labels=scales::percent)+
+    scale_x_discrete(guide = guide_axis(n.dodge = 1)) +
+    theme_bar+
+    theme(legend.position = "none",
+          text = element_text(size = 16),
+          axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = ps.in.MN.total.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+
+
+```
+
+<br>
+
+Next, lets check to see if the RUCA category of their high school is related to whether they attend a college inside or outside Minnesota.
+
+The crosstabs below indicate that there is a relationship between the RUCA category of a student's high school and whether they attend a college inside or outside of Minnesota. The p-value was near zero.
+
+The primary difference is that as districts become more urban, the percentage of graduates that attend a college in Minnesota declines - 68% for entirely urban, 71% for urban/town/rural mix and 73% for town/rural mix graduates.
+
+<br>
+
+::: panel-tabset
+## Chart - RUCA
+
+```{r chart attend college MN RUCA}
+ps.in.MN.ruca <- master.9 %>%
+  filter(attended.ps == "Yes") %>%
+  group_by(Dem_Desc, ps.in.MN) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(Dem_Desc) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = as.character(seq(n())))
+
+ps.in.MN.ruca.plot <- ggplot(ps.in.MN.ruca, aes(ps.in.MN, pct, fill = Dem_Desc, group = Dem_Desc)) +
+    geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(Dem_Desc, "\nCollege in Minnesota or not: ", ps.in.MN, "\nNumber of students: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(position = position_dodge(width = .9), aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Percent of students attending college in\nMinnesota")+
+    scale_y_continuous(labels=scales::percent)+
+    theme_bar+
+    scale_fill_manual(values= color.ruca,
+                       guide = guide_legend(ncol = 3)) +
+    theme(legend.position = "bottom",
+          text = element_text(size = 16),
+          axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = ps.in.MN.ruca.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+
+```
+
+## Tabset - RUCA
+
+```{r crosstabs attend college MN ruca}
+ps.in.MN.ct.ruca <- master.9 %>%
+  filter(attended.ps == "Yes")
+
+CrossTable(ps.in.MN.ct.ruca$Dem_Desc, ps.in.MN.ct.ruca$ps.in.MN, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+
+<br>
+:::
+
+# What states are students going to college
+
+The last piece here is to provide a map of the United States to see where students are going for college.
+
+Outside of Minnesota, Central MN graduates attend colleges in North Dakota at the highest rate - 7.8%. This is followed by Wisconsin at 5.3%.
+
+<br>
+
+```{r map states attending college}
+us_boundary <- read_sf('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/US shapefiles/cb_2018_us_state_500k.shp', quiet = TRUE) %>%
+  tigris::shift_geometry()
+  
+ps.state <- nsc.enrollment.location.join %>%
+  select(PersonID, ps.statefp) %>%
+  distinct(PersonID, ps.statefp) %>%
+  group_by(ps.statefp) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  mutate(pct = n / sum(n),
+         pct.bins = cut(pct,
+                        breaks = c(-1, 0, .01, .05, .10, 1),
+                        labels = c("0", "0% - 1%", "1% - 5%", "5% - 10%", "More than 10%"))) %>% 
+  right_join(us_boundary[,c(1,6,10)], by = c("ps.statefp" = "STATEFP")) %>%
+  filter(!ps.statefp %in% c("60", "66", "69", "72", "78"))
+
+
+ps.state.map <- ggplot(ps.state) +
+  geom_sf_interactive(color = "grey85", aes(geometry = geometry, fill = pct.bins, data_id = NAME, tooltip = paste(NAME, "\nNumber of students enrolled in college from SW MN: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+  coord_sf(crs = 'ESRI:102003') + 
+  theme_sf+
+  scale_fill_manual(values = brewer.pal(n = 4, "PuBu")) +
+  labs(title = "Percent of students attending colleges in states") +
+  theme(text = element_text(size = 18))
+
+girafe(ggobj = ps.state.map, height_svg = 10, width_svg = 10) %>%
+  girafe_options(opts_sizing(rescale = FALSE))
+
+```
+
+<br>
+
+```{r write master}
+write_csv(master.9, "Data/SLEDS/Masters/Master-9.csv")
+
+```
