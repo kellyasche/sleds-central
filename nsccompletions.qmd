@@ -1,0 +1,827 @@
+---
+title: "NSC - Completions"
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(tigris)
+```
+
+```{r themes and join docs, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         mif = ifelse(is.na(mif), "TC", mif),
+         mif = as.factor(mif),
+         mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
+Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+
+```
+
+<br>
+
+# Data prep - NSC completion
+
+Alright, now we are going to determine who graduated. Let's see what this data looks like. I'm going to import the entire dataset and then filter by PersonID among the high school graduates from Central.
+
+<br>
+
+```{r nsc completions original}
+graduates <- read_csv("Data/SLEDS/Masters/Master-9.csv") %>%
+  select(PersonID)
+
+nsccompletions.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/NSCCompletions/NCS_Completions.csv') %>%
+  rename(PersonID = 1) %>%
+  mutate(PersonID = as.integer(PersonID),
+         OPEID = str_pad(OPEID, width = 8, side = "left", pad = "0"),
+         OPEID.6 = str_sub(OPEID, 1, 6)) %>%
+  drop_na(PersonID) %>%
+  drop_na(OPEID) %>%
+  mutate(DegreeTitle = as_factor(DegreeTitle)) %>%
+  right_join(graduates, by = "PersonID") %>%
+  drop_na(OPEID.6)
+
+kable(head(nsccompletions.original))
+
+kable(names(nsccompletions.original))
+```
+
+<br>
+
+This dataset has `r comma(nsccompletions.original %>% nrow(), accuracy = 1)` rows and `r comma(nsccompletions.original %>% ncol(), accuracy = 1)` columns. Here are explanations of the rows:
+
+-   Graduated: Whether the student graduated. This dataset only provides students that have a "Y" in the column.
+-   GraduationTimeID: Provides the yearmonthday of the PersonID graduation.
+-   OPEID: ID of the institution which has been converted to an 8 long string padded with "0" on the left.
+-   InstitutionName: Name of the institution from which the PersonID graduated.
+-   DegreeTitle: The Degree Title the PersonID graduated with. This column is a shitshow - some have values of BA, while others have it written out - Bachelor of Arts. I will need to fix this.
+-   Major - Major the PersonID graduated with.
+-   OPEID.6 - this is the OPEID with a string length of 6 so that it matches up with our IPEDS dataset.
+
+The main characteristics from this dataset that I want to add to the master dataset/model are the following;
+
+-   Confirmation that they graduated from a post secondary institution
+-   The year they graduated from their first post secondary institution
+-   The year they graduated from their last post-seconary institution
+-   The sector of the institution(s) from which they graduated
+-   The highest level of degree obtained by the PersonID
+-   The degrees earned
+-   Whether the institution(s) from which they graduated are in the same RUCA category, EDR, planning region, and state as their high school
+
+Okay, lets first create a dataset with a unique PersonID and a column confirming that they graduated from a post secondary institution. However, we don't want to include any students that never had a chance to complete their post-secondary institution. For example, if an individual has graduated by 2023 (the last year of the data), but is attending, then they shouldn't be counted against the region for not having that person not "graduated".
+
+Essentially, what we want to identify is that in 2023, has the individual;
+
+1.  Graduated from a post-secondary institution,
+2.  Is still attending post-secondary institution,
+3.  Not attending post-secondary and never graduated from one.
+
+To do this, I will need to import the NSC enrollment data, filter to 2023, and double check to see if anyone in our graduate list was attending post-secondary that year. Then ps.grad can be categorized as the following;
+
+-   ps.grad: graduated from a post-secondary institution by 2023
+-   ps.attending: attending post-secondary as of 2023
+-   not.ps.grad: never graduated from a post-secondary institution and wasn't enrolled in one as of 2023.
+
+<br>
+
+```{r confirmed gradauted ps}
+ps.enrollment <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/NSCEnrollment/NSC_Enrollments.csv") %>%
+  mutate(PersonID = as.integer(PersonID),
+         OPEID = str_pad(OPEID, width = 8, side = "left", pad = "0"),
+         OPEID.6 = str_sub(OPEID, 1, 6)) %>%
+  drop_na(PersonID) %>%
+  drop_na(OPEID) %>%
+  filter(!EnrollmentStatus %in% c("A", "W", "D")) %>%
+  mutate(enrollment.year = str_sub(EnrollmentEndTimeID, 1,4),
+         enrollment.year = as.integer(enrollment.year)) %>%
+  filter(enrollment.year == 2023) %>%
+  select(PersonID, enrollment.year) %>%
+  mutate(ps.attending.2023 = "Yes") %>%
+  select(-enrollment.year) %>%
+  distinct(PersonID, .keep_all = TRUE)
+
+
+ps.graduate <- nsccompletions.original %>%
+  distinct(PersonID, .keep_all = TRUE) %>%
+  select(1) %>%
+  mutate(Graduated = "Y")
+
+kable(head(ps.graduate))
+
+kable(names(ps.graduate))
+```
+
+<br>
+
+This dataset has `r comma(ps.graduate %>% nrow(), accuracy = 1)` rows and `r comma(ps.graduate %>% ncol(), accuracy = 1)` columns. The dataset is a list of distinct PersonID in the original dataset along with a confirmation column that they graduated from a post-secondary institution. Essentially, this is how many individuals in the original dataset graduated from a post-secondary institution.
+
+Next, lets try and see if we can figure out the firs and last year they graduated from a first post-secondary institution.
+
+<br>
+
+```{r first year graduated}
+year.first.last.graduated <- nsccompletions.original %>%
+  mutate(grad.year = str_sub(GraduationTimeID, 1, 4),
+         grad.year = as.integer(grad.year)) %>%
+  distinct(PersonID, grad.year, .keep_all = TRUE) %>%
+  group_by(PersonID) %>%
+  mutate(min.ps.grad.year = min(grad.year),
+         max.ps.grad.year = max(grad.year)) %>%
+  ungroup() %>%
+  select(PersonID, min.ps.grad.year, max.ps.grad.year) %>%
+  distinct(PersonID, .keep_all = TRUE)
+
+kable(head(year.first.last.graduated))
+
+kable(names(year.first.last.graduated))
+```
+
+<br>
+
+As expected, this dataset has `r comma(year.first.last.graduated %>% nrow(), accuracy = 1)` rows and `r comma(year.first.last.graduated %>% ncol(), accuracy = 1)` columns. This dataset provides each distinct PersonID's year they received their first and last diploma/degrees.
+
+Next we will determine the sector(s) of the institution(s) from which they graduated. If they graduated from multiple institutions with different sectors than a new category will be created defined as "Graduated from multiple institution sectors". This will be coded as "10". I will use the IPEDS sector data. Here are the definitions of the institution sector;
+
+-   0 - Administrative Unit\
+-   1 - Public, 4-year or above\
+-   2 - Private not-for-profit, 4-year or above\
+-   3 - Private for-profit, 4-year or above\
+-   4 - Public, 2-year\
+-   5 - Private not-for-profit, 2-year\
+-   6 - Private for-profit, 2-year\
+-   7 - Public, less-than 2-year\
+-   8 - Private not-for-profit, less-than 2-year\
+-   9 - Private for-profit, less-than 2-year\
+-   10 - Multiple sectors
+-   99 - Sector unknown (not active)
+
+<br>
+
+```{r grad institution sector}
+ipeds.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/IPEDS/IPEDS.csv') 
+
+ipeds.sector <- ipeds.original %>%
+  filter(!is.na(OPEID)) %>%
+  mutate(OPEID = str_pad(OPEID, width = 8, side = "left", pad = "0"),
+         OPEID.6 = str_sub(OPEID, 1, 6)) %>%
+  select(Unitid, InstitutionName, OPEID.6, City, State, FIPS, GeographicRegion, CountyCode, InstitutionSector)  %>%
+  mutate(CountyCode = str_pad(CountyCode, width = 5, side = "left", pad = "0"))
+
+nsccompletions.ipeds<- nsccompletions.original %>%
+  left_join(ipeds.sector, by = "OPEID.6") %>%
+  drop_na(Unitid) 
+
+grad.institution.sector <- nsccompletions.ipeds %>%
+  group_by(PersonID, InstitutionSector) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(PersonID) %>%
+  mutate(n = n()) %>%
+  ungroup() %>%
+  mutate(multiple.sectors = ifelse(n > 1, 10, InstitutionSector)) %>%
+  select(PersonID, multiple.sectors) %>%
+  rename(InstitutionSector = 2) %>%
+  distinct(PersonID, .keep_all = TRUE)
+
+kable(head(grad.institution.sector))
+
+kable(names(grad.institution.sector))
+```
+
+<br>
+
+This dataset has `r comma(grad.institution.sector %>% nrow(), accuracy = 1)` rows which is fewer than previous subsets of the original. This is due to a few PersonID having "NULL" in their InstitutionSector. This dataset now provides the institution sector from which each PersonID graduated. If they graduated from multiple different sectors than it was labeled as "10".
+
+Next we will create a subset that provides the highest credential earned by each PersonID. As mentioned earlier, the DegreeTitle column is a mess, so I'm going to import a crosswalk table that will match the strings inputted by institutions into 9 categories. They are
+
+-   AD - Associate Degree
+-   BD - Bachelors Degree
+-   CR - Certificate
+-   DP - Doctoral-Professional
+-   DR - Doctorate Research
+-   MD - Masters Degree
+-   PC - PostBach Certificate
+-   PD - Diploma
+-   UC - Certificate
+
+I'm going to combine these into just a few categories.
+
+-   Less than associate degree = CR, PD, UC
+-   Associate degree = AD
+-   Bachelors Degree = BD, PC
+-   Higher than Bachelors Degree = MD, DP, DR
+
+<br>
+
+```{r highest credential earned}
+clean.degree <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/NSC/NSC_Degree_Title_Cleaned.xlsx', sheet = 1) %>%
+  drop_na(`CREDENTIAL_TITLE_REPORTED_TO_NSC`)
+
+highest.credential.code <- nsccompletions.original %>%
+  left_join(clean.degree[,c(1,2)], by = c("DegreeTitle" = "CREDENTIAL_TITLE_REPORTED_TO_NSC")) %>%
+  rename(credential.code = 7) %>%
+  mutate(credential.code = as.factor(credential.code)) %>%
+  mutate(cred.level = ifelse(credential.code %in% c("CR", "PD", "UC"), "Less than Associate Degree",
+                             ifelse(credential.code == "AD", "Associate degree",
+                                    ifelse(credential.code %in% c("BD", "PC"), "Bachelor degree", "Master degree or higher"))),
+         cred.level.code = ifelse(cred.level == "Less than Associate Degree", 1,
+                                  ifelse(cred.level == "Associate degree", 2,
+                                         ifelse(cred.level == "Bachelor degree", 3,
+                                                ifelse(cred.level == "Master degree or higher", 4, cred.level)))),
+         cred.level.code = ifelse(is.na(cred.level.code), 0, cred.level.code)) %>%
+  group_by(PersonID) %>%
+  filter(cred.level.code == max(cred.level.code)) %>%
+  distinct(PersonID, cred.level.code, .keep_all = TRUE) %>%
+  select(PersonID, cred.level) %>%
+  rename(highest.cred.level = 2)
+
+kable(head(highest.credential.code))
+
+kable(names(highest.credential.code))
+```
+
+<br>
+
+As expected, we have `r comma(highest.credential.code %>% nrow(), accuracy = 1)` rows. This dataset provides the highest credential level earned for each PersonID.
+
+Next we will determine whether they graduated from a post-secondary institution inside or outside of the planning region, outside their EDR, or outside of Minnesota. Since many of the PersonID in the dataset have attended multiple institutions, we will categorize it in the following way in order to capture the combinations of attendance;
+
+-   Graduated inside region only (planning region, EDR, RUCA, State)
+-   Graduated inside and outside region (planning region, EDR, RUCA, state)
+-   Graduated outside region only (planning region, EDR, RUCA, state)
+
+In order to do this we will need to combine our planning region and EDR joining documents with the nsccompletions.ipeds dataset. We will also need to join the master dataset with it to determine the location of the PersonID's high school graduation location. Lastly, we will need to join up the RUCA categories for counties outside of Minnesota. Then we can start the categorization process.
+
+<br>
+
+```{r nsc enrollment location}
+dem.desc.county <- read_csv("Data/Join docs/Master-ruca-county.csv")
+
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
+grad.location <- read_csv("Data/SLEDS/Masters/Master-9.csv") %>%
+  select(PersonID, edr, Dem_Desc) %>%
+  rename(grad.edr = 2,
+         grad.ruca = 3) %>%
+  mutate(grad.pr = "Central")
+
+nsccompletions.location.join <- nsccompletions.ipeds %>%
+  select(PersonID, InstitutionName, CountyCode) %>%
+  left_join(dem.desc.county, by = c("CountyCode" = "State-County FIPS Code")) %>%
+  left_join(grad.location, by = "PersonID") %>%
+  drop_na(grad.ruca) %>%
+  mutate(countyfp = str_sub(CountyCode, 3, 5),
+         statefp = str_sub(CountyCode, 1, 2)) %>%
+  left_join(counties.regions.1[,c(1,5,10,9)], by = c("countyfp", "statefp")) %>%
+  rename(ps.grad.Dem_Desc = 4,
+         ps.grad.countyfp = 8,
+         ps.grad.statefp = 9,
+         ps.grad.edr = 10,
+         ps.grad.pr = 11,
+         hs.grad.edr = 5,
+         hs.grad.ruca = 6,
+         hs.grad.pr = 7) 
+  
+kable(head(nsccompletions.location.join))
+
+kable(names(nsccompletions.location.join))
+```
+
+<br>
+
+This joined dataset gives us `r comma(nsccompletions.location.join %>% nrow(), accuracy = 1)` rows and `r comma(nsccompletions.location.join %>% ncol, accuracy = 1)` columns. The columns beginning with "ps" are the ruca category and regions of the post-secondary institution from which they graduated The columns beginning with "hs" are the RUCA category and regions of the high school from which the PersonID graduated.
+
+From here we can start creating new columns beginning with the RUCA category. to create this column we will gather each PersonID to examine whether or they graduated from a post-secondary institution in the same RUCA category, or if they graduated from multiple post-secondary institutions with one institution in the same category and another not the same.
+
+<br>
+
+```{r nsc enrollment same ruca}
+nsccompletions.same.ruca <- nsccompletions.location.join %>% 
+  mutate(ps.grad.in.same.ruca = ifelse(ps.grad.Dem_Desc == hs.grad.ruca, "In same RUCA", "Outside RUCA")) %>%
+  select(PersonID, ps.grad.Dem_Desc, hs.grad.ruca, ps.grad.in.same.ruca) %>%
+  select(PersonID, ps.grad.in.same.ruca) %>%
+  distinct(PersonID, ps.grad.in.same.ruca) %>%
+  mutate(code = ifelse(ps.grad.in.same.ruca == "In same RUCA", 1, 2)) %>%
+  group_by(PersonID) %>%
+  summarize(code = sum(code)) %>%
+  ungroup() %>%
+  mutate(ps.grad.in.same.ruca = ifelse(code == 1, "In same RUCA",
+                                  ifelse(code == 2, "Outside RUCA", "Inside and outside same RUCA"))) %>%
+  select(PersonID, ps.grad.in.same.ruca)
+
+kable(head(nsccompletions.same.ruca))
+
+kable(names(nsccompletions.same.ruca))
+
+```
+
+<br>
+
+This dataset has `r comma(nsccompletions.same.ruca %>% nrow(), accuracy = 1)` rows. It provides whether a PersonID graduated from a post-secondary institution within the same RUCA category, not in the same RUCA category, or both if they attended multiple institutions.
+
+Next we will check to see whether they graduated from a post-secondary institution that's within the same EDR.
+
+<br>
+
+```{r nsc completions same edr}
+nsccompletions.same.edr <- nsccompletions.location.join %>%
+  mutate(ps.grad.in.same.edr = ifelse(ps.grad.edr == hs.grad.edr, "In same EDR", "Outside EDR"),
+         ps.grad.in.same.edr = ifelse(is.na(ps.grad.in.same.edr), "Outside EDR", ps.grad.in.same.edr)) %>%
+  select(PersonID, ps.grad.edr, hs.grad.edr, ps.grad.in.same.edr) %>%
+  select(PersonID, ps.grad.in.same.edr) %>%
+  distinct(PersonID, ps.grad.in.same.edr) %>%
+  mutate(code = ifelse(ps.grad.in.same.edr == "In same EDR", 1, 2)) %>%
+  group_by(PersonID) %>%
+  summarize(code = sum(code)) %>%
+  ungroup() %>%
+  mutate(ps.grad.in.same.edr = ifelse(code == 1, "In same EDR",
+                                  ifelse(code == 2, "Outside EDR", "Inside and outside same EDR"))) %>%
+  select(PersonID, ps.grad.in.same.edr)
+
+kable(head(nsccompletions.same.edr))
+
+kable(names(nsccompletions.same.edr))
+```
+
+<br>
+
+As expected there are `r comma(nsccompletions.same.edr %>% nrow(), accuracy = 1)` rows and `r comma(nsccompletions.same.edr %>% ncol(), accuracy = 1)` columns.
+
+Next we will determine which Central MN graduates attended a post-secondary institution in the same project region (Central project region).
+
+<br>
+
+```{r nsc completions same pr}
+nsccompletions.same.pr <- nsccompletions.location.join %>%
+  mutate(ps.grad.in.same.pr = ifelse(ps.grad.pr == hs.grad.pr, "In same PR", "Outside PR"),
+         ps.grad.in.same.pr = ifelse(is.na(ps.grad.in.same.pr), "Outside PR", ps.grad.in.same.pr)) %>%
+  select(PersonID, ps.grad.pr, hs.grad.pr, ps.grad.in.same.pr) %>%
+  select(PersonID, ps.grad.in.same.pr) %>%
+  distinct(PersonID, ps.grad.in.same.pr) %>%
+  mutate(code = ifelse(ps.grad.in.same.pr == "In same PR", 1, 2)) %>%
+  group_by(PersonID) %>%
+  summarize(code = sum(code)) %>%
+  ungroup() %>%
+  mutate(ps.grad.in.same.pr = ifelse(code == 1, "In same PR",
+                                  ifelse(code == 2, "Outside PR", "Inside and outside same PR"))) %>%
+  select(PersonID, ps.grad.in.same.pr)
+
+kable(head(nsccompletions.same.pr))
+
+kable(names(nsccompletions.same.pr))
+```
+
+<br>
+
+As expected, there are `r comma(nsccompletions.same.pr %>% nrow(), accuracy = 1)` rows and `r comma(nsccompletions.same.pr %>% ncol(), accuracy = 1)` columns. This dataset provides whether the post-secondary institution(s) from which a PersonID graduated were in the same planning region as the high school from which they graduated, outside of the planning region, or both (attended multiple institutions).
+
+Next we want to see how many of the students leave the state to attend post-secondary education.
+
+<br>
+
+```{r nsc completions in MN}
+nsccompletions.in.MN <- nsccompletions.location.join %>%
+  mutate(ps.grad.in.MN = ifelse(ps.grad.statefp == "27", "In MN", "Outside MN")) %>%
+  select(PersonID, ps.grad.in.MN) %>%
+  distinct(PersonID, ps.grad.in.MN) %>%
+  mutate(code = ifelse(ps.grad.in.MN == "In MN", 1, 2)) %>%
+  group_by(PersonID) %>%
+  summarize(code = sum(code)) %>%
+  ungroup() %>%
+  mutate(ps.grad.in.MN = ifelse(code == 1, "In MN",
+                                  ifelse(code == 2, "Outside MN", "Inside and outside MN"))) %>%
+  select(PersonID, ps.grad.in.MN)
+
+kable(head(nsccompletions.same.pr))
+
+kable(names(nsccompletions.same.pr))
+```
+
+<br>
+
+As expected we have `r comma(nsccompletions.in.MN %>% nrow(), accuracy = 1)` rows and `r comma(nsccompletions.in.MN %>% ncol(), accuracy = 1)` columns. This dataset provides each distinct PersonID with whether they graduated from a post secondary institutions inside MN, outside MN, or both.
+
+Okay, now it's time to join all of these with the master dataset.
+
+<br>
+
+```{r join with master}
+master.10 <- read_csv("Data/SLEDS/Masters/Master-9.csv") %>%
+  mutate(PersonID = as.integer(PersonID)) %>%
+  left_join(ps.graduate, by = "PersonID") %>%
+  left_join(ps.enrollment, by = "PersonID") %>%
+  mutate(new.Graduated = ifelse(is.na(Graduated) & ps.attending.2023 == "Yes", "Attending ps",
+                            ifelse(Graduated == "No" & ps.attending.2023 == "Yes", "Attending ps", Graduated)),
+         new.Graduated = ifelse(is.na(Graduated) & is.na(ps.attending.2023), "No", new.Graduated)) %>%
+  select(-ps.attending.2023, -Graduated) %>%
+  rename(Graduated = new.Graduated) %>%
+  left_join(year.first.last.graduated, by = "PersonID") %>%
+  mutate(years.between.grads = min.ps.grad.year - grad.year) %>%
+  left_join(grad.institution.sector, by = "PersonID") %>%
+  left_join(highest.credential.code, by = "PersonID") %>%
+  mutate(highest.cred.level = ifelse(is.na(highest.cred.level), "Less than Associate Degree", highest.cred.level)) %>%
+  left_join(nsccompletions.same.ruca, by = "PersonID") %>%
+  left_join(nsccompletions.same.edr, by = "PersonID") %>%
+  left_join(nsccompletions.same.pr, by = "PersonID") %>%
+  left_join(nsccompletions.in.MN, by = "PersonID") %>%
+  rename(ps.grad = Graduated,
+         hs.grad.year = grad.year,
+         ps.attended.in.same.ruca = ps.in.same.ruca,
+         ps.attended.in.same.edr = ps.in.same.edr,
+         ps.attended.in.same.pr = ps.in.same.pr,
+         ps.attended.in.MN = ps.in.MN,
+         ps.grad.InstitutionSector = InstitutionSector)
+
+nsccompletions.master<- read_csv("Data/SLEDS/Masters/Master-9.csv") %>%
+  select(PersonID, grad.year, ps.in.same.ruca, ps.in.same.edr, ps.in.same.pr, ps.in.MN) %>%
+  mutate(PersonID = as.integer(PersonID)) %>%
+  left_join(ps.graduate, by = "PersonID") %>%
+    left_join(ps.enrollment, by = "PersonID") %>%
+  mutate(new.Graduated = ifelse(is.na(Graduated) & ps.attending.2023 == "Yes", "Attending ps",
+                            ifelse(Graduated == "No" & ps.attending.2023 == "Yes", "Attending ps", Graduated)),
+         new.Graduated = ifelse(is.na(Graduated) & is.na(ps.attending.2023), "No", new.Graduated)) %>%
+  select(-ps.attending.2023, -Graduated) %>%
+  rename(Graduated = new.Graduated) %>%
+  mutate(Graduated = ifelse(is.na(Graduated), "N", Graduated)) %>%
+  left_join(year.first.last.graduated, by = "PersonID") %>%
+  mutate(years.between.grads = min.ps.grad.year - grad.year) %>%
+  left_join(grad.institution.sector, by = "PersonID") %>%
+  left_join(highest.credential.code, by = "PersonID") %>%
+  mutate(highest.cred.level = ifelse(is.na(highest.cred.level), "Less than Associate Degree", highest.cred.level)) %>%
+  left_join(nsccompletions.same.ruca, by = "PersonID") %>%
+  left_join(nsccompletions.same.edr, by = "PersonID") %>%
+  left_join(nsccompletions.same.pr, by = "PersonID") %>%
+  left_join(nsccompletions.in.MN, by = "PersonID") %>%
+  rename(ps.grad = Graduated,
+         hs.grad.year = grad.year,
+         ps.attended.in.same.ruca = ps.in.same.ruca,
+         ps.attended.in.same.edr = ps.in.same.edr,
+         ps.attended.in.same.pr = ps.in.same.pr,
+         ps.attended.in.MN = ps.in.MN,
+         ps.grad.InstitutionSector = InstitutionSector) 
+
+write_csv(nsccompletions.master, "Data/SLEDS/Masters/nsccompletions_master.csv")
+
+kable(head(master.10))
+
+kable(names(master.10))
+
+```
+
+<br>
+
+As expected, we have `r comma(master.10 %>% nrow(), accuracy = 1)` rows and `r comma(master.10 %>% ncol(), accuracy = 1)` columns.
+
+<br>
+
+# Summary of students graduated from post secondary institution
+
+We will being by summarizing the number of students in the master dataset that have graduated from a post-secondary institution. We will first look at the percentage from the total dataset and then break it up by RUCA category and regions to see if there are any significant differences.
+
+The table below shows that the number of individuals that graduated from a post-secondary institution by 2023 was 36% while 13% were still attending a post-secondary institution.
+
+<br>
+
+```{r table summary ps grad total}
+ps.grad.table.total <- master.10 %>%
+  group_by(ps.grad) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  mutate(pct = n / sum(n))
+
+datatable(ps.grad.table.total, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 0:2)))) %>%
+  formatCurrency(2, "", digits = 0) %>%
+  formatPercentage(3)
+  
+```
+
+<br>
+
+Next, lets check to see if there are differences by RUCA category.
+
+The crosstabs below do indicate a relationship with a p-value near zero.
+
+The largest difference is that a higher percentage of graduates from a town/rural mix district did not graduate from post-secondary (54.4%).
+
+<br>
+
+::: panel-tabset
+## Chart- RUCA
+
+```{r chart ps grad ruca}
+ps.grad.ruca <- master.10 %>%
+  group_by(Dem_Desc, ps.grad) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(Dem_Desc) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = as.character(seq(n())))
+
+ps.grad.ruca.plot <- ggplot(ps.grad.ruca, aes(ps.grad, pct, fill = Dem_Desc, group = Dem_Desc)) +
+    geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(Dem_Desc, "\nGraduated from post secondary institution?: ", ps.grad, "\nNumber of students: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(position = position_dodge(width = .9), aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Percent of students graduating or not from post-secondary institution")+
+    scale_y_continuous(labels=scales::percent)+
+    scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
+    theme_bar+
+    scale_fill_manual(values= color.ruca,
+                       guide = guide_legend(ncol = 3)) +
+    theme(legend.position = "bottom",
+          text = element_text(size = 18))
+
+
+girafe(ggobj = ps.grad.ruca.plot, width_svg = 10, height_svg = 6) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+```
+
+## Cross-tabs - RUCA
+
+```{r crosstabs ps grad ruca}
+CrossTable(master.10$Dem_Desc, master.10$ps.grad, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+:::
+
+<br>
+
+# Summary of years between graduations
+
+Next we will summarize the number of years between high school graduation and the first credential earned after high school.
+
+We will start out with the total dataset before moving on to see if there are any statistically significant differences by RUCA category and region.
+
+The table below provides summary statistics of the number of years between high school graduation and earning of their first credential after high school. The average was 4 years with a median of 4.
+
+<br>
+
+```{r table years between grad total}
+years.between.grad.total <- master.10 %>%
+  filter(ps.grad == "Y") %>%
+  summarize(n = n(),
+            mean = mean(years.between.grads),
+            median = median(years.between.grads),
+            min = min(years.between.grads),
+            max = max(years.between.grads),
+            sd = sd(years.between.grads)) 
+
+datatable(years.between.grad.total, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 0:5)))) %>%
+  formatCurrency(1:3, "", digits = 0) %>%
+  formatCurrency(6, "", digits = 3)
+
+```
+
+<br>
+
+Next lets see if these averages are significantly different across RUCA categories.
+
+The ANOVA table indicates a relationship between the average number of years between high school graduation and earning first credential by RUCA category.
+
+The primary trend is that the average number of years between high school graduation and earning first credential increases as a high school becomes more urban - 3.26 years for town/rural mix students, 3.67 for urban/town/rural mix students and 3.76 years for entirely urban graduates.
+
+<br>
+
+::: panel-tabset
+## Chart - RUCA
+
+```{r chart years between grad ruca}
+years.between.grad.ruca <- master.10 %>%
+  filter(ps.grad == "Y") %>%
+  group_by(Dem_Desc) %>%
+  summarize(n = n(),
+            mean = mean(years.between.grads),
+            median = median(years.between.grads),
+            min = min(years.between.grads),
+            max = max(years.between.grads),
+            sd = sd(years.between.grads)) %>%
+  ungroup()
+
+datatable(years.between.grad.ruca, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 1:5)))) %>%
+  formatCurrency(2, "", digits = 0) %>%
+  formatCurrency(3, "", digits = 2) %>%
+  formatCurrency(7, "", digits = 2)
+
+```
+
+## ANOVA - RUCA
+
+```{r anova years between grad ruca}
+years.between.grads.summary.ruca <- master.10 %>%
+  filter(ps.grad == "Y")
+
+years.between.grads.anova.ruca <- aov(years.between.grads ~ Dem_Desc, data = years.between.grads.summary.ruca)
+
+summary(years.between.grads.anova.ruca)
+
+TukeyHSD(years.between.grads.anova.ruca)
+
+```
+:::
+
+<br>
+
+# Summary of post-secondary graduate sector
+
+Next we will take a look at the percentage of students that graduated by institution sector. We will start with the total dataset and then look to see if there are any statistical differences on the RUCA category and EDR of their high school from which they graduated.
+
+First, let's look at it from a total dataset. Of the over 50,000 individuals that attended post-secondary in the dataset, nearly 42% went to a public, 4-year college, 28% went to a 2-year public college, 17% went to a private 4-year, and 9% graduated from a mixture of institution types.
+
+<br>
+
+```{r table grad sector total}
+sectors <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/NSC/IPEDS/institution-sectors.xlsx')
+
+grad.sector.total <- master.10 %>%
+  group_by(ps.grad.InstitutionSector) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  left_join(sectors, by = c("ps.grad.InstitutionSector" = "Code")) %>%
+  filter(!is.na(Sector)) %>%
+  mutate(pct = n / sum(n)) %>%
+  arrange(desc(n)) %>%
+  select(Sector, n, pct)
+
+datatable(grad.sector.total, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 0:2)))) %>%
+  formatCurrency(2, "", digits = 0) %>%
+  formatPercentage(3, digits = 2)
+
+```
+
+<br>
+
+Next lets see if the RUCA category from where they graduated high school makes any significant difference in the post-secondary institution from which they received a degree.
+
+The crosstabs indicates a relationship between the RUCA location of their high school and the institution type from which they received a degree.
+
+The table shows 3 significant differences.
+
+1.  Entirely urban:
+    1.  Significantly more likely to earn a credential from a 4-year public university
+    2.  Significantly more likely to earn a credential from a 4-year, for-profit
+    3.  Significantly less likely to earn a credential from a 2-year, public
+2.  Urban/town/rural mix:
+    1.  Significantly more likely to earn a credential from a public, 4-year college.
+    2.  Significantly less likely to earn a credential from a public, 2-year college
+    3.  Significantly more likely to earn a credential from a private, not-for-profit 4-year college
+3.  Town/rural mix
+    1.  Significantly less likely to earn a credential from a not-for-profit 4-year
+    2.  Significantly less likely to earn a credential from a public, 4-year college
+    3.  Significantly more likely to earn a credential from a 2-year public.
+
+<br>
+
+::: panel-tabset
+## Chart - RUCA
+
+```{r chart grad institution sector ruca}
+grad.sector.ruca <- master.10 %>%
+  filter(!is.na(ps.grad.InstitutionSector)) %>%
+  group_by(Dem_Desc, ps.grad.InstitutionSector) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  left_join(sectors, by = c("ps.grad.InstitutionSector" = "Code")) %>%
+  select(Dem_Desc, Sector, n) %>%
+  group_by(Dem_Desc) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  complete(Dem_Desc, Sector, fill = list(n = 0, pct = 0)) %>%
+  select(Dem_Desc, Sector, pct) %>%
+  arrange(pct) %>%
+  spread(key = Dem_Desc, value = pct) 
+
+datatable(grad.sector.ruca, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 1:3)))) %>%
+  formatPercentage(2:4, digits = 2)
+
+```
+
+## Cross-tabs - RUCA
+
+```{r crosstabs grad sector ruca}
+grad.sector.summary.ruca <- master.10 %>%
+  filter(!is.na(ps.grad.InstitutionSector)) %>%
+  left_join(sectors, by = c("ps.grad.InstitutionSector" = "Code"))
+
+CrossTable(grad.sector.summary.ruca$Sector, grad.sector.summary.ruca$Dem_Desc, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+
+```
+:::
+
+<br>
+
+```{r write master}
+write_csv(master.10, "Data/SLEDS/Masters/Master-10.csv")
+
+```
