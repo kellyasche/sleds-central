@@ -2,6 +2,8 @@ project:
   type: website
   output-dir: docs
 
+execute: 
+  cache: true
 
 website:
   title: "Pathways taken after high school - Central"
