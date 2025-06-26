@@ -32,6 +32,8 @@ website:
             href: nscenrollment.qmd
           - text: National Student Clearinghouse - Completions
             href: nsccompletions.qmd
+          - text: Employment
+            href: employment.qmd
           - text: Employment states each year
             href: emp_states_each_year.qmd
           - text: Unemployment

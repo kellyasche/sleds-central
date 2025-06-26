@@ -1,0 +1,1143 @@
+---
+title: "Employment"
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(tigris)
+```
+
+```{r themes and join docs, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         mif = ifelse(is.na(mif), "TC", mif),
+         mif = as.factor(mif),
+         mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
+Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+
+```
+
+<br>
+
+# Data prep
+
+Now I'm going to prep the employment data in order to join with the master dataset. So, let's import the original data. I will then filter so that I only have PersonID that have graduated from a high school in Central. The "Employment-Central.csv" file came from a script within that "Employment" folder, where I imported the very large employment dataset and then filtered the PersonID by Central MN grads.
+
+<br>
+
+```{r employment original}
+employment.original <- read_csv("Data/SLEDS/Employment/Employment-Central.csv") %>%
+  drop_na(PersonID)
+
+kable(head(employment.original))
+
+kable(names(employment.original))
+```
+
+<br>
+
+In the original dataset we have `r employment.original %>% nrow()` rows and `r employment.original %>% ncol()` columns. Below is a description of each variable.
+
+-   PersonID: Every individual that graduated from a Central MN high school and was found within the large employment spreadsheet.
+-   TimeID: Last day of fiscal quarter
+-   EmploymentOrganizationID: An internal identification for each employer.
+-   EmployeeQuarterlyHoursWorked: The total number of hours worked by an employee at an employer's location during a specific calendar quarter
+-   EmployeeQuarterlyWages: The total wages earned by an employee at an employer's location during a specific calendar quarter
+-   EmployeeTenure: The total number of quarters a worker has been employeed by an organization at a specific location, up to an including the current calendar quarter
+-   IndustryID: Auto generated ID code for a record in the Industry dimension.
+-   USIndustryCode: Six-digit North American Industrial Classification System (NAICS) code
+-   GroupCode: Four-digit North American Industrial Classification System (NAICS) code
+-   OwnershipCode: A classification system based upon the controlling interest of the establishment primarily designed to distinguish between governmental and non-governmental establishments
+    -   10 = Federal government
+    -   20 = State government
+    -   30 = Local government
+    -   50 = Private
+-   EmployerLocationTotalWagesPaid: The total wages paid to all workers employeed by an organization at a specific location during a specific calendar quarter
+-   QuarterlyAverageEmployment: The average number of workers employeed by an organization at a specific location during a specific calendar quarter
+-   County: Minnesota county code to which this institution belongs. This can be used as a foreign key into the Geography dimension on MNCounty.
+    -   [Link to codes](https://sleds.mn.gov/dataDictionary/658)
+-   CountyName: The name of the county corresponding to the County and MNCounty Codes for this Location.
+-   MNCounty: County Code for this location as assigned by the state of Minnesota.
+    -   [Link to codes](https://sleds.mn.gov/dataDictionary/663) City: All of the city data is NA
+-   City: this is blank so I will eliminate
+
+The next thing I want to do is put in the EDR and region of each of these employment instances. I will convert the "County" column to a 3 width character format and then match it with my counties.regions.1 list.
+
+<br>
+
+```{r join with edr and regions}
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
+employment.updated <- employment.original %>%
+  mutate(County = formatC(County, width = 3, flag = "0")) %>%
+  left_join(counties.regions.1[,c(1,5,10)], by = c("County" = "countyfp")) 
+
+kable(head(employment.updated))
+
+kable(names(employment.updated))
+```
+
+<br>
+
+So all the previous datasets we structured and filtered so that each observation in the master dataset was an individual. We will want to continue to do the same. So we need to create an employment dataset with the following columns;
+
+1.  PersonID
+2.  Confirmation on whether PersonID in the master dataset has a MN employment record at graduation year, and grad year +2, +7, and +12
+3.  Confirmation on whether they were working at an employer with which they had "meaningful employment" at graduation year, and grad year +2, +7, and +12.
+4.  Whether they had meaningful employment with an employer located in their high school county, edr, one of the research EDRs and in Minnesota at graduation year, and grad year +2, +7, and +12 years.
+5.  Whether they had meaningful employment with an employer in an industry that matches a CTE careercluster at grad year, grad year +2, +7, and +12.
+
+## Who has an employment record?
+
+First, we want to figure out who from our master dataset has a MN employment record at each of the time instances being measured - graduation year, and graduation year +2, graduation year +7. Here are the columns I want when finished;
+
+-   PersonID has no MN employment record (Grad year, grad year +2, grad year +7)
+    -   No MN emp record - Has never worked in Minnesota
+    -   After 2023 - the grad year +X is after 2023.
+
+<br>
+
+```{r mn employment record}
+grad.years <- read_csv("Data/SLEDS/Masters/Master-10.csv") %>%
+  select(PersonID, hs.grad.year) %>%
+  mutate(hs.grad.year.2 = hs.grad.year + 2,
+         hs.grad.year.7 = hs.grad.year + 7) %>%
+  gather(key = "hs.grad.year", value = "year", 2:4)
+
+mn.emp.record.year <- employment.updated %>%
+  mutate(CalendarYear = as.integer(str_sub(TimeID, 1,4))) %>%
+  select(PersonID, CalendarYear) %>%
+  distinct(PersonID, CalendarYear) %>%
+  mutate(mn.emp.record = "MN emp record")
+
+mn.emp.record <- grad.years %>%
+  left_join(mn.emp.record.year, by = c("PersonID", "year" = "CalendarYear")) %>%
+  mutate(mn.emp.record = ifelse(year > 2023, "After 2023", mn.emp.record),
+         mn.emp.record = ifelse(is.na(mn.emp.record), "No MN emp record", mn.emp.record),
+         label = paste("mn.emp.record.", hs.grad.year, sep = "")) %>%
+  select(PersonID, label, mn.emp.record) %>%
+  pivot_wider(names_from = label, values_from = mn.emp.record)
+
+kable(names(mn.emp.record))
+
+kable(head(mn.emp.record))
+```
+
+<br>
+
+The dataset above provides each unique PersonID from our master list along with a confirmation column on whether they had a Minnesota employment record on graduation year, and graduation year +2 and +7. As expected, there are `r comma(nrow(mn.emp.record))` individuals that had an MN employment record in our master list.
+
+<br>
+
+## Filter for "meaningful" employment
+
+The biggest issue is how do we get a meaningful indicator on whether they were employed in the region and whether they are employed in an industry that matches their CTE experience that wasn't just a "summer job". We need to filter out summer jobs between college years, as well as adapt to different paths that students take.
+
+We will define "meaningful employment" as an employment experience in which an individual works for one particular employer for 1,000 hours worked in any given year.
+
+However, this isn't going to just be checking to see if an individual has worked at an employer for 1,000 hours at graduation year, grad year +2, grad year +7 and grad year +12. Rather, it's going to be checking on whether they are working at an employer at grad year, grad year +2, grad year +7 and grad year +12 for which they worked 1,000 hours for an given year.
+
+For example, a person may be employed with an employer for a few years working full-time, but part-way through grad year +7, they decide to move on. I want to make sure we capture that that individual was employed in meaningful employment even though it wasn't full-time that particular year.
+
+The same can go the other way. Perhaps an individual just starts employment at grad year +7 but does work full-time with that particular employer form multiple years. We will want to count that as well.
+
+In addition, I want to capture if someone is working at an employer but isn't quite "meaningful" but turns into meaningful later on. We will count that as well.
+
+This will be a couple step process.
+
+1.  First, we will filter out the employment.original data so that only meaningful employment for each PersonID is included along with the years worked at EmploymentOrganizationID.
+2.  Collect EmploymentOrganizationID for all the years that each PersonID worked meaningful employment.
+3.  Create a new datalist of each PersonID in the master datalist with grad year, grad year +2, and +7.
+4.  Then, we will cross reference the grad year list with employment year to see if meaningful employment matches.
+
+We will end with the following columns and labels;
+
+-   PersonID has had meaningful employment since graduating high school (Grad year, grad year +2, grad year +7)
+    -   No MN emp record - Has no MN emp record
+    -   No meaningful emp - Has MN emp record but never
+    -   Meaningful emp - Has MN emp record and is meaningful
+    -   After 2023 - the grad year +X is after 2023.
+
+<br>
+
+```{r prep filter meaningful employment step 1}
+meaningful.employer <- employment.updated %>%
+  mutate(CalendarYear = as.integer(str_sub(TimeID, 1, 4))) %>%
+  group_by(PersonID, EmploymentOrganizationID, CalendarYear) %>%
+  summarize(EmployeeQuarterlyHoursWorked = sum(EmployeeQuarterlyHoursWorked)) %>%
+  ungroup() %>%
+  group_by(PersonID) %>%
+  filter(EmployeeQuarterlyHoursWorked > 999) %>%
+  ungroup() %>%
+  distinct(PersonID, EmploymentOrganizationID) %>%
+  right_join(mn.emp.record[,c(1)], by = "PersonID")
+
+kable(head(meaningful.employer))
+
+kable(names(meaningful.employer))
+```
+
+<br>
+
+This dataset has `r comma(nrow(meaningful.employer))` rows which represents an PersonID and EmploymentOrganizationID with which they worked 1,000 or more hours had been worked in any given year of employment with that organization. Each PersonID is also in our master datalist. If the EmploymentOrganizationID is vacant, then it means they have a MN employment record but didn't reach the 1,000 hour threshold.
+
+Next, we need to make sure we are not missing any years in which a PersonID had meaningful employment with an OrganizationID but for other years they may not have been "meaningful".
+
+<br>
+
+```{r meaningful emp step 2}
+meaningful.emp <- employment.updated %>%
+  mutate(CalendarYear = as.integer(str_sub(TimeID, 1, 4))) %>%
+  select(PersonID, CalendarYear, EmploymentOrganizationID) %>%
+  right_join(meaningful.employer, by = c("PersonID", "EmploymentOrganizationID")) %>%
+  distinct(PersonID, EmploymentOrganizationID, CalendarYear) %>%
+  drop_na(EmploymentOrganizationID)
+
+kable(names(meaningful.emp))
+
+kable(head(meaningful.emp))
+```
+
+<br>
+
+After filling in any missing years where an PersonID may have had non-meaningful employment with an employer that they one time had/will have meaningful employment the data set grew to `r comma(nrow(meaningful.emp))` rows and `r comma(ncol(meaningful.emp))` columns.
+
+Next, we want to collect the PersonID from the master datalist along with the graduation year, grad year +2, and grad year +7.
+
+<br>
+
+```{r grad years}
+grad.years <- read_csv("Data/SLEDS/Masters/Master-10.csv") %>%
+  select(PersonID, hs.grad.year) %>%
+  mutate(hs.grad.year.2 = hs.grad.year + 2,
+         hs.grad.year.7 = hs.grad.year + 7)
+
+kable(head(grad.years))
+
+kable(names(grad.years))
+
+```
+
+<br>
+
+As expected, the dataset has `r comma(nrow(grad.years))` rows and `r comma(ncol(grad.years))` columns.
+
+Now, we will cross-reference these lists to confirm whether the PersonID from the grad.years datalist were working "meaningful employment" (as defined in above section) in each of grad year times.
+
+<br>
+
+```{r meaningful emp step 3}
+meaningful.emp.grad.years <- grad.years %>%
+  gather(key = "grad.years", value= "year", 2:4) %>%
+  left_join(meaningful.emp, by = c("PersonID", "year" = "CalendarYear")) %>%
+  mutate(EmploymentOrganizationID = ifelse(year > 2023, "After 2023", EmploymentOrganizationID)) %>%
+  filter(!is.na(EmploymentOrganizationID)) %>%
+  filter(EmploymentOrganizationID != "After 2023") %>%
+  mutate(EmploymentOrganizationID = as.integer(EmploymentOrganizationID),
+         meaningful.emp = "Yes")
+
+kable(names(meaningful.emp.grad.years))
+
+kable(head(meaningful.emp.grad.years))
+```
+
+<br>
+
+The dataset above provides only PersonIDs that had meaningful employment for at least one hs.grad.year along with the EmploymentOrganizationID for which meaningful employment was gained. This leaves us with `r comma(nrow(meaningful.emp.grad.years))` rows.
+
+Now we want to merge this with all the PersonID from the master dataset so we end up with a list that has each PersonID, a column that represents grad year, and grad year +2 and +7, and confirmation on whether they had meaninful employment during those years.
+
+```{r meaningful employment merge with master personid}
+master.personid.meaningful.emp <- meaningful.emp.grad.years %>%
+  select(PersonID, grad.years, meaningful.emp) %>%
+  distinct(PersonID, grad.years) %>%
+  mutate(meaningful.emp = "Meaningful emp") %>%
+  right_join(grad.years[,c(1)], by = "PersonID") %>%
+  complete(PersonID, grad.years, fill = list(meaningful.emp = "No meaningful emp")) %>%
+  filter(!is.na(grad.years)) %>%
+  mutate(label = paste("meaningful.emp.", grad.years, sep = "")) %>%
+  select(PersonID, label, meaningful.emp) %>%
+  pivot_wider(names_from = label, values_from = meaningful.emp) %>%
+  left_join(mn.emp.record, by = "PersonID") %>%
+  select(PersonID, 5,6,7,2,3,4) %>%
+  mutate(meaningful.emp.hs.grad.year = ifelse(mn.emp.record.hs.grad.year == "No MN emp record", "No MN emp record", meaningful.emp.hs.grad.year),
+         meaningful.emp.hs.grad.year = ifelse(mn.emp.record.hs.grad.year == "After 2023", "After 2023", meaningful.emp.hs.grad.year),
+         meaningful.emp.hs.grad.year.2 = ifelse(mn.emp.record.hs.grad.year.2 == "No MN emp record", "No MN emp record", meaningful.emp.hs.grad.year.2),
+         meaningful.emp.hs.grad.year.2 = ifelse(mn.emp.record.hs.grad.year.2 == "After 2023", "After 2023", meaningful.emp.hs.grad.year.2),
+          meaningful.emp.hs.grad.year.7 = ifelse(mn.emp.record.hs.grad.year.7 == "No MN emp record", "No MN emp record", meaningful.emp.hs.grad.year.7),
+         meaningful.emp.hs.grad.year.7 = ifelse(mn.emp.record.hs.grad.year.7 == "After 2023", "After 2023", meaningful.emp.hs.grad.year.7))
+
+kable(names(master.personid.meaningful.emp))
+
+kable(head(master.personid.meaningful.emp))
+```
+
+<br>
+
+The dataset above provides each PersonID in our Master datalist along with a confirmation on whether they had meaningful employment on their graduation year, and grad year +2 and +7. As expected, there are `r comma(nrow(master.personid.meaningful.emp))` rows.
+
+<br>
+
+## Match meaningful employment and high school locations/regions.
+
+Now, we want to determine if the locations of meaningful employment match the counties and regions from which they graduated high school. To do this, we will import the latest master dataset so we can compare their high school locations with meaningful employment locations.
+
+Here are the columns and labels that I need;
+
+-   PersonID has had meaningful employment within the county/region (Grad year, grad year +2, grad year +7)
+    -   No MN emp record - has no MN employment record
+    -   No meaningful emp - Has MN emp record but not meaningful
+    -   No location match - Has MN emp record, had meaningful employment, but no match with region
+    -   Location match - Has MN emp record, had meaningful employment, and had meaningful employment in county/region
+    -   After 2023 - the grad year +X is After 2023
+
+<br>
+
+```{r match employment with hs regions}
+emp.original.locations <- employment.updated %>%
+  mutate(CalendarYear = as.integer(str_sub(TimeID, 1, 4)),
+         CountyName = str_replace(CountyName, " County", ""),
+         CountyName = str_replace(CountyName, "Saint Louis", "St. Louis"),
+         CountyName = str_replace(CountyName, "City of Duluth", "St. Louis"),
+         CountyName = str_replace(CountyName, "City of Minneapolis", "Hennepin"),
+         CountyName = str_replace(CountyName, "City of St. Paul", "Ramsey"),
+         CountyName = str_replace(CountyName, "Shakopee Mdewakanton Community", "Scott"),
+         CountyName = str_replace(CountyName, "White Earth Tribal Counci", "Mahnomen")) %>%
+  select(PersonID, CalendarYear, EmploymentOrganizationID, CountyName, edr, project.pr) %>% 
+  distinct(PersonID, CalendarYear, EmploymentOrganizationID, CountyName, edr, project.pr) %>%
+  rename(employment.county = CountyName,
+         emp.edr = edr,
+         emp.region = project.pr) %>%
+  mutate(emp.edr = str_replace(emp.edr, "  ", " "),
+         emp.edr = as.factor(emp.edr),
+         employment.county = str_replace(employment.county, " County", ""),
+         employment.county = str_replace(employment.county, "City of Duluth", "St. Louis"),
+         employment.county = str_replace(employment.county, "Saint Louis", "St. Louis"),
+         employment.county = str_replace(employment.county, "City of Minneapolis", "Hennepin"),
+         employment.county = str_replace(employment.county, "City of St. Paul", "Ramsey"),
+         employment.county = str_replace(employment.county, "White Earth Tribal Counci", "Mahnomen"),
+         employment.county = as.factor(employment.county)) %>%
+  left_join(counties.regions[,c(2,4)], by = c("employment.county" = "Name")) %>%
+  rename(emp.Dem_Desc = Dem_Desc) 
+
+meaningful.emp.locations <- meaningful.emp.grad.years %>%
+  left_join(emp.original.locations, by = c("PersonID", "year" = "CalendarYear", "EmploymentOrganizationID")) %>%
+  mutate(emp.edr = ifelse(employment.county == "Statewide (i.e. no fixed location)", "Unknown", as.character(emp.edr)),
+         emp.Dem_Desc = ifelse(employment.county == "Statewide (i.e. no fixed location)", "Unknown", emp.Dem_Desc),
+         emp.edr = ifelse(employment.county == "Hennepin", "EDR 11 - 7 County Twin Cities", emp.edr),
+         emp.edr = ifelse(employment.county == "Ramsey", "EDR 11 - 7 County Twin Cities", emp.edr),
+         emp.edr = ifelse(employment.county == "St. Louis", "EDR 3 - Arrowhead", emp.edr),
+         emp.edr = ifelse(employment.county == "Unknown", "Unknown", emp.edr),
+         emp.Dem_Desc = ifelse(employment.county == "Unknown", "Unknown", emp.Dem_Desc),
+         emp.Dem_Desc = ifelse(employment.county == "NULL", "NULL", emp.Dem_Desc),
+         emp.edr = ifelse(employment.county == "Mahnomen", "EDR 2 - Headwaters", emp.edr))
+
+grad.locations <- read_csv("Data/SLEDS/Masters/Master-10.csv") %>%
+  select(PersonID, county.name, Dem_Desc, edr) %>%
+  rename(hs.county.name = county.name,
+         hs.Dem_Desc = Dem_Desc,
+         hs.edr = edr)
+
+grad.emp.location.match <- grad.locations %>%
+  right_join(meaningful.emp.locations, by = "PersonID") %>%
+  mutate(county.match = ifelse(employment.county == hs.county.name, 1,
+                               ifelse(employment.county %in%  c("Unknown", "Statewide (i.e. no fixed location)"), 0, -1)),
+         edr.match = ifelse(emp.edr == hs.edr, 1,
+                            ifelse(emp.edr == "Unknown", 0, -1)),
+         region.match = ifelse(emp.edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), 1,
+                               ifelse(emp.edr == "Unknown", 0, -1)),
+         state.match = 1) %>%
+  group_by() %>%
+  group_by(PersonID, grad.years) %>%
+  summarize(county.match = max(county.match),
+         edr.match = max(edr.match),
+         region.match = max(region.match),
+         state.match = max(state.match)) %>%
+  ungroup() %>%
+  gather(key = "region.match", value = "confirm", 3:6) %>%
+  mutate(confirm = ifelse(confirm == -1, "No location match",
+                          ifelse(confirm == 0, "Unknown", "Location match")),
+         grad.years.region.emp.match = paste(grad.years, ".", region.match, sep = "")) %>%
+  select(PersonID, grad.years.region.emp.match, confirm) %>%
+  pivot_wider(names_from = grad.years.region.emp.match, values_from = confirm, values_fill = "No meaningful employment") %>%
+  select(PersonID, hs.grad.year.county.match, hs.grad.year.2.county.match, hs.grad.year.7.county.match, hs.grad.year.edr.match, hs.grad.year.2.edr.match, hs.grad.year.7.edr.match, hs.grad.year.region.match, hs.grad.year.2.region.match, hs.grad.year.7.region.match, hs.grad.year.state.match, hs.grad.year.2.state.match, hs.grad.year.7.state.match)
+
+master.personid.grad.emp.location.match <- master.personid.meaningful.emp %>%
+  left_join(grad.emp.location.match, by = "PersonID") %>%
+  mutate(hs.grad.year.county.match = ifelse(mn.emp.record.hs.grad.year == "No MN emp record", "No MN emp record", hs.grad.year.county.match),
+         hs.grad.year.county.match = ifelse(meaningful.emp.hs.grad.year == "No meaningful emp", "No meaningful emp", hs.grad.year.county.match),
+         hs.grad.year.2.county.match = ifelse(mn.emp.record.hs.grad.year.2 == "No MN emp record", "No MN emp record", hs.grad.year.2.county.match),
+         hs.grad.year.2.county.match = ifelse(meaningful.emp.hs.grad.year.2 == "No meaningful emp", "No meaningful emp", hs.grad.year.2.county.match),
+         hs.grad.year.2.county.match = ifelse(mn.emp.record.hs.grad.year.2 == "After 2023", "After 2023", hs.grad.year.2.county.match),
+         hs.grad.year.7.county.match = ifelse(mn.emp.record.hs.grad.year.7 == "No MN emp record", "No MN emp record", hs.grad.year.7.county.match),
+         hs.grad.year.7.county.match = ifelse(meaningful.emp.hs.grad.year.7 == "No meaningful emp", "No meaningful emp", hs.grad.year.7.county.match),
+         hs.grad.year.7.county.match = ifelse(mn.emp.record.hs.grad.year.7 == "After 2023", "After 2023", hs.grad.year.7.county.match),
+         hs.grad.year.edr.match = ifelse(mn.emp.record.hs.grad.year == "No MN emp record", "No MN emp record", hs.grad.year.edr.match),
+         hs.grad.year.edr.match = ifelse(meaningful.emp.hs.grad.year == "No meaningful emp", "No meaningful emp", hs.grad.year.edr.match),
+         hs.grad.year.edr.match = ifelse(hs.grad.year.county.match == "Unknown", "Unknown", hs.grad.year.edr.match),
+         hs.grad.year.2.edr.match = ifelse(mn.emp.record.hs.grad.year.2 == "No MN emp record", "No MN emp record", hs.grad.year.2.edr.match),
+         hs.grad.year.2.edr.match = ifelse(meaningful.emp.hs.grad.year.2 == "No meaningful emp", "No meaningful emp", hs.grad.year.2.edr.match),
+         hs.grad.year.2.edr.match = ifelse(mn.emp.record.hs.grad.year.2 == "After 2023", "After 2023", hs.grad.year.2.edr.match),
+         hs.grad.year.2.edr.match = ifelse(hs.grad.year.2.county.match == "Unknown", "Unknown", hs.grad.year.2.edr.match),
+         hs.grad.year.7.edr.match = ifelse(mn.emp.record.hs.grad.year.7 == "No MN emp record", "No MN emp record", hs.grad.year.7.edr.match),
+         hs.grad.year.7.edr.match = ifelse(meaningful.emp.hs.grad.year.7 == "No meaningful emp", "No meaningful emp", hs.grad.year.7.edr.match),
+         hs.grad.year.7.edr.match = ifelse(mn.emp.record.hs.grad.year.7 == "After 2023", "After 2023", hs.grad.year.7.edr.match),
+         hs.grad.year.7.edr.match = ifelse(hs.grad.year.7.county.match == "Unknown", "Unknown", hs.grad.year.7.edr.match),
+         hs.grad.year.state.match = ifelse(mn.emp.record.hs.grad.year == "No MN emp record", "No MN emp record", hs.grad.year.state.match),
+         hs.grad.year.state.match = ifelse(meaningful.emp.hs.grad.year == "No meaningful emp", "No meaningful emp", hs.grad.year.state.match),
+         hs.grad.year.state.match = ifelse(hs.grad.year.county.match == "Unknown", "Unknown", hs.grad.year.state.match),
+         hs.grad.year.2.state.match = ifelse(mn.emp.record.hs.grad.year.2 == "No MN emp record", "No MN emp record", hs.grad.year.2.state.match),
+         hs.grad.year.2.state.match = ifelse(meaningful.emp.hs.grad.year.2 == "No meaningful emp", "No meaningful emp", hs.grad.year.2.state.match),
+         hs.grad.year.2.state.match = ifelse(mn.emp.record.hs.grad.year.2 == "After 2023", "After 2023", hs.grad.year.2.state.match),
+         hs.grad.year.2.state.match = ifelse(hs.grad.year.2.county.match == "Unknown", "Unknown", hs.grad.year.2.state.match),
+         hs.grad.year.7.state.match = ifelse(mn.emp.record.hs.grad.year.7 == "No MN emp record", "No MN emp record", hs.grad.year.7.state.match),
+         hs.grad.year.7.state.match = ifelse(meaningful.emp.hs.grad.year.7 == "No meaningful emp", "No meaningful emp", hs.grad.year.7.state.match),
+         hs.grad.year.7.state.match = ifelse(mn.emp.record.hs.grad.year.7 == "After 2023", "After 2023", hs.grad.year.7.state.match),
+         hs.grad.year.7.state.match = ifelse(hs.grad.year.7.county.match == "Unknown", "Unknown", hs.grad.year.7.state.match),
+         hs.grad.year.region.match = ifelse(mn.emp.record.hs.grad.year == "No MN emp record", "No MN emp record", hs.grad.year.region.match),
+         hs.grad.year.region.match = ifelse(meaningful.emp.hs.grad.year == "No meaningful emp", "No meaningful emp", hs.grad.year.region.match),
+         hs.grad.year.region.match = ifelse(hs.grad.year.county.match == "Unknown", "Unknown", hs.grad.year.region.match),
+         hs.grad.year.2.region.match = ifelse(mn.emp.record.hs.grad.year.2 == "No MN emp record", "No MN emp record", hs.grad.year.2.region.match),
+         hs.grad.year.2.region.match = ifelse(meaningful.emp.hs.grad.year.2 == "No meaningful emp", "No meaningful emp", hs.grad.year.2.region.match),
+         hs.grad.year.2.region.match = ifelse(mn.emp.record.hs.grad.year.2 == "After 2023", "After 2023", hs.grad.year.2.region.match),
+         hs.grad.year.2.region.match = ifelse(hs.grad.year.2.county.match == "Unknown", "Unknown", hs.grad.year.2.region.match),
+         hs.grad.year.7.region.match = ifelse(mn.emp.record.hs.grad.year.7 == "No MN emp record", "No MN emp record", hs.grad.year.7.region.match),
+         hs.grad.year.7.region.match = ifelse(meaningful.emp.hs.grad.year.7 == "No meaningful emp", "No meaningful emp", hs.grad.year.7.region.match),
+         hs.grad.year.7.region.match = ifelse(mn.emp.record.hs.grad.year.7 == "After 2023", "After 2023", hs.grad.year.7.region.match),
+         hs.grad.year.7.region.match = ifelse(hs.grad.year.7.county.match == "Unknown", "Unknown", hs.grad.year.7.region.match))
+
+kable(names(master.personid.grad.emp.location.match))
+
+kable(head(master.personid.grad.emp.location.match))
+
+  
+```
+
+<br>
+
+## Match employment industry with career cluster
+
+Next we need to find a way to compare the CTE careerclusters with the actual industry from which they work. We are not able to compare majors which is a bummer. But, the careerclusters from CTE coursework does align somewhat with NAICS codes. Here's what it looks like;
+
+```{r career cluster and naics crosswalk table}
+careercluster.naics.cw <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/Employment/career-cluster-naics.xlsx') %>%
+  rename(cw.CareerCluster = `Career cluster code`,
+         cw.CareerClusterName = `Career Cluster`,
+         cw.emp.ind.code = 3,
+         cw.emp.ind.name = 4)
+
+
+datatable(careercluster.naics.cw, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 1:3)))) 
+
+```
+
+<br>
+
+There is one industry in which two career clusters will have to be marged - Human Services and Health Science & Health Occupations. Due to this, we will create a new column with an "updated" careercluster code that includes the merged cluster.
+
+Here are the columns and labels that I will use;
+
+-   PersonID has had meaningful employment in industry from a CTE course taken (Grad year, grad year +2, grad year +7)
+    -   No MN emp record - has no MN employment record
+    -   No meaningful emp - Has MN emp record nut not meaningful
+    -   No ind match - Has MN emp record, was meaningful, but industry does not match CTE course taken
+    -   Ind match - Has MN emp record, was meaningful, and industry and cTE course match.
+    -   After 2023 - the grad year +X is After 2023
+
+Step 1 is to determine the industry codes for each PersonID that experienced meaningful employment for each of their "grad years".
+
+<br>
+
+```{r emp ind match step 1}
+emp.original.for.cw <- employment.updated %>%
+  mutate(CalendarYear = as.integer(str_sub(TimeID, 1, 4))) %>%
+  select(PersonID, CalendarYear, EmploymentOrganizationID, GroupCode) %>%
+  distinct(PersonID, CalendarYear, EmploymentOrganizationID, GroupCode) 
+
+cc.cw.meaningful.emp <- meaningful.emp.grad.years %>%
+  left_join(emp.original.for.cw, by = c("PersonID", "EmploymentOrganizationID", "year" = "CalendarYear")) %>%
+  mutate(ind.code = ifelse(GroupCode == "6215", "6215", str_sub(GroupCode, 1, 2)),
+         ind.code = as.integer(ind.code)) %>%
+  left_join(careercluster.naics.cw, by = c("ind.code" = "cw.emp.ind.code"))
+
+
+kable(head(cc.cw.meaningful.emp))
+
+kable(names(cc.cw.meaningful.emp))
+```
+
+<br>
+
+The dataset above provides each of the meaningful employment instances during the grad years for each PersonID in the master dataset along with the GroupCode and matching CTE careercluster crosswalk for each of those employment instances. There are `r comma(nrow(cc.cw.meaningful.emp))` rows/instances with `r comma(ncol(cc.cw.meaningful.emp))` columns.
+
+Step 2 is to merge each PersonID's cte courses taken. with the meaningful employment dataset so we can compare if the CTE courses match the industries.
+
+<br>
+
+```{r emp ind match step 2}
+grad.cc <- read_csv("Data/SLEDS/Masters/Master-10.csv") %>%
+  select(PersonID, 22:46) %>%
+  gather(key = "cte", value = "n.courses", 2:ncol(.)) %>%
+  filter(n.courses > 0) %>%
+  rename(cte.cw = cte) %>%
+  select(PersonID, cte.cw, n.courses)
+
+grad.cc.cw.naics <- cc.cw.meaningful.emp %>%
+  left_join(grad.cc, by = "PersonID") %>%
+  mutate(cc.ind.match = ifelse(is.na(n.courses), -1,
+                               ifelse(cw.CareerCluster == cte.cw, 1, 0)),
+         cc.ind.match = ifelse(ind.code == 54, 1, cc.ind.match)) %>%
+  group_by(PersonID, grad.years) %>%
+  summarize(max.match = max(cc.ind.match)) %>%
+  ungroup() %>%
+  mutate(cc.ind.match = ifelse(max.match == -1, "No CTE",
+                               ifelse(max.match == 0, "No ind match", "Ind match")),
+         cc.ind.match = ifelse(is.na(cc.ind.match), "No crosswalk", cc.ind.match)) %>%
+  select(PersonID, grad.years, cc.ind.match) %>%
+  complete(PersonID, grad.years) %>%
+  mutate(label = paste("ind.match.", grad.years, sep = "")) %>%
+  select(PersonID, label, cc.ind.match) %>%
+  pivot_wider(names_from = label, values_from = cc.ind.match)
+
+master.personid.grad.cc.cw.naics <- master.personid.grad.emp.location.match %>%
+  left_join(grad.cc.cw.naics, by = "PersonID") %>%
+  mutate(ind.match.hs.grad.year = ifelse(mn.emp.record.hs.grad.year == "No MN emp record", "No MN emp record", ind.match.hs.grad.year),
+         ind.match.hs.grad.year = ifelse(mn.emp.record.hs.grad.year == "After 2023", "After 2023", ind.match.hs.grad.year),
+         ind.match.hs.grad.year = ifelse(meaningful.emp.hs.grad.year == "No meaningful emp", "No meaningful emp", ind.match.hs.grad.year),
+         ind.match.hs.grad.year.2 = ifelse(mn.emp.record.hs.grad.year.2 == "No MN emp record", "No MN emp record", ind.match.hs.grad.year.2),
+         ind.match.hs.grad.year.2 = ifelse(mn.emp.record.hs.grad.year.2 == "After 2023", "After 2023", ind.match.hs.grad.year.2),
+         ind.match.hs.grad.year.2 = ifelse(meaningful.emp.hs.grad.year.2 == "No meaningful emp", "No meaningful emp", ind.match.hs.grad.year.2),
+         ind.match.hs.grad.year.7 = ifelse(mn.emp.record.hs.grad.year.7 == "No MN emp record", "No MN emp record", ind.match.hs.grad.year.7),
+         ind.match.hs.grad.year.7 = ifelse(mn.emp.record.hs.grad.year.7 == "After 2023", "After 2023", ind.match.hs.grad.year.7),
+         ind.match.hs.grad.year.7 = ifelse(meaningful.emp.hs.grad.year.7 == "No meaningful emp", "No meaningful emp", ind.match.hs.grad.year.7))
+
+
+kable(names(master.personid.grad.cc.cw.naics))
+
+kable(head(master.personid.grad.cc.cw.naics))
+```
+
+<br>
+
+The dataset above provides each PersonID with meaningful employment in the master dataset and whether they took a CTE course that matches the industry in which they worked at any of the grad years. There are `r comma(nrow(grad.cc.cw.naics))` rows and `r comma(ncol(grad.cc.cw.naics))` columns.
+
+```{r merge with master}
+master.10 <- read_csv("Data/SLEDS/Masters/Master-10.csv")
+
+master.11 <- master.10 %>%
+  left_join(master.personid.grad.cc.cw.naics, by = "PersonID")
+
+kable(names(master.11))
+
+employment.master <- read_csv("Data/SLEDS/Masters/Master-1.csv") %>%
+  select(PersonID) %>%
+  left_join(master.personid.grad.cc.cw.naics, by = "PersonID")
+
+write_csv(employment.master, "Data/SLEDS/Masters/employment_master.csv")
+
+```
+
+<br>
+
+# Summary - MN employment record
+
+We will first summarize the number of individuals that had MN employment records.
+
+The chart below provides the percentage of individuals in the master dataset that had a MN employment record during their graduation year, grad year plus two years, and grad year plus seven years.
+
+It shows that 81% of the individuals had a MN employment record at their graduation year. That percentage drops to 69% two years after graduation and only 41% had a MN employment record 7 years after graduation. The percentage of people with no MN employment record hovers between 15% and 20%.
+
+<br>
+
+```{r mn employment record total}
+summary.mn.emp.record.total <- master.11 %>%
+  select(PersonID, mn.emp.record.hs.grad.year, mn.emp.record.hs.grad.year.2, mn.emp.record.hs.grad.year.7) %>%
+  gather(key = "grad.year", value = "mn.emp.record", 2:4) %>%
+  group_by(grad.year, mn.emp.record) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  complete(grad.year, mn.emp.record, fill = list(n = 0, pct = 0)) %>%
+  mutate(data_id = as.character(seq(n())),
+         grad.year = ifelse(grad.year == "mn.emp.record.hs.grad.year", "Grad year",
+                            ifelse(grad.year == "mn.emp.record.hs.grad.year.2", "Grad year + 2", "Grad year +7")))
+
+summary.mn.emp.record.total.plot <- ggplot(summary.mn.emp.record.total, aes(grad.year, pct, fill = mn.emp.record, group = mn.emp.record)) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(grad.year, "\n", mn.emp.record, "\nPercent: ", percent(pct, accuracy = .1), sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5, position = position_dodge(width = .9)) +
+  labs(x="", y = "", color="", title = "Percent with MN employment record by year\nafter graduation")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 5, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 16),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = summary.mn.emp.record.total.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))      
+
+```
+
+<br>
+
+Next let's break it down by RUCA category.
+
+The cross tabs indicate a relationship between RUCA category and percentage of individuals that have a MN employment record for each graduation year timeframe. However, after reviewing the percentages I'm not seeing any important differences.
+
+<br>
+
+::: panel-tabset
+## RUCA - Chart
+
+```{r mn employment record ruca}
+summary.mn.emp.record.ruca <- master.11 %>%
+  select(PersonID, Dem_Desc, mn.emp.record.hs.grad.year, mn.emp.record.hs.grad.year.2, mn.emp.record.hs.grad.year.7) %>%
+  gather(key = "grad.year", value = "mn.emp.record", 3:5) %>%
+  group_by(grad.year, Dem_Desc, mn.emp.record) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(Dem_Desc, grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  complete(Dem_Desc, grad.year, mn.emp.record, fill = list(n = 0, pct = 0)) %>%
+  mutate(data_id = as.character(seq(n())),
+         grad.year = ifelse(grad.year == "mn.emp.record.hs.grad.year", "Grad year",
+                            ifelse(grad.year == "mn.emp.record.hs.grad.year.2", "Grad year + 2", "Grad year +7")))
+
+summary.mn.emp.record.ruca.plot <- ggplot(summary.mn.emp.record.ruca, aes(grad.year, pct, fill = mn.emp.record, group = mn.emp.record)) +
+  facet_wrap(~Dem_Desc, ncol = 2) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(grad.year, "\n", mn.emp.record, "\nPercent: ", percent(pct, accuracy = .1), sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5, position = position_dodge(width = .9)) +
+  labs(x="", y = "", color="", title = "Percent with MN employment record by year after graduation")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 5, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 16),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = summary.mn.emp.record.ruca.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))      
+
+```
+
+## RUCA - Cross-tabs
+
+```{r mn emp record summary ruca crosstabs}
+summary.mn.emp.record.ct.ruca <- master.11 %>%
+  select(Dem_Desc, mn.emp.record.hs.grad.year, mn.emp.record.hs.grad.year.2, mn.emp.record.hs.grad.year.7) %>%
+  gather(key = "grad.year", value = "mn.emp.record", 2:4) %>%
+  mutate(Dem_Desc = str_sub(Dem_Desc, 1, 6)) %>%
+  mutate(grad.year = as.factor(grad.year),
+         Dem_Desc = as.factor(Dem_Desc),
+         mn.emp.record = as.factor(mn.emp.record))
+
+summary.mn.emp.record.grad.year.ct.ruca <- summary.mn.emp.record.ct.ruca %>%
+  filter(grad.year == "mn.emp.record.hs.grad.year")
+
+CrossTable(summary.mn.emp.record.grad.year.ct.ruca$Dem_Desc, summary.mn.emp.record.grad.year.ct.ruca$mn.emp.record, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+summary.mn.emp.record.grad.year.2.ct.ruca <- summary.mn.emp.record.ct.ruca %>%
+  filter(grad.year == "mn.emp.record.hs.grad.year.2")
+
+CrossTable(summary.mn.emp.record.grad.year.2.ct.ruca$Dem_Desc, summary.mn.emp.record.grad.year.2.ct.ruca$mn.emp.record, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+summary.mn.emp.record.grad.year.7.ct.ruca <- summary.mn.emp.record.ct.ruca%>%
+  filter(grad.year == "mn.emp.record.hs.grad.year.7")
+
+CrossTable(summary.mn.emp.record.grad.year.7.ct.ruca$Dem_Desc, summary.mn.emp.record.grad.year.7.ct.ruca$mn.emp.record, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+# Summary - meaningful employment
+
+First, let's check to see what percentage of individuals in the dataset had "meaningful" employment. This is defined as and individual having worked for an employer for 1,000 or more hours in any given year with that employer.
+
+The table below shows that the percentage of individuals working meaningful employment grows significantly as the years after graduation progress. By 7 years after graduating, 63% have meaningful employment. The percentage of individuals with no MN employment record grows as well - it's 26% of all individuals by seven years after graduating.
+
+<br>
+
+```{r summary meaningful emp total}
+summary.meaningful.emp.total <- master.11 %>%
+  select(PersonID, meaningful.emp.hs.grad.year, meaningful.emp.hs.grad.year.2, meaningful.emp.hs.grad.year.7) %>%
+  gather(key = "grad.year", value = "meaningful.emp", 2:4) %>%
+  filter(meaningful.emp != "After 2023") %>%
+  group_by(grad.year, meaningful.emp) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  complete(grad.year, meaningful.emp, fill = list(n = 0, pct = 0)) %>%
+  mutate(data_id = as.character(seq(n())),
+         grad.year = ifelse(grad.year == "meaningful.emp.hs.grad.year", "Grad year",
+                            ifelse(grad.year == "meaningful.emp.hs.grad.year.2", "Grad year + 2", "Grad year +7")))
+
+summary.meaningful.emp.total.plot <- ggplot(summary.meaningful.emp.total, aes(grad.year, pct, fill = meaningful.emp, group = meaningful.emp)) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(grad.year, "\n", meaningful.emp, "\nPercent: ", percent(pct, accuracy = .1), sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5, position = position_dodge(width = .9)) +
+  labs(x="", y = "", color="", title = "Percent with meaningful employment by year after graduation")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 5, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 16),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = summary.meaningful.emp.total.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))  
+
+
+
+```
+
+<br>
+
+Next lets check to see what this looks like by RUCA category.
+
+The cross tabs indicate a relationship, but after reviewing the percentages, I'm not seeing anything that is importantly different.
+
+<br>
+
+::: panel-tabset
+## RUCA - chart
+
+```{r summary meaningful emp ruca}
+summary.meaningful.emp.ruca <- master.11 %>%
+  select(Dem_Desc, meaningful.emp.hs.grad.year, meaningful.emp.hs.grad.year.2, meaningful.emp.hs.grad.year.7) %>%
+  gather(key = "grad.year", value = "meaningful.emp", 2:4) %>%
+  filter(meaningful.emp != "After 2023") %>%
+  group_by(Dem_Desc, grad.year, meaningful.emp) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(Dem_Desc, grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  complete(grad.year, meaningful.emp, fill = list(n = 0, pct = 0)) %>%
+  mutate(data_id = as.character(seq(n())),
+         grad.year = ifelse(grad.year == "meaningful.emp.hs.grad.year", "Grad year",
+                            ifelse(grad.year == "meaningful.emp.hs.grad.year.2", "Grad year + 2", "Grad year +7")))
+
+summary.meaningful.emp.ruca.plot <- ggplot(summary.meaningful.emp.ruca, aes(grad.year, pct, fill = meaningful.emp, group = meaningful.emp)) +
+  facet_wrap(~Dem_Desc, ncol = 2) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(grad.year, "\n", meaningful.emp, "\nPercent: ", percent(pct, accuracy = .1), sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5, position = position_dodge(width = .9)) +
+  labs(x="", y = "", color="", title = "Percent with meaningful employment by year after graduation")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 5, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 16),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = summary.meaningful.emp.ruca.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))  
+
+```
+
+## RUCA - cross-tabs
+
+```{r summary meaningful emp crosstabs ruca}
+data <- master.11 %>%
+  select(Dem_Desc, meaningful.emp.hs.grad.year) %>%
+  filter(meaningful.emp.hs.grad.year != "After 2023")
+
+data.2 <- master.11 %>%
+  select(Dem_Desc, meaningful.emp.hs.grad.year.2) %>%
+  filter(meaningful.emp.hs.grad.year.2 != "After 2023")
+
+data.7 <- master.11 %>%
+  select(Dem_Desc, meaningful.emp.hs.grad.year.7) %>%
+  filter(meaningful.emp.hs.grad.year.7 != "After 2023")
+
+
+CrossTable(data$Dem_Desc, data$meaningful.emp.hs.grad.year, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.2$Dem_Desc, data.2$meaningful.emp.hs.grad.year.2, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.7$Dem_Desc, data.7$meaningful.emp.hs.grad.year.7, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+# Summary - matching employment locations and high school locations
+
+First we will summarize the percentage of students that had an employment instance in a location that matches their high school graduation. We will only use PersonID that had meaningful employment for the following summaries.
+
+We will begin with counties, then look at EDR, planning region, employed within Minnesota, and then by RUCA categories.
+
+<br>
+
+## High school grad and employment instance match
+
+First, let's look what percentage of individuals had an employment instance where the employer was located in the same county as their high school.
+
+The table below shows that 13% of the individuals in the master dataset had meaningful employment in the same county as their high school the year they graduated. It increased to 17% two years after graduation and then 18% seven years after graduation. These percentages are after filtering out all of the "After 2023" category.
+
+<br>
+
+```{r pct employed in county}
+match.region.summary.total.county <- master.11 %>%
+  select(PersonID, hs.grad.year.county.match, hs.grad.year.2.county.match, hs.grad.year.7.county.match) %>%
+  gather(key = "hs.grad.year", value = "county.match", 2:4) %>%
+  filter(county.match != "After 2023") %>%
+  group_by(hs.grad.year, county.match) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(hs.grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = seq(n()),
+         hs.grad.year = str_sub(hs.grad.year, 1, 14),
+         hs.grad.year = str_replace(hs.grad.year, "hs.grad.year.c", "hs.grad.year"))
+
+match.region.summary.total.county.plot <- ggplot(match.region.summary.total.county, aes(hs.grad.year, pct, fill = county.match, group = county.match)) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(hs.grad.year, "\nEmployment match high school county? - ", county.match, sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "white", size = 5, position = position_dodge(width = .9)) +
+  coord_flip() +
+  labs(x="", y = "", color="", title = "Percent of individuals with meaningful employment in high school\ncounty")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 18))
+
+
+girafe(ggobj = match.region.summary.total.county.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))      
+
+  
+```
+
+<br>
+
+Next, let's check the differences by RUCA category.
+
+Crosstabs indicate a relationship.
+
+-   hs.grad.year: The more rural a district is, the higher the percentage of graduates that have meaningful employment in the high school county - 14.1% for town/rural mix vs. 8.9% for entirely urban.
+
+-   hs.grad.year.2: The increasing percentage for rural districts continues - 18.8% for town/rural mix districts vs. 11.3% for entirely urban.
+
+-   hs.grad.year.7: Same as previous years - 19.5% for town/rural mix vs. 10.3% for entirely urban.
+
+-   <br>
+
+::: panel-tabset
+## RUCA - Chart pct
+
+```{r summary chart employed in county by ruca}
+
+match.region.summary.total.county.ruca <- master.11 %>%
+  select(Dem_Desc, hs.grad.year.county.match, hs.grad.year.2.county.match, hs.grad.year.7.county.match) %>%
+  gather(key = "hs.grad.year", value = "county.match", 2:4) %>%
+  filter(county.match != "After 2023") %>%
+  group_by(Dem_Desc, hs.grad.year, county.match) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(Dem_Desc, hs.grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = seq(n()),
+         hs.grad.year = str_sub(hs.grad.year, 1, 14),
+         hs.grad.year = str_replace(hs.grad.year, "hs.grad.year.c", "hs.grad.year"))
+
+match.region.summary.total.county.ruca.plot <- ggplot(match.region.summary.total.county.ruca, aes(hs.grad.year, pct, fill = county.match, group = county.match)) +
+  facet_wrap(~Dem_Desc, ncol = 2) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(Dem_Desc, "\n", hs.grad.year, "\nEmployment match high school county? - ", county.match, sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "white", size = 5, position = position_dodge(width = .9)) +
+  coord_flip() +
+  labs(x="", y = "", color="", title = "Percent of individuals with meaningful employment in high school county")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 18))
+
+
+girafe(ggobj = match.region.summary.total.county.ruca.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+```
+
+## RUCA - cross-tabs
+
+```{r summary cross tabs employed in county by ruca}
+data <- master.11 %>%
+  select(Dem_Desc, hs.grad.year.county.match) %>%
+  filter(hs.grad.year.county.match != "After 2023")
+
+data.2 <- master.11 %>%
+  select(Dem_Desc, hs.grad.year.2.county.match) %>%
+  filter(hs.grad.year.2.county.match != "After 2023")
+
+data.7 <- master.11 %>%
+  select(Dem_Desc, hs.grad.year.7.county.match) %>%
+  filter(hs.grad.year.7.county.match != "After 2023")
+
+CrossTable(data$Dem_Desc, data$hs.grad.year.county.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.2$Dem_Desc, data.2$hs.grad.year.2.county.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.7$Dem_Desc, data.7$hs.grad.year.7.county.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+## Region grad location and employment match
+
+Next we will look at the percentage of individuals that have meaningful employment in the research region the year they graduate, two years after graduating, and seven years after graduating.
+
+The chart below shows that 16.7% of individuals in the main dataset had meaningful employment in the region the year of graduation. The percent increases to 29.9% of individuals seven years after graduating. All "After 2023" individuals were taken out.
+
+<br>
+
+```{r summary employment in region match total}
+match.region.summary.total.region <- master.11 %>%
+  select(PersonID, hs.grad.year.region.match, hs.grad.year.2.region.match, hs.grad.year.7.region.match) %>%
+  gather(key = "hs.grad.year", value = "region.match", 2:4) %>%
+  filter(region.match != "After 2023") %>%
+  group_by(hs.grad.year, region.match) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(hs.grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = seq(n()),
+         hs.grad.year = str_sub(hs.grad.year, 1, 14),
+         hs.grad.year = str_replace(hs.grad.year, "hs.grad.year.r", "hs.grad.year"))
+
+match.region.summary.total.region.plot <- ggplot(match.region.summary.total.region, aes(hs.grad.year, pct, fill = region.match, group = region.match)) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(hs.grad.year, "\nEmployment match high school region? - ", region.match, sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "white", size = 5, position = position_dodge(width = .9)) +
+  coord_flip() +
+  labs(x="", y = "", color="", title = "Percent of individuals with meaningful employment in region")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 18))
+
+
+girafe(ggobj = match.region.summary.total.region.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))      
+
+```
+
+<br>
+
+Next let's analyze by RUCA.
+
+Relationship confirmed for two years and seven years after graduating high school.
+
+The chart has the exact same pattern as the percentage of students that work in the high school county by RUCA category - more rural districts have a higher percentage of individuals that have meaningful employment in the region.
+
+<br>
+
+::: panel-tabset
+## RUCA - chart
+
+```{r summary region location match by ruca}
+match.region.summary.ruca.region <- master.11 %>%
+  select(Dem_Desc, hs.grad.year.region.match, hs.grad.year.2.region.match, hs.grad.year.7.region.match) %>%
+  gather(key = "hs.grad.year", value = "region.match", 2:4) %>%
+  filter(region.match != "After 2023") %>%
+  group_by(Dem_Desc, hs.grad.year, region.match) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(Dem_Desc, hs.grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = seq(n()),
+         hs.grad.year = str_sub(hs.grad.year, 1, 14),
+         hs.grad.year = str_replace(hs.grad.year, "hs.grad.year.r", "hs.grad.year"))
+
+match.region.summary.ruca.region.plot <- ggplot(match.region.summary.ruca.region, aes(hs.grad.year, pct, fill = region.match, group = region.match)) +
+  facet_wrap(~Dem_Desc, ncol = 2) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(hs.grad.year, "\nEmployment match high school region? - ", region.match, sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "white", size = 5, position = position_dodge(width = .9)) +
+  coord_flip() +
+  labs(x="", y = "", color="", title = "Percent of individuals with meaningful employment in region")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 18))
+
+
+girafe(ggobj = match.region.summary.ruca.region.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))      
+
+
+```
+
+## RUCA - cross-tabs
+
+```{r summary region location match by ruca cross tabs}
+data <- master.11 %>%
+  select(Dem_Desc, hs.grad.year.region.match) %>%
+  filter(hs.grad.year.region.match != "After 2023")
+
+data.2 <- master.11 %>%
+  select(Dem_Desc, hs.grad.year.2.region.match) %>%
+  filter(hs.grad.year.2.region.match != "After 2023")
+
+data.7 <- master.11 %>%
+  select(Dem_Desc, hs.grad.year.7.region.match) %>%
+  filter(hs.grad.year.7.region.match != "After 2023")
+
+
+CrossTable(data$Dem_Desc, data$hs.grad.year.region.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.2$Dem_Desc, data.2$hs.grad.year.2.region.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.7$Dem_Desc, data.7$hs.grad.year.7.region.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+
+
+```
+:::
+
+<br>
+
+```{r write master}
+write_csv(master.11, "Data/SLEDS/Masters/Master-11.csv")
+
+```
