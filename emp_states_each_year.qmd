@@ -516,7 +516,7 @@ datatable(region.match.matrix.table, class = "cell-border stripe", filter = "top
 
 ## State Match
 
-Half the graduates have meaningful employment in Minnesota while about 30% have no MN employment record.
+Half the graduates have meaningful employment in Minnesota while about 30% have no MN employment record. This is a test.
 
 ```{r MN match matrix}
 
