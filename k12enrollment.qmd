@@ -101,6 +101,16 @@ counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive
          mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
 Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
+
 
 color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
 
@@ -116,7 +126,7 @@ mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasch
   ms_simplify(keep = .01, keep_shapes = TRUE) %>%
   rename(countyfp = FIPS_CODE)
 
-k12.county.codes <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12-county-codes.csv")
+k12.county.codes <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12-county-codes.csv")
 
 
 
@@ -129,7 +139,7 @@ This dataset is of all the individuals that have graduated from a high school in
 <br>
 
 ```{r import original dataset}
-enrollment.original <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/K12 Enrollment/K12Enrollment.csv")  %>%
+enrollment.original <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/K12 Enrollment/K12Enrollment.csv")  %>%
   mutate(PersonID = as.integer(PersonID),
          K12OrganizationID = as.integer(K12OrganizationID)) %>%
   drop_na(PersonID)
@@ -148,7 +158,7 @@ Next we need to create a dataset that only has students who graduated from a hig
 <br>
 
 ```{r k12org original data}
-k12.org.original <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12Organization.csv") %>%
+k12.org.original <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12Organization.csv") %>%
   distinct(K12OrganizationID, .keep_all = TRUE) %>%
   drop_na(K12OrganizationID) %>%
   mutate(K12OrganizationID = as.integer(K12OrganizationID)) %>%
@@ -165,7 +175,7 @@ kable(names(k12.org.original))
 
 This dataset provides each school institution as of June 29, 2024. This isn't a list of each school but rather a list of each K12OrganizationID. Each school will have multiple K12OrganizationID. I'm not sure why and this would be something to ask Meredith.
 
-My goal is to join my standardized region and county code data with this document which will then be joined to the master enrollment document. Unfortunatley the main data does not include county name but rather their own code for county. So I will join their codes with the county names and then use my counties.regions data to bring together the remaining regions.
+My goal is to join my standardized region and county code data with this document which will then be joined to the master enrollment document. Unfortunately the main data does not include county name but rather their own code for county. So I will join their codes with the county names and then use my "counties.regions" data to bring together the remaining regions.
 
 <br>
 
@@ -177,8 +187,8 @@ k12.org.master <- k12.org.original %>%
   mutate(county.name = str_replace(county.name, " County", "")) %>%
   select(K12OrganizationID, OrganizationName, county.name) %>%
   mutate(county.name = str_replace(county.name, "Saint Louis", "St. Louis")) %>%
-  left_join(counties.regions, by = c("county.name" = "Name")) %>%
-  select(-Dem_RUCA, -planning.region, -mif)
+  left_join(counties.regions.1, by = c("county.name" = "Name")) %>%
+  select(-Dem_RUCA, -edr.simple, -mif)
 
 kable(head(k12.org.master))
 
@@ -187,14 +197,14 @@ kable(names(k12.org.master))
 
 <br>
 
-Now I should be able to join this dataset with the enrollment data to figure out what EDR they are from and then filter any rows that are not associated with a school district located in EDR 3.
+Now I should be able to join this dataset with the enrollment data to figure out what EDR they are from and then filter any rows that are not associated with a school district located in the Central region as defined by the project.
 
 <br>
 
 ```{r join enrollment data with org data}
 enrollment.org.central <- enrollment.original %>%
   left_join(k12.org.master, by = "K12OrganizationID") %>%
-  filter(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"))
+  filter(project.pr == "Central")
 
 kable(head(enrollment.org.central))
 

@@ -161,11 +161,11 @@ ul.task-list li input[type="checkbox"] {
  <span class="dropdown-text">Employment states each year</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./unemployment.qmd">
+    <a class="dropdown-item" href="./unemployment.html">
  <span class="dropdown-text">Unemployment</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./avgwages.qmd">
+    <a class="dropdown-item" href="./avgwages.html">
  <span class="dropdown-text">Average wages</span></a>
   </li>  
     </ul>
@@ -178,11 +178,7 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-analysis">    
         <li>
-    <a class="dropdown-item" href="./analysis_categorizing_range_schools.qmd">
- <span class="dropdown-text">Categorizing range schools</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./analysis_mca.qmd">
+    <a class="dropdown-item" href="./analysis_mca.html">
  <span class="dropdown-text">Multiple Correspondence Analysis</span></a>
   </li>  
         <li>
@@ -616,19 +612,21 @@ ul.task-list li input[type="checkbox"] {
 </div>
 <p><br></p>
 <p>This dataset provides each school institution as of June 29, 2024. This isn’t a list of each school but rather a list of each K12OrganizationID. Each school will have multiple K12OrganizationID. I’m not sure why and this would be something to ask Meredith.</p>
-<p>My goal is to join my standardized region and county code data with this document which will then be joined to the master enrollment document. Unfortunatley the main data does not include county name but rather their own code for county. So I will join their codes with the county names and then use my counties.regions data to bring together the remaining regions.</p>
+<p>My goal is to join my standardized region and county code data with this document which will then be joined to the master enrollment document. Unfortunately the main data does not include county name but rather their own code for county. So I will join their codes with the county names and then use my “counties.regions” data to bring together the remaining regions.</p>
 <p><br></p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 13%">
-<col style="width: 25%">
-<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 18%">
 <col style="width: 6%">
-<col style="width: 15%">
-<col style="width: 22%">
-<col style="width: 8%">
+<col style="width: 4%">
+<col style="width: 11%">
+<col style="width: 16%">
+<col style="width: 14%">
+<col style="width: 4%">
+<col style="width: 14%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -638,7 +636,9 @@ ul.task-list li input[type="checkbox"] {
 <th style="text-align: left;">countyfp</th>
 <th style="text-align: left;">Dem_Desc</th>
 <th style="text-align: left;">edr</th>
-<th style="text-align: left;">edr.simple</th>
+<th style="text-align: left;">planning.region</th>
+<th style="text-align: left;">statefp</th>
+<th style="text-align: left;">project.pr</th>
 </tr>
 </thead>
 <tbody>
@@ -649,7 +649,9 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">053</td>
 <td style="text-align: left;">Entirely urban</td>
 <td style="text-align: left;">EDR 11 - 7 County Twin Cities</td>
-<td style="text-align: left;">EDR 11</td>
+<td style="text-align: left;">Seven County Mpls-St Paul</td>
+<td style="text-align: left;">27</td>
+<td style="text-align: left;">Seven County Mpls-St Paul</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">172384</td>
@@ -658,7 +660,9 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">099</td>
 <td style="text-align: left;">Urban/town/rural mix</td>
 <td style="text-align: left;">EDR 10 - Southeast</td>
-<td style="text-align: left;">EDR 10</td>
+<td style="text-align: left;">Southeast</td>
+<td style="text-align: left;">27</td>
+<td style="text-align: left;">Southern</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">89982</td>
@@ -667,7 +671,9 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">153</td>
 <td style="text-align: left;">Town/rural mix</td>
 <td style="text-align: left;">EDR 5 - North Central</td>
-<td style="text-align: left;">EDR 5</td>
+<td style="text-align: left;">Northwest</td>
+<td style="text-align: left;">27</td>
+<td style="text-align: left;">Central</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">111573</td>
@@ -676,7 +682,9 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">025</td>
 <td style="text-align: left;">Entirely urban</td>
 <td style="text-align: left;">EDR 7E- East Central</td>
-<td style="text-align: left;">EDR 7E</td>
+<td style="text-align: left;">Central</td>
+<td style="text-align: left;">27</td>
+<td style="text-align: left;">Central</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">52166</td>
@@ -685,7 +693,9 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">135</td>
 <td style="text-align: left;">Town/rural mix</td>
 <td style="text-align: left;">EDR 1 - Northwest</td>
-<td style="text-align: left;">EDR 1</td>
+<td style="text-align: left;">Northwest</td>
+<td style="text-align: left;">27</td>
+<td style="text-align: left;">Northwest</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">29693</td>
@@ -694,7 +704,9 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">045</td>
 <td style="text-align: left;">Urban/town/rural mix</td>
 <td style="text-align: left;">EDR 10 - Southeast</td>
-<td style="text-align: left;">EDR 10</td>
+<td style="text-align: left;">Southeast</td>
+<td style="text-align: left;">27</td>
+<td style="text-align: left;">Southern</td>
 </tr>
 </tbody>
 </table>
@@ -726,14 +738,20 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">edr</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">edr.simple</td>
+<td style="text-align: left;">planning.region</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">statefp</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">project.pr</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 <p><br></p>
-<p>Now I should be able to join this dataset with the enrollment data to figure out what EDR they are from and then filter any rows that are not associated with a school district located in EDR 3.</p>
+<p>Now I should be able to join this dataset with the enrollment data to figure out what EDR they are from and then filter any rows that are not associated with a school district located in the Central region as defined by the project.</p>
 <p><br></p>
 <div class="cell">
 <div class="cell-output-display">
@@ -743,22 +761,24 @@ ul.task-list li input[type="checkbox"] {
 <col style="width: 1%">
 <col style="width: 4%">
 <col style="width: 2%">
-<col style="width: 6%">
 <col style="width: 5%">
-<col style="width: 10%">
+<col style="width: 5%">
+<col style="width: 9%">
 <col style="width: 8%">
 <col style="width: 3%">
 <col style="width: 2%">
 <col style="width: 1%">
-<col style="width: 4%">
-<col style="width: 8%">
-<col style="width: 5%">
-<col style="width: 4%">
-<col style="width: 8%">
 <col style="width: 3%">
+<col style="width: 8%">
+<col style="width: 4%">
+<col style="width: 4%">
+<col style="width: 8%">
+<col style="width: 2%">
 <col style="width: 2%">
 <col style="width: 5%">
 <col style="width: 5%">
+<col style="width: 3%">
+<col style="width: 1%">
 <col style="width: 2%">
 </colgroup>
 <thead>
@@ -783,7 +803,9 @@ ul.task-list li input[type="checkbox"] {
 <th style="text-align: left;">countyfp</th>
 <th style="text-align: left;">Dem_Desc</th>
 <th style="text-align: left;">edr</th>
-<th style="text-align: left;">edr.simple</th>
+<th style="text-align: left;">planning.region</th>
+<th style="text-align: left;">statefp</th>
+<th style="text-align: left;">project.pr</th>
 </tr>
 </thead>
 <tbody>
@@ -808,7 +830,9 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">145</td>
 <td style="text-align: left;">Urban/town/rural mix</td>
 <td style="text-align: left;">EDR 7W- Central</td>
-<td style="text-align: left;">EDR 7W</td>
+<td style="text-align: left;">Central</td>
+<td style="text-align: left;">27</td>
+<td style="text-align: left;">Central</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">10443694</td>
@@ -831,7 +855,9 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">097</td>
 <td style="text-align: left;">Town/rural mix</td>
 <td style="text-align: left;">EDR 5 - North Central</td>
-<td style="text-align: left;">EDR 5</td>
+<td style="text-align: left;">Northwest</td>
+<td style="text-align: left;">27</td>
+<td style="text-align: left;">Central</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">9841703</td>
@@ -854,7 +880,9 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">145</td>
 <td style="text-align: left;">Urban/town/rural mix</td>
 <td style="text-align: left;">EDR 7W- Central</td>
-<td style="text-align: left;">EDR 7W</td>
+<td style="text-align: left;">Central</td>
+<td style="text-align: left;">27</td>
+<td style="text-align: left;">Central</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1365935</td>
@@ -877,7 +905,9 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">141</td>
 <td style="text-align: left;">Entirely urban</td>
 <td style="text-align: left;">EDR 7W- Central</td>
-<td style="text-align: left;">EDR 7W</td>
+<td style="text-align: left;">Central</td>
+<td style="text-align: left;">27</td>
+<td style="text-align: left;">Central</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">11934143</td>
@@ -900,7 +930,9 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">097</td>
 <td style="text-align: left;">Town/rural mix</td>
 <td style="text-align: left;">EDR 5 - North Central</td>
-<td style="text-align: left;">EDR 5</td>
+<td style="text-align: left;">Northwest</td>
+<td style="text-align: left;">27</td>
+<td style="text-align: left;">Central</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">11485629</td>
@@ -923,7 +955,9 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">141</td>
 <td style="text-align: left;">Entirely urban</td>
 <td style="text-align: left;">EDR 7W- Central</td>
-<td style="text-align: left;">EDR 7W</td>
+<td style="text-align: left;">Central</td>
+<td style="text-align: left;">27</td>
+<td style="text-align: left;">Central</td>
 </tr>
 </tbody>
 </table>
@@ -997,7 +1031,13 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">edr</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">edr.simple</td>
+<td style="text-align: left;">planning.region</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">statefp</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">project.pr</td>
 </tr>
 </tbody>
 </table>
@@ -1281,8 +1321,8 @@ ul.task-list li input[type="checkbox"] {
 <p><br></p>
 <div class="cell">
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-26c0b889eef610ef0ac7" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-26c0b889eef610ef0ac7">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"1013\" data-max=\"68740\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"1\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["Female","Free or reduced lunch","Homeless","Limited English Proficiency","Non-english in home","Non-white","PSEO participant","Special Ed"],[68740,43512,1013,2117,5418,35383,49888,18914],[137622,137622,137622,137622,137622,137622,137622,137622],["49.9%","31.6%","0.7%","1.5%","3.9%","25.7%","36.3%","13.7%"]],"container":"<table class=\"cell-border stripe\">\n  <thead>\n    <tr>\n      <th>indicator<\/th>\n      <th>confirmed.indicator<\/th>\n      <th>total.observations<\/th>\n      <th>pct<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2]},{"name":"indicator","targets":0},{"name":"confirmed.indicator","targets":1},{"name":"total.observations","targets":2},{"name":"pct","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-61a31a2262b70a9292e7" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-61a31a2262b70a9292e7">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"1013\" data-max=\"68740\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"1\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["Female","Free or reduced lunch","Homeless","Limited English Proficiency","Non-english in home","Non-white","PSEO participant","Special Ed"],[68740,43512,1013,2117,5418,35383,49888,18914],[137622,137622,137622,137622,137622,137622,137622,137622],["49.9%","31.6%","0.7%","1.5%","3.9%","25.7%","36.3%","13.7%"]],"container":"<table class=\"cell-border stripe\">\n  <thead>\n    <tr>\n      <th>indicator<\/th>\n      <th>confirmed.indicator<\/th>\n      <th>total.observations<\/th>\n      <th>pct<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2]},{"name":"indicator","targets":0},{"name":"confirmed.indicator","targets":1},{"name":"total.observations","targets":2},{"name":"pct","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <p><br></p>

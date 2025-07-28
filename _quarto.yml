@@ -2,9 +2,6 @@ project:
   type: website
   output-dir: docs
 
-execute: 
-  cache: true
-
 website:
   title: "Pathways taken after high school - Central"
   navbar:
@@ -45,8 +42,6 @@ website:
       - text: Analysis
         icon: fa-gear
         menu:
-          - text: Categorizing range schools
-            href: analysis_categorizing_range_schools.qmd
           - text: Multiple Correspondence Analysis
             href: analysis_mca.qmd
           - text: Dependent Variable States
