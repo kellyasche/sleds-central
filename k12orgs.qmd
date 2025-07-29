@@ -101,6 +101,16 @@ counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive
          mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
 Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
+
 
 color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
 
@@ -116,12 +126,12 @@ mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasch
   ms_simplify(keep = .01, keep_shapes = TRUE) %>%
   rename(countyfp = FIPS_CODE)
 
-k12.county.codes <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12-county-codes.csv")
+k12.county.codes <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12-county-codes.csv")
 ```
 
 # Data prep
 
-This dataset is of all the individuals that have graduated from a high school in Northeast Minnesota. While preparing the K12Enrollment data, I already joined the organizational data and created a dataset that has all the individuals that graduated from a school located in EDR 3.
+This dataset is of all the individuals that have graduated from a high school in Central Minnesota (as defined by the project). While preparing the K12Enrollment data, I already joined the organizational data and created a dataset that has all the individuals that graduated from a school located in the Central region.
 
 <br>
 
@@ -137,34 +147,32 @@ kable(names(original))
 
 <br>
 
-The one metric that wasn't included when I joined the enrollment data with the organizational data is the number of years they attended a school in the Northeast region.
+The one metric that wasn't included when I joined the enrollment data with the organizational data is the number of years they attended a school in the Central region (as defined by the project).
 
 <br>
 
 ```{r enrollment joined with n years attended}
-enrollment.original <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/K12 Enrollment/K12Enrollment.csv")  %>%
+enrollment.original <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/K12 Enrollment/K12Enrollment.csv")  %>%
   mutate(PersonID = as.integer(PersonID),
          K12OrganizationID = as.integer(K12OrganizationID)) %>%
   drop_na(PersonID)
 
-k12.org.original <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12Organization.csv") %>%
+k12.org.original <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12Organization-updated.csv") %>%
   distinct(K12OrganizationID, .keep_all = TRUE) %>%
   drop_na(K12OrganizationID) %>%
   mutate(K12OrganizationID = as.integer(K12OrganizationID))
 
 k12.org.master <- k12.org.original %>%
-  select(K12OrganizationID, SiteCountyCode, OrganizationName, DistrictID, SchoolNumber) %>%
-  left_join(k12.county.codes[,c(1,2)], by = c("SiteCountyCode" = "county.code")) %>%
-  rename(county.name = 4) %>%
+  select(K12OrganizationID, County, OrganizationName, DistrictID, SchoolNumber) %>%
+  rename(county.name = 2) %>%
   mutate(county.name = str_replace(county.name, " County", "")) %>%
   select(K12OrganizationID, OrganizationName, county.name) %>%
-  mutate(county.name = str_replace(county.name, "Saint Louis", "St. Louis")) %>%
-  left_join(counties.regions, by = c("county.name" = "Name")) %>%
-  select(-Dem_RUCA, -planning.region, -mif, -edr.simple)
+  left_join(counties.regions.1, by = c("county.name" = "Name")) %>%
+  select(-Dem_RUCA, -mif, -edr.simple, -planning.region)
 
 enrollment.org.central <- enrollment.original %>%
   left_join(k12.org.master, by = "K12OrganizationID") %>%
-  filter(edr == "EDR 3 - Arrowhead")
+  filter(project.pr == "Central")
 
 n.years <- original %>%
   select(PersonID, grad.year, K12OrganizationID) %>%
@@ -178,7 +186,8 @@ n.years <- original %>%
   ungroup()
 
 master <- original %>%
-  left_join(n.years, by = "PersonID")
+  left_join(n.years, by = "PersonID") %>%
+  mutate(Dem_Desc = fct_relevel(Dem_Desc, "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
 kable(head(master))
 
@@ -219,7 +228,7 @@ datatable(k12.org.summary.ruca, class = "cell-border stripe", filter = "top")
 
 <br>
 
-Below is a map with the percentages of graduates graduating from high schools located within each county. The schools with the highest percent of graduates/observations are located in Wright and Steans with nearly 20% each. The rest of the counties have 10% or less of the share of the dataset.
+Below is a map with the percentages of graduates graduating from high schools located within each county. The schools with the highest percent of graduates/observations are located in Wright and Stearns with nearly 20% each. The rest of the counties have 12% or less of the share of the dataset.
 
 <br>
 
@@ -293,8 +302,8 @@ k12.dem.free.lunch.ruca.plot <- ggplot(k12.dem.free.lunch.ruca, aes(Dem_Desc, pc
   geom_col_interactive(size = 5, aes(data_id = data_id, tooltip = paste(Dem_Desc, "\nTotal graduates: ", comma(n, accuracy = 1), "\nGraduates received free or reduced lunch: ", comma(free.lunch, accuracy = 1), "\nPercent of total graduates: ", percent(pct, accuracy = .1), sep = ""))) +
   annotate(geom = "text",
            x = 3,
-           y = .361,
-           label = "All graduates\npercent, 31.6%",
+           y = k12.dem.free.lunch.ruca$total.pct,
+           label = paste("All graduates\npercent, ", percent(k12.dem.free.lunch.ruca$total.pct, accuracy = .1)),
            size = 5) +
   labs(x="", y = "", color="", fill = "", title = "Percent of graduates receiving free or reduced lunch")+
   geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, size = 5) +
@@ -329,12 +338,46 @@ CrossTable(master$Dem_Desc, master$Gender, expected = TRUE, prop.t = FALSE, prop
 
 ### RUCA Homeless
 
-Town/rural mix schools had a significantly higher percentage of individuals indicating they were homeless at 1%.
+Town/rural mix schools had a significantly higher percentage of individuals indicating they were homeless at 1%, which is higher than the other RUCA graduates.
 
 <br>
 
 ```{r cross-tabs homeless ruca}
 CrossTable(master$Dem_Desc, master$HomelessIndicator, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+
+```{r chart homeless ruca}
+k12.dem.homeless.ruca <- master %>%
+  mutate(HomelessIndicator = ifelse(HomelessIndicator == "Y", 1, 0)) %>%
+  group_by(Dem_Desc) %>%
+  summarise(n = n(),
+           HomelessIndicator = sum(HomelessIndicator)) %>%
+  ungroup() %>%
+  mutate(pct = HomelessIndicator / n,
+         total.pct = sum(HomelessIndicator) / sum(n),
+         data_id = as.character(seq(n()))) 
+
+k12.dem.homeless.ruca.plot <- ggplot(k12.dem.homeless.ruca, aes(Dem_Desc, pct, fill = Dem_Desc)) +
+  geom_hline(yintercept = k12.dem.homeless.ruca$total.pct, color = "black") +
+  geom_col_interactive(size = 5, aes(data_id = data_id, tooltip = paste(Dem_Desc, "\nTotal graduates: ", comma(n, accuracy = 1), "\nGraduates indicating homelessness: ", comma(HomelessIndicator, accuracy = 1), "\nPercent of total graduates: ", percent(pct, accuracy = .1), sep = ""))) +
+  annotate(geom = "text",
+           x = 3,
+           y = k12.dem.homeless.ruca$total.pct,
+           label = paste("All graduates\npercent, ", percent(k12.dem.homeless.ruca$total.pct, accuracy = .1)),
+           size = 5) +
+  labs(x="", y = "", color="", fill = "", title = "Percent of graduates homeless")+
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, size = 5) +
+  scale_y_continuous(labels=scales::percent)+
+  theme_line+
+  scale_fill_manual(values= color.ruca,
+                     guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "none",
+        text = element_text(size = 16))
+
+  girafe(ggobj = k12.dem.homeless.ruca.plot) %>%
+    girafe_options(opts_selection(type = "none"),
+                   opts_toolbar(saveaspng = FALSE),
+                   opts_sizing(rescale = FALSE))
 ```
 
 <br>
@@ -347,6 +390,40 @@ The urban/town/rural mix has significantly higher percentage of graduates catego
 
 ```{r cross-tabs limited english ruca}
 CrossTable(master$Dem_Desc, master$LimitedEnglishProficiencyIndicator, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+
+```{r chart limited english ruca}
+k12.dem.limited.english.ruca <- master %>%
+  mutate(LimitedEnglishProficiencyIndicator = ifelse(LimitedEnglishProficiencyIndicator == "Y", 1, 0)) %>%
+  group_by(Dem_Desc) %>%
+  summarise(n = n(),
+           LimitedEnglishProficiencyIndicator = sum(LimitedEnglishProficiencyIndicator)) %>%
+  ungroup() %>%
+  mutate(pct = LimitedEnglishProficiencyIndicator / n,
+         total.pct = sum(LimitedEnglishProficiencyIndicator) / sum(n),
+         data_id = as.character(seq(n()))) 
+
+k12.dem.limited.english.ruca.plot <- ggplot(k12.dem.limited.english.ruca, aes(Dem_Desc, pct, fill = Dem_Desc)) +
+  geom_hline(yintercept = k12.dem.limited.english.ruca$total.pct, color = "black") +
+  geom_col_interactive(size = 5, aes(data_id = data_id, tooltip = paste(Dem_Desc, "\nTotal graduates: ", comma(n, accuracy = 1), "\nGraduates indicating homelessness: ", comma(LimitedEnglishProficiencyIndicator, accuracy = 1), "\nPercent of total graduates: ", percent(pct, accuracy = .1), sep = ""))) +
+  annotate(geom = "text",
+           x = 3,
+           y = k12.dem.limited.english.ruca$total.pct,
+           label = paste("All graduates\npercent, ", percent(k12.dem.limited.english.ruca$total.pct, accuracy = .1)),
+           size = 5) +
+  labs(x="", y = "", color="", fill = "", title = "Percent of graduates homeless")+
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, size = 5) +
+  scale_y_continuous(labels=scales::percent)+
+  theme_line+
+  scale_fill_manual(values= color.ruca,
+                     guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "none",
+        text = element_text(size = 16))
+
+  girafe(ggobj = k12.dem.limited.english.ruca.plot) %>%
+    girafe_options(opts_selection(type = "none"),
+                   opts_toolbar(saveaspng = FALSE),
+                   opts_sizing(rescale = FALSE))
 ```
 
 <br>
@@ -378,8 +455,8 @@ k12.non.english.home.ruca.plot <- ggplot(k12.non.english.home.ruca, aes(Dem_Desc
   geom_col_interactive(size = 5, aes(data_id = data_id, tooltip = paste(Dem_Desc, "\nTotal graduates: ", comma(n, accuracy = 1), "\nGraduates with non-english speaker at home: ", comma(non.english, accuracy = 1), "\nPercent of total graduates: ", percent(pct, accuracy = .1), sep = ""))) +
   annotate(geom = "text",
            x = 3,
-           y = .039,
-           label = "All graduates\npercent, 3.9%",
+           y = k12.non.english.home.ruca$total.pct,
+           label = paste("All graduates\npercent, ", percent(k12.non.english.home.ruca$total.pct, accuracy = .1)),
            size = 5) +
   labs(x="", y = "", fill = "", color="", title = "Percent of graduates with non-english speaker at home")+
   geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, size = 5) +
@@ -428,8 +505,8 @@ k12.pseo.ruca.plot <- ggplot(k12.pseo.ruca, aes(Dem_Desc, pct, fill = Dem_Desc))
   geom_col_interactive(size = 5, aes(data_id = data_id, tooltip = paste(Dem_Desc, "\nTotal graduates: ", comma(n, accuracy = 1), "\nGraduates participated in PSEO: ", comma(pseo.participant, accuracy = 1), "\nPercent of total graduates: ", percent(pct, accuracy = .1), sep = ""))) +
   annotate(geom = "text",
            x = 1,
-           y = .5,
-           label = "All graduates\npercent, 44.8%",
+           y = k12.pseo.ruca$total.pct,
+           label = paste("All graduates\npercent, ", percent(k12.pseo.ruca$total.pct, accuracy = .1)),
            size = 5) +
   labs(x="", y = "", color="", fill = "", title = "Percent of graduates participated in PSEO")+
   geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, size = 5) +
@@ -453,9 +530,9 @@ k12.pseo.ruca.plot <- ggplot(k12.pseo.ruca, aes(Dem_Desc, pct, fill = Dem_Desc))
 
 # Summary of years attended
 
-First, lets see the distribution of the number of years attending a Northeast High School within this dataset.
+First, lets see the distribution of the number of years attending a Central High School within this dataset.
 
-A large majority of students (\~30,000 students) attended a Central MN High School for 3 years. A few attended for longer than that, which is largely due to students who attended a CTE course after they graduated for special training.
+A large majority of students (\~120,000 students) attended a Central MN High School for 3 years. A few attended for longer than that, which is largely due to students who attended a CTE course after they graduated for special training.
 
 <br>
 

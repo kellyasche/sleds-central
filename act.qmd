@@ -101,6 +101,16 @@ counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive
          mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
 Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
+
 
 color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
 
@@ -119,12 +129,12 @@ mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasch
 
 # Data Prep
 
-Next up is to join the ACT data. I'll first load the entire ACT dataset, clean it up, and then join with my master/NE graduate dataset to finalize.
+Next up is to join the ACT data. I'll first load the entire ACT dataset, clean it up, and then join with my master/Central graduate dataset to finalize.
 
 <br>
 
 ```{r act original data}
-act.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/ACT/ACT.csv') %>%
+act.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/ACT/ACT.csv') %>%
   mutate(PersonID = as.integer(PersonID))
 
 kable(head(act.original))
@@ -164,7 +174,8 @@ Now we will join it up with the master.
 
 ```{r act join with master}
 master.2 <- read_csv("Data/SLEDS/Masters/master-1.csv") %>%
-  left_join(act.highest.comp, by = "PersonID")
+  left_join(act.highest.comp, by = "PersonID") %>%
+  mutate(Dem_Desc = fct_relevel(Dem_Desc, "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
 act.master <- read_csv("Data/SLEDS/Masters/master-1.csv") %>%
   select(PersonID) %>%
@@ -206,7 +217,7 @@ datatable(act.pct.taken, class = "cell-border stripe", filter = "top", rownames 
 
 Next lets see if the ACT taken rate differs across RUCA, regions and counties.
 
-The cross-tabs for the percentage of students who have taken the ACT by RUCA category has a p-value of less than .01, indicating that RUCA category is related. Graduates from town/rural mix districts had the lowest percentage of individuals who didn't take the ACT with 54.5%, followed by urban/town/rural mix with 63.6% and entirely urban with 69.0%.
+The cross-tabs for the percentage of students who have taken the ACT by RUCA category has a p-value of less than .01, indicating that RUCA category is related. The trend shows that the more rural a school district, the lower the percentage of graduates that have taken the ACT - town/rural mix had 55% of their graduates take the ACT whereas entirely urban districts had 69%.
 
 <br>
 
@@ -236,7 +247,39 @@ CrossTable(act.taken.ruca.cross.tabs$Dem_Desc, act.taken.ruca.cross.tabs$act.tak
 
 <br>
 
-Finally, here's a look at the percentages by county. The largest percentage comes from Itasca County with only 52.9% of graduates taking the ACT. The highest was in Cook County with 67.6%.
+Next, let's see what it looks like by EDR.
+
+The cross-tabs for the percentage of students who have taken the ACT by RUCA category has a p-value of less than .01, indicating that RUCA category is related. The trend shows a similar pattern as the RUCA categories. EDR 5 is the most rural and has the lowest percentage of graduates that took the ACT - 55% compared to EDR 7W with 66.5%.
+
+<br>
+
+::: panel-tabset
+## EDR Table
+
+```{r prep act taken summary by edr, echo=FALSE}
+act.taken.edr <- master.2 %>%
+  mutate(act.taken = ifelse(is.na(ACTCompositeScore), "ACT not taken", "ACT taken")) %>%
+  tabyl(edr, act.taken) %>%
+  mutate(`Percent ACT taken` = scales::percent(`ACT taken` / (`ACT not taken` + `ACT taken`), accuracy = .1))
+  
+datatable(act.taken.edr, class = "cell-border stripe", filter = "top", rownames = FALSE)
+```
+
+## EDR Cross-tabs
+
+```{r cross tabs ACT edr}
+
+act.taken.edr.cross.tabs <- master.2 %>%
+  mutate(act.taken = ifelse(is.na(ACTCompositeScore), "ACT not taken", "ACT taken"))
+
+CrossTable(act.taken.edr.cross.tabs$edr, act.taken.ruca.cross.tabs$act.taken, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+Finally, here's a look at the percentages by county. The percentages are higher as the counties approach the seven county metro and thus are the most "urban". The lowest percentages are in the rural parts of the region - Northwest counties.
 
 <br>
 
