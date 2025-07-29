@@ -101,6 +101,15 @@ counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive
          mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
 Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
 
 color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
 
@@ -130,7 +139,7 @@ Alright, now we are going to determine who graduated. Let's see what this data l
 graduates <- read_csv("Data/SLEDS/Masters/Master-9.csv") %>%
   select(PersonID)
 
-nsccompletions.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/NSCCompletions/NCS_Completions.csv') %>%
+nsccompletions.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/NSCCompletions/NCS_Completions.csv') %>%
   rename(PersonID = 1) %>%
   mutate(PersonID = as.integer(PersonID),
          OPEID = str_pad(OPEID, width = 8, side = "left", pad = "0"),
@@ -162,7 +171,7 @@ The main characteristics from this dataset that I want to add to the master data
 
 -   Confirmation that they graduated from a post secondary institution
 -   The year they graduated from their first post secondary institution
--   The year they graduated from their last post-seconary institution
+-   The year they graduated from their last post-secondary institution
 -   The sector of the institution(s) from which they graduated
 -   The highest level of degree obtained by the PersonID
 -   The degrees earned
@@ -185,7 +194,7 @@ To do this, I will need to import the NSC enrollment data, filter to 2023, and d
 <br>
 
 ```{r confirmed gradauted ps}
-ps.enrollment <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/NSCEnrollment/NSC_Enrollments.csv") %>%
+ps.enrollment <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/NSCEnrollment/NSC_Enrollments.csv") %>%
   mutate(PersonID = as.integer(PersonID),
          OPEID = str_pad(OPEID, width = 8, side = "left", pad = "0"),
          OPEID.6 = str_sub(OPEID, 1, 6)) %>%
@@ -258,7 +267,7 @@ Next we will determine the sector(s) of the institution(s) from which they gradu
 <br>
 
 ```{r grad institution sector}
-ipeds.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/IPEDS/IPEDS.csv') 
+ipeds.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/IPEDS/IPEDS.csv') 
 
 ipeds.sector <- ipeds.original %>%
   filter(!is.na(OPEID)) %>%
@@ -314,7 +323,7 @@ I'm going to combine these into just a few categories.
 <br>
 
 ```{r highest credential earned}
-clean.degree <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/NSC/NSC_Degree_Title_Cleaned.xlsx', sheet = 1) %>%
+clean.degree <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/NSC/NSC_Degree_Title_Cleaned.xlsx', sheet = 1) %>%
   drop_na(`CREDENTIAL_TITLE_REPORTED_TO_NSC`)
 
 highest.credential.code <- nsccompletions.original %>%
@@ -357,15 +366,6 @@ In order to do this we will need to combine our planning region and EDR joining 
 ```{r nsc enrollment location}
 dem.desc.county <- read_csv("Data/Join docs/Master-ruca-county.csv")
 
-counties.regions.1 <- counties.regions %>%
-  mutate(statefp = "27",
-         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
-                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
-                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
-                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
-                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
-         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
-
 grad.location <- read_csv("Data/SLEDS/Masters/Master-9.csv") %>%
   select(PersonID, edr, Dem_Desc) %>%
   rename(grad.edr = 2,
@@ -398,7 +398,7 @@ kable(names(nsccompletions.location.join))
 
 This joined dataset gives us `r comma(nsccompletions.location.join %>% nrow(), accuracy = 1)` rows and `r comma(nsccompletions.location.join %>% ncol, accuracy = 1)` columns. The columns beginning with "ps" are the ruca category and regions of the post-secondary institution from which they graduated The columns beginning with "hs" are the RUCA category and regions of the high school from which the PersonID graduated.
 
-From here we can start creating new columns beginning with the RUCA category. to create this column we will gather each PersonID to examine whether or they graduated from a post-secondary institution in the same RUCA category, or if they graduated from multiple post-secondary institutions with one institution in the same category and another not the same.
+From here we can start creating new columns beginning with the RUCA category. To create this column we will gather each PersonID to examine whether or they graduated from a post-secondary institution in the same RUCA category, or if they graduated from multiple post-secondary institutions with one institution in the same category and another not the same.
 
 <br>
 
@@ -537,7 +537,8 @@ master.10 <- read_csv("Data/SLEDS/Masters/Master-9.csv") %>%
          ps.attended.in.same.edr = ps.in.same.edr,
          ps.attended.in.same.pr = ps.in.same.pr,
          ps.attended.in.MN = ps.in.MN,
-         ps.grad.InstitutionSector = InstitutionSector)
+         ps.grad.InstitutionSector = InstitutionSector)%>%
+  mutate(Dem_Desc = fct_relevel(Dem_Desc, "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
 nsccompletions.master<- read_csv("Data/SLEDS/Masters/Master-9.csv") %>%
   select(PersonID, grad.year, ps.in.same.ruca, ps.in.same.edr, ps.in.same.pr, ps.in.MN) %>%
@@ -653,6 +654,54 @@ CrossTable(master.10$Dem_Desc, master.10$ps.grad, expected = TRUE, prop.t = FALS
 
 <br>
 
+Next, lets check to see if there are differences by high school EDR.
+
+The crosstabs below do indicate a relationship with a p-value near zero.
+
+The largest difference is that a higher percentage of graduates from EDR 5 and 7W that did not graduate from a post-secondary institution.
+
+<br>
+
+::: panel-tabset
+## Chart- EDR
+
+```{r chart ps grad edr}
+ps.grad.edr <- master.10 %>%
+  group_by(edr, ps.grad) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(edr) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = as.character(seq(n())))
+
+ps.grad.edr.plot <- ggplot(ps.grad.edr, aes(ps.grad, pct, fill = edr, group = edr)) +
+    geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(edr, "\nGraduated from post secondary institution?: ", ps.grad, "\nNumber of students: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(position = position_dodge(width = .9), aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Percent of students graduating or not from post-secondary institution")+
+    scale_y_continuous(labels=scales::percent)+
+    scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
+    theme_bar+
+    scale_fill_manual(values= color.edr,
+                       guide = guide_legend(ncol = 3)) +
+    theme(legend.position = "bottom",
+          text = element_text(size = 18))
+
+
+girafe(ggobj = ps.grad.edr.plot, width_svg = 10, height_svg = 6) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+```
+
+## Cross-tabs - EDR
+
+```{r crosstabs ps grad edr}
+CrossTable(master.10$edr, master.10$ps.grad, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+:::
+
+<br>
+
 # Summary of years between graduations
 
 Next we will summarize the number of years between high school graduation and the first credential earned after high school.
@@ -730,16 +779,64 @@ TukeyHSD(years.between.grads.anova.ruca)
 
 <br>
 
+Next lets see if these averages are significantly different across EDRs.
+
+The ANOVA table indicates a relationship between the average number of years between high school graduation and earning first credential by EDR.
+
+The primary trend is that the average number of years between high school graduation and earning first credential increases as a high school becomes more urban - 3.26 years for EDR 5 students, 3.58 for EDR 7E and 3.73 years for EDR 7W graduates.
+
+<br>
+
+::: panel-tabset
+## Chart - EDR
+
+```{r chart years between grad edr}
+years.between.grad.edr <- master.10 %>%
+  filter(ps.grad == "Y") %>%
+  group_by(edr) %>%
+  summarize(n = n(),
+            mean = mean(years.between.grads),
+            median = median(years.between.grads),
+            min = min(years.between.grads),
+            max = max(years.between.grads),
+            sd = sd(years.between.grads)) %>%
+  ungroup()
+
+datatable(years.between.grad.edr, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 1:5)))) %>%
+  formatCurrency(2, "", digits = 0) %>%
+  formatCurrency(3, "", digits = 2) %>%
+  formatCurrency(7, "", digits = 2)
+
+```
+
+## ANOVA - EDR
+
+```{r anova years between grad edr}
+years.between.grads.summary.edr <- master.10 %>%
+  filter(ps.grad == "Y")
+
+years.between.grads.anova.edr <- aov(years.between.grads ~ edr, data = years.between.grads.summary.edr)
+
+summary(years.between.grads.anova.edr)
+
+TukeyHSD(years.between.grads.anova.edr)
+
+```
+:::
+
+<br>
+
 # Summary of post-secondary graduate sector
 
 Next we will take a look at the percentage of students that graduated by institution sector. We will start with the total dataset and then look to see if there are any statistical differences on the RUCA category and EDR of their high school from which they graduated.
 
-First, let's look at it from a total dataset. Of the over 50,000 individuals that attended post-secondary in the dataset, nearly 42% went to a public, 4-year college, 28% went to a 2-year public college, 17% went to a private 4-year, and 9% graduated from a mixture of institution types.
+First, let's look at it from a total dataset. Of the over 90,000 individuals that attended post-secondary in the dataset, over 42% graduated from a public, 4-year college, 28% graduated from a 2-year public college, 17% graduated from a private 4-year, and 9% graduated from a mixture of institution types.
 
 <br>
 
 ```{r table grad sector total}
-sectors <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/NSC/IPEDS/institution-sectors.xlsx')
+sectors <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/NSC/IPEDS/institution-sectors.xlsx')
 
 grad.sector.total <- master.10 %>%
   group_by(ps.grad.InstitutionSector) %>%
@@ -814,6 +911,65 @@ grad.sector.summary.ruca <- master.10 %>%
   left_join(sectors, by = c("ps.grad.InstitutionSector" = "Code"))
 
 CrossTable(grad.sector.summary.ruca$Sector, grad.sector.summary.ruca$Dem_Desc, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+
+```
+:::
+
+<br>
+
+<br>
+
+Next lets see if the EDR from where they graduated high school makes any significant difference in the post-secondary institution from which they received a degree.
+
+The crosstabs indicates a relationship between the EDR location of their high school and the institution type from which they received a degree.
+
+The table shows 3 significant differences.
+
+1.  EDR 5:
+    1.  Significantly more likely to earn a credential from a 2-year public university
+    2.  Significantly less likely to earn a credential from a 4-year, public
+2.  EDR 7E:
+    1.  Significantly more likely to earn a credential from a private, non-profit 4-year college.
+3.  EDR 7W:
+    1.  Significantly more likely to earn a credential from a public, 4-year college
+    2.  Significantly less likely to earn a credential from a 2-year public.
+
+<br>
+
+::: panel-tabset
+## Chart - EDR
+
+```{r chart grad institution sector edr}
+grad.sector.edr <- master.10 %>%
+  filter(!is.na(ps.grad.InstitutionSector)) %>%
+  group_by(edr, ps.grad.InstitutionSector) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  left_join(sectors, by = c("ps.grad.InstitutionSector" = "Code")) %>%
+  select(edr, Sector, n) %>%
+  group_by(edr) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  complete(edr, Sector, fill = list(n = 0, pct = 0)) %>%
+  select(edr, Sector, pct) %>%
+  arrange(pct) %>%
+  spread(key = edr, value = pct) 
+
+datatable(grad.sector.edr, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 1:3)))) %>%
+  formatPercentage(2:4, digits = 2)
+
+```
+
+## Cross-tabs - EDR
+
+```{r crosstabs grad sector edr}
+grad.sector.summary.edr <- master.10 %>%
+  filter(!is.na(ps.grad.InstitutionSector)) %>%
+  left_join(sectors, by = c("ps.grad.InstitutionSector" = "Code"))
+
+CrossTable(grad.sector.summary.edr$Sector, grad.sector.summary.edr$edr, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
 
 
 ```
