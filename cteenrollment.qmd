@@ -127,7 +127,7 @@ mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasch
 
 # Data prep
 
-The next dataset is individuals that were enrolled in CTE courses. I'm first going to load the entire dataset, then clean it up, and then I will merge it with my master/NE graduate dataset.
+The next dataset is individuals that were enrolled in CTE courses. I'm first going to load the entire dataset, then clean it up, and then I will merge it with my master/Central graduate dataset.
 
 <br>
 

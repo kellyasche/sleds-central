@@ -101,6 +101,16 @@ counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive
          mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
 Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
+
 
 color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
 
@@ -119,12 +129,12 @@ mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasch
 
 # Data prep
 
-Now I'm going to prep the CTE demographics dataset to join with the master. I will first load the entire CTE demographics dataset, clean it up, and then join with my master/NE graduate dataset.
+Now I'm going to prep the CTE demographics dataset to join with the master. I will first load the entire CTE demographics dataset, clean it up, and then join with my master/Central graduate dataset.
 
 <br>
 
 ```{r cte demographics original}
-cte.demographics.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/CTEDemographics/CTEDemographic.csv')  %>%
+cte.demographics.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/CTEDemographics/CTEDemographic.csv')  %>%
   mutate(PersonID = as.integer(PersonID)) 
 
 kable(head(cte.demographics.original))
@@ -182,7 +192,7 @@ kable(names(cte.concentrator.cat))
 
 <br>
 
-When joined with the master file, there were `r comma(cte.concentrator.cat %>% filter(cte.achievement != "No CTE") %>% nrow(), accuracy = 1)` that were either a CTE participant or concentrator. This is below the \~34,000 that took at least one CTE course according to the CTE enrollment dataset. This could mean that there roughly 5,000 students that took a CTE course but did not graduate.
+When joined with the master file, there were `r comma(cte.concentrator.cat %>% filter(cte.achievement != "No CTE") %>% nrow(), accuracy = 1)` that were either a CTE participant or concentrator. This is below the \~115,556,000 that took at least one CTE course according to the CTE enrollment dataset. This could mean that there roughly 20,000 students that took a CTE course but did not graduate.
 
 Lets join this dataset with the master to confirm this thought.
 
@@ -190,7 +200,8 @@ Lets join this dataset with the master to confirm this thought.
 
 ```{r cte concentrator join master}
 master.5 <- read_csv("Data/SLEDS/Masters/Master-4.csv") %>%
-  left_join(cte.concentrator.cat, by = "PersonID")
+  left_join(cte.concentrator.cat, by = "PersonID") %>%
+  mutate(Dem_Desc = fct_relevel(Dem_Desc, "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
 ctedemographics.master <- read_csv("Data/SLEDS/Masters/Master-4.csv") %>%
   select(PersonID) %>%
@@ -261,9 +272,44 @@ CrossTable(master.5$Dem_Desc, master.5$cte.achievement, expected = TRUE, prop.t 
 
 <br>
 
+Let's take a look at the cross-tabs by EDR.
+
+The cross-tabs show a significant difference between the percentage of students by categorization and EDRs. The largest difference is EDR 7E where 50% of the graduates were a CTE concentrator or completor.
+
+<br>
+
+::: panel-tabset
+### EDR Table
+
+```{r summary cte demographics edr table}
+cte.dem.summary.edr.table <- master.5 %>%
+  mutate(cte.achievement = as.factor(cte.achievement)) %>%
+  tabyl(edr, cte.achievement) %>%
+  adorn_percentages("row")
+
+datatable(cte.dem.summary.edr.table, class = "cell-border stripe", filter = "top", rownames = FALSE) %>%
+  formatPercentage(2:4) 
+```
+
+### EDR Cross-tabs
+
+```{r summary cte demographics edr crosstabs}
+
+CrossTable(master.5$edr, master.5$cte.achievement, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
 Lets take a look at the county map.
 
-The cross tabulations show that there is a statistically significant difference in the percent of graduates in each CTE category by county.
+The cross tabulations show that there is a statistically significant difference in the percent of graduates in each CTE category by county. The highest percentage of No CTE graduates is Sherburne County with 42.5% and Pine not far behind with 40%. The counties with the highest percentage of CTE completors/concentrators are;
+
+-   Isanti: 56%
+-   Chisago: 56%
+-   Mille Lacs: 53%
+-   Wadena: 53%.
 
 <br>
 
