@@ -4,7 +4,7 @@ editor: visual
 ---
 
 ```{r library, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(sf)
 library(ggrepel)
@@ -101,6 +101,14 @@ counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive
          mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
 Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
 
 color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
 
@@ -124,7 +132,7 @@ Okay, lets check out assessments. This is the entire assessment dataset, which I
 <br>
 
 ```{r ipeds original}
-assessments.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/Assessments/K12Assessment.csv')  %>%
+assessments.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/Assessments/K12Assessment.csv')  %>%
   mutate(PersonID = as.integer(PersonID),
          TestName = as.factor(TestName),
          Subject = as.factor(Subject),
@@ -248,7 +256,8 @@ master.7 <- read_csv("Data/SLEDS/Masters/Master-5.csv") %>%
   mutate(PersonID = as.integer(PersonID)) %>%
   left_join(el, by = "PersonID") %>%
   left_join(mca.highest, by = "PersonID") %>%
-  mutate(english.learner = ifelse(is.na(english.learner), 0, english.learner))
+  mutate(english.learner = ifelse(is.na(english.learner), 0, english.learner),
+         Dem_Desc = fct_relevel(Dem_Desc, "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
 assessments.master <- read_csv("Data/SLEDS/Masters/Master-5.csv") %>%
   select(PersonID) %>%
@@ -313,7 +322,7 @@ datatable(el.summary.ruca,
           filter = "top", 
           rownames = FALSE,
           options = list(columnDefs = list(list(className = "dt-center", targets = 0:3)))) %>%
-  formatPercentage(4, 2) %>%
+  formatPercentage(4, 2, digits = 1) %>%
   formatCurrency(2:3, "", digits = 0)
 ```
 
@@ -321,6 +330,44 @@ datatable(el.summary.ruca,
 
 ```{r english learners cross tabs ruca}
 CrossTable(master.7$Dem_Desc, master.7$english.learner, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+:::
+
+<br>
+
+Let's now see if there are any significant differences by EDR.
+
+The cross-tabs provides a very low p-value indicating that there are significant differences in the percentage of individuals in the dataset categorized as English learners.
+
+The highest percentage of english learner graduates was found in EDR 7W with 8% of graduates, compared to 5% in EDR 7E and 6% in EDR 5.
+
+<br>
+
+::: panel-tabset
+## EDR Table
+
+```{r english learners summary edr}
+el.summary.edr <- master.7 %>%
+  group_by(edr) %>%
+  summarize(n = n(),
+            english.learner = sum(english.learner)) %>%
+  ungroup() %>%
+  mutate(pct.english.learner = english.learner / n)
+
+
+datatable(el.summary.edr, 
+          class = "cell-border stripe", 
+          filter = "top", 
+          rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 0:3)))) %>%
+  formatPercentage(4, 2, digits = 1) %>%
+  formatCurrency(2:3, "", digits = 0)
+```
+
+## EDR Cross-tabs
+
+```{r english learners cross tabs edr}
+CrossTable(master.7$edr, master.7$english.learner, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
 ```
 :::
 
@@ -334,7 +381,7 @@ Math: 70% either met or exceeded the standard.
 
 Reading: 80% either met or exceeded the standard
 
-Science: Nearly 60% either met or exceeded standard.
+Science: Nearly 53% either met or exceeded standard.
 
 <br>
 
@@ -387,11 +434,11 @@ We will start with analyzing math and RUCA categories.
 
 The p-value from the cross-tabs indicate that there is a relationship between RUCA categories and the grades received in the MCA-Math test.
 
-Entirely urban: 74% met or exceeded
-
 Town/rural mix: 67% met or exceeded
 
 Urban/town/rural mix: 71% met or exceeded
+
+Entirely urban: 74% met or exceeded
 
 <br>
 
@@ -434,7 +481,7 @@ girafe(ggobj = mca.highest.ruca.plot) %>%
 
 ## RUCA Cross-tabs
 
-```{r mca math cross tabs}
+```{r mca math cross tabs ruca}
 CrossTable(master.7$Dem_Desc, master.7$MCA.M, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
 
 ```
@@ -448,11 +495,11 @@ Next lets analyze reading and RUCA categories.
 
 The p-value from the cross-tabs indicate that there is a relationship between RUCA categories and the grades received in the MCA-Reading test. Hoewever, I'm seeing every little difference here.
 
-Entirely urban: 83%
-
 Town/rural mix: 77%
 
 Urban/town/rural mix: 80%
+
+Entirely urban: 83%
 
 <br>
 
@@ -510,11 +557,11 @@ The p-value from the cross-tabs indicate that there is a relationship between RU
 
 The largest different is the town/rural mix districts where 65% of graduates have exceeded or met standards for science compared to 60% for entirely rural and 58% for urban/town/rural mix.
 
-Entirely urban: 56%
-
 Town/rural mix: 49%
 
 Urban/town/rural mix: 53%
+
+Entirely urban: 56%
 
 <br>
 
@@ -559,6 +606,193 @@ girafe(ggobj = mca.highest.science.ruca.plot) %>%
 
 ```{r mca science cross tabs}
 CrossTable(master.7$Dem_Desc, master.7$MCA.S, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+:::
+
+<br>
+
+Now let's see what it looks like by EDR.
+
+<br>
+
+## MCA - Math
+
+We will start with analyzing math and EDR categories.
+
+The p-value from the cross-tabs indicate that there is a relationship between EDR categories and the grades received in the MCA-Math test.
+
+EDR 5: 67%
+
+EDR 7E: 69%
+
+EDR 7W: 73%
+
+<br>
+
+::: panel-tabset
+## EDR Table
+
+```{r mca math summary edr}
+mca.highest.summary.edr <- master.7 %>%
+  select(edr, MCA.M) %>%
+  mutate(MCA.M = ifelse(MCA.M == 1, "D",
+                              ifelse(MCA.M == 2, "P",
+                                     ifelse(MCA.M == 3, "M",
+                                            ifelse(MCA.M == 4, "E", MCA.M)))),
+         MCA.M = fct_relevel(MCA.M, "D", "P", "M", "E")) %>%
+  group_by(edr, MCA.M) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(edr) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = as.character(seq(n())))
+
+mca.highest.edr.plot <- ggplot(mca.highest.summary.edr, aes(edr, pct, fill = MCA.M, group = MCA.M)) +
+    geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste("MCA - Math", "\nGrade: ", MCA.M, "\nNumber of students with this grade: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(position = position_dodge(width = .9), aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Student grades within EDR category for MCA - Math")+
+    scale_y_continuous(labels=scales::percent)+
+    theme_bar+
+    scale_fill_manual(values= brewer.pal(n = 5, "RdYlBu"),
+                       guide = guide_legend(ncol = 3)) +
+    theme(legend.position = "bottom",
+          text = element_text(size = 16),
+          axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = mca.highest.edr.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+```
+
+## EDR Cross-tabs
+
+```{r mca math cross tabs edr}
+CrossTable(master.7$edr, master.7$MCA.M, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+## MCA - Reading
+
+Next lets analyze reading and EDR categories.
+
+The p-value from the cross-tabs indicate that there is a relationship between EDR categories and the grades received in the MCA-Reading test. H
+
+EDR 5: 77%
+
+EDR 7E: 79%
+
+EDR 7W: 81%%
+
+<br>
+
+::: panel-tabset
+## EDR Table
+
+```{r mca read summary edr}
+mca.highest.reading.summary.edr <- master.7 %>%
+  select(edr, MCA.R) %>%
+  mutate(MCA.R = ifelse(MCA.R == 1, "D",
+                              ifelse(MCA.R == 2, "P",
+                                     ifelse(MCA.R == 3, "M",
+                                            ifelse(MCA.R == 4, "E", MCA.R)))),
+         MCA.R = fct_relevel(MCA.R, "D", "P", "M", "E")) %>%
+  group_by(edr, MCA.R) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(edr) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = as.character(seq(n())))
+
+mca.highest.reading.edr.plot <- ggplot(mca.highest.reading.summary.edr, aes(edr, pct, fill = MCA.R, group = MCA.R)) +
+    geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste("MCA - Math", "\nGrade: ", MCA.R, "\nNumber of students with this grade: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(position = position_dodge(width = .9), aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Student grades within EDR category for MCA - Reading")+
+    scale_y_continuous(labels=scales::percent)+
+    theme_bar+
+    scale_fill_manual(values= brewer.pal(n = 5, "RdYlBu"),
+                       guide = guide_legend(ncol = 3)) +
+    theme(legend.position = "bottom",
+          text = element_text(size = 16),
+          axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = mca.highest.reading.edr.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+```
+
+## EDR Cross-tabs
+
+```{r mca reading cross tabs edr}
+CrossTable(master.7$edr, master.7$MCA.R, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+```
+:::
+
+<br>
+
+## MCA - Science
+
+Next lets analyze science and EDR categories.
+
+The p-value from the cross-tabs indicate that there is a relationship between EDR categories and the grades received in the MCA-Science test.
+
+The largest different is the town/rural mix districts where 65% of graduates have exceeded or met standards for science compared to 60% for entirely rural and 58% for urban/town/rural mix.
+
+EDR 5: 56%
+
+EDR 7E: 60%
+
+EDR 7W: 55%
+
+<br>
+
+::: panel-tabset
+## EDR Table
+
+```{r mca science summary edr}
+mca.highest.science.summary.edr <- master.7 %>%
+  select(edr, MCA.S) %>%
+  mutate(MCA.S = ifelse(MCA.S == 1, "D",
+                              ifelse(MCA.S == 2, "P",
+                                     ifelse(MCA.S == 3, "M",
+                                            ifelse(MCA.S == 4, "E", MCA.S)))),
+         MCA.S = fct_relevel(MCA.S, "D", "P", "M", "E")) %>%
+  group_by(edr, MCA.S) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(edr) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = as.character(seq(n())))
+
+mca.highest.science.edr.plot <- ggplot(mca.highest.science.summary.edr, aes(edr, pct, fill = MCA.S, group = MCA.S)) +
+    geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste("MCA - Math", "\nGrade: ", MCA.S, "\nNumber of students with this grade: ", comma(n, accuracy = 1), "\nPercent of students: ", percent(pct, accuracy = .1), sep = ""))) +
+    geom_label(position = position_dodge(width = .9), aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5) +
+    labs(x="", y = "", color="", title = "Student grades within edr category for MCA - science")+
+    scale_y_continuous(labels=scales::percent)+
+    theme_bar+
+    scale_fill_manual(values= brewer.pal(n = 5, "RdYlBu"),
+                       guide = guide_legend(ncol = 3)) +
+    theme(legend.position = "bottom",
+          text = element_text(size = 16),
+          axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = mca.highest.science.edr.plot) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))
+```
+
+## EDR Cross-tabs
+
+```{r mca science cross tabs edr}
+CrossTable(master.7$edr, master.7$MCA.S, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
 ```
 :::
 

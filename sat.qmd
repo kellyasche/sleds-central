@@ -101,6 +101,14 @@ counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive
          mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
 Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
 
 color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
 
@@ -124,7 +132,7 @@ Alright, lets see what this dataset looks like. I will first import the entire d
 <br>
 
 ```{r sat original}
-sat.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/SAT/AdvancedPlacementSATPSAT_SAT.csv') %>%
+sat.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/SAT/AdvancedPlacementSATPSAT_SAT.csv') %>%
   mutate(PersonID = as.integer(PersonID))
 
 kable(head(sat.original))
@@ -166,7 +174,8 @@ Now we will join it with the master dataset.
 master.8 <- read_csv("Data/SLEDS/Masters/Master-7.csv") %>%
   mutate(PersonID) %>%
   left_join(sat.taken, by = "PersonID") %>%
-  mutate(sat.taken = ifelse(is.na(sat.taken), 0, sat.taken))
+  mutate(sat.taken = ifelse(is.na(sat.taken), 0, sat.taken),
+         Dem_Desc = fct_relevel(Dem_Desc, "Town/rural mix", "Urban/town/rural mix", "Entirely urban")) 
 
 sat.master <- read_csv("Data/SLEDS/Masters/Master-1.csv") %>%
   select(PersonID) %>%
@@ -188,7 +197,7 @@ As expected there are `r comma(master.8 %>% nrow(), accuracy = 1)` rows and `r c
 
 Lets check to see what percentage of the master dataset has taken the SAT.
 
-There is a tiny percentage of the dataset that has taken the SAT, 1.0%. With this information I don't see a need to check whether there is a significant difference in students taking the SAT based on RUCA categoriy or EDR. Even if there is a significant difference, there just isn't enough observations to make a difference.
+There is a tiny percentage of the dataset that has taken the SAT, 1.0%. With this information I don't see a need to check whether there is a significant difference in students taking the SAT based on RUCA category or EDR. Even if there is a significant difference, there just isn't enough observations to make a difference.
 
 <br>
 
