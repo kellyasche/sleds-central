@@ -4,7 +4,7 @@ editor: visual
 ---
 
 ```{r library, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(sf)
 library(ggrepel)
@@ -101,6 +101,14 @@ counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive
          mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
 Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
 
 color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
 
@@ -124,7 +132,7 @@ The next dataset is individuals that were enrolled in CTE courses. I'm first goi
 <br>
 
 ```{r cte enrollment original}
-cte.enrollment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/CTEEnrollment/CTEEnrollment.csv') %>%
+cte.enrollment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/CTEEnrollment/CTEEnrollment.csv') %>%
   mutate(PersonID = as.integer(PersonID)) %>%
   filter(FiscalYearTimeID != "NULL") %>%
   mutate(CareerCluster = ifelse(CareerCluster == "26" & CareerClusterName == "Diversified Youth Apprenticeship", "25", CareerCluster),
@@ -133,7 +141,7 @@ cte.enrollment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/Goog
          CareerCluster = as.integer(CareerCluster))
 
 
-career.cluster.codes.names.original <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/CTEEnrollment/career-cluster-codes-names_from SLEDS_March2025.xlsx') %>%
+career.cluster.codes.names.original <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/CTEEnrollment/career-cluster-codes-names_from SLEDS_March2025.xlsx') %>%
   mutate(cte.year = ifelse(Introduced > 2020, 2021, Discontinued),
          cte.year = ifelse(is.na(Introduced) & is.na(Discontinued), 2021, cte.year),
          cte.year = ifelse(is.na(cte.year), 2020, cte.year),
@@ -239,7 +247,8 @@ master.3 <- read_csv("Data/SLEDS/Masters/Master-3.csv")
 
 master.4 <- master.3 %>%
   left_join(cte.n.total.courses, by = "PersonID") %>%
-  left_join(cte.n.careercluster, by = "PersonID")
+  left_join(cte.n.careercluster, by = "PersonID") %>%
+  mutate(Dem_Desc = fct_relevel(Dem_Desc, "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
 cteenrollment.master <- master.3 %>%
   select(PersonID) %>%
@@ -415,7 +424,7 @@ Now we will take a look at the breakdown of the number of times a CTE courses ha
 
 First, lets look at the concentrations of courses taken across CareerClusters.
 
-Not surprisingly, Transportation, Distribution & Logistics was the careercluster with the highest percentage of courses taken with 20.6%. This was followed by manfacturing with 12.4% and architecture and construction with 11.2% of CTE courses taken in that CareerCluster.
+Surprisingly, agriculture, food and natural resources was the careercluster with the highest percentage of courses taken with 15.9%. This was followed by human services with 13.4% and then transportation, distribution and logistics with 12.6% of CTE courses taken in that CareerCluster.
 
 <br>
 
