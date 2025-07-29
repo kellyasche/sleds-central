@@ -4,7 +4,7 @@ editor: visual
 ---
 
 ```{r library, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(sf)
 library(ggrepel)
@@ -101,6 +101,14 @@ counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive
          mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
 Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
 
 color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
 
@@ -124,7 +132,7 @@ The next dataset to merge with the master is the enrollment in AP courses. I'm f
 <br>
 
 ```{r ap original data}
-ap.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/AP/AdvancedPlacementSATPSAT_AP.csv') %>%
+ap.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/AP/AdvancedPlacementSATPSAT_AP.csv') %>%
   mutate(PersonID = as.integer(PersonID)) %>%
   drop_na(PersonID)
 
@@ -169,7 +177,8 @@ The updated AP dataset shows that `r comma(nrow(ap.tookexam), accuracy = 1)` too
 ```{r ap join with master}
 master.3 <- read_csv("Data/SLEDS/Masters/master-2.csv") %>%
   left_join(ap.tookexam, by = "PersonID") %>%
-  mutate(ap.exam = ifelse(is.na(ap.exam), 0, ap.exam))
+  mutate(ap.exam = ifelse(is.na(ap.exam), 0, ap.exam),
+         Dem_Desc = fct_relevel(Dem_Desc, "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
 ap.master <- read_csv("Data/SLEDS/Masters/master-2.csv") %>%
   select(PersonID) %>%
@@ -211,7 +220,7 @@ datatable(ap.summary.total, class = "cell-border stripe", filter = "top", rownam
 
 Now lets check to see if there are any statistically significant differences by RUCA category.
 
-Interestingly, there was significant difference between the percentage of students who took an AP exam by their RUCA categories. Although, nearly 18.5% of all students took the AP exam, only 12.5% from town/rural mix districts took the exam compared to 19.2% from the urban/town/rural districts and 23.0% from the entirely urban districts.
+Interestingly, there was significant difference between the percentage of students who took an AP exam by their RUCA categories. The trend shows that the more urban a district is, the larger percentage of their graduates have taken the AP test - 12.5% for town/rural mix schools vs. 23% for entirely urban schools.
 
 <br>
 
@@ -244,7 +253,42 @@ CrossTable(ap.crosstabs.ruca$Dem_Desc, ap.crosstabs.ruca$ap.exam, expected = TRU
 
 <br>
 
-There is significant variation in the percent of students who've taken an AP exam across counties. It ranges from 28.6% in Sherburne to 1.0% in Wadena County.
+Now lets check to see if there are any statistically significant differences by EDR.
+
+Interestingly, there was significant difference between the percentage of students who took an AP exam by their EDR. Similar to the RUCA categories, the more urban a district is, the higher the percentage of graduates took the AP exam - 12.5% for EDR 5 vs. 23% for EDR 7W.
+
+<br>
+
+::: panel-tabset
+## EDR Table
+
+```{r table ap exam edr, echo=FALSE}
+ap.summary.edr <- master.3 %>%
+  select(edr, ap.exam) %>%
+  mutate(ap.exam = ifelse(ap.exam == 0, "Did not take AP exam", "Took AP exam")) %>%
+  tabyl(edr, ap.exam) %>%
+  mutate(percent.took.exam = `Took AP exam` / (`Did not take AP exam` + `Took AP exam`),
+         percent.took.exam = scales::percent(percent.took.exam, accuracy = .1))
+
+datatable(ap.summary.edr, class = "cell-border stripe", filter = "top", rownames = FALSE)
+  
+```
+
+## EDR Cross-tabs
+
+```{r cross tabs ap exam edr}
+ap.crosstabs.edr <- master.3 %>%
+  select(edr, ap.exam) %>%
+  mutate(ap.exam = ifelse(ap.exam == 0, "Did not take AP exam", "Took AP exam")) 
+
+CrossTable(ap.crosstabs.edr$edr, ap.crosstabs.edr$ap.exam, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+There is significant variation in the percent of students who've taken an AP exam across counties. Interestingly, Wadena County had a high percentage of graduates take the AP exam with 25% which is higher than Wright County.
 
 <br>
 
