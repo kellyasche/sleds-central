@@ -101,6 +101,14 @@ counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive
          mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
 Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
 
 color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
 
@@ -168,15 +176,6 @@ The next thing I want to do is put in the EDR and region of each of these employ
 <br>
 
 ```{r join with edr and regions}
-counties.regions.1 <- counties.regions %>%
-  mutate(statefp = "27",
-         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
-                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
-                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
-                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
-                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
-         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
-
 employment.updated <- employment.original %>%
   mutate(County = formatC(County, width = 3, flag = "0")) %>%
   left_join(counties.regions.1[,c(1,5,10)], by = c("County" = "countyfp")) 
@@ -258,12 +257,12 @@ The biggest issue is how do we get a meaningful indicator on whether they were e
 
 We will define "meaningful employment" as an employment experience in which an individual works for one particular employer for 1,000 hours worked in any given year.
 
-This will be a couple step process. First we will build a dataset that has each grad.year.x from each PersonID high school graduation year and match it with the MN employment records. We will end up with each PersonID having each grad.year.x along with wither they have a MN employment record, whether they had meaningful employment, whether grad.year.x is after 2019, or whether they have no MN employment record.
+This will be a couple step process. First we will build a dataset that has each grad.year.x from each PersonID high school graduation year and match it with the MN employment records. We will end up with each PersonID having each grad.year.x along with wither they have a MN employment record, whether they had meaningful employment, whether grad.year.x is after 2023, or whether they have no MN employment record.
 
 <br>
 
 ```{r prep filter meaningful employment step 1}
-meaningful.employer <- employment.updated %>%
+meaningful.employer <- employment.original %>%
   mutate(CalendarYear = as.integer(str_sub(TimeID, 1, 4))) %>%
   group_by(PersonID, EmploymentOrganizationID, CalendarYear) %>%
   summarize(AnnualHoursWorked = sum(EmployeeQuarterlyHoursWorked)) %>%
@@ -271,7 +270,7 @@ meaningful.employer <- employment.updated %>%
   group_by(PersonID) %>%
   ungroup() %>%
   right_join(mn.emp.record, by = c("PersonID", "CalendarYear")) %>%
-  mutate(grad.year = fct_relevel(grad.year, "grad.year.0", "grad.year.1", "grad.year.2", "grad.year.3", "grad.year.4", "grad.year.5", "grad.year.6", "grad.year.7", "grad.year.8", "grad.year.9", "grad.year.10", "grad.year.11", "grad.year.12", "grad.year.13", "grad.year.14", "grad.year.15"),
+  mutate(grad.year = fct_relevel(grad.year, "grad.year.0", "grad.year.1", "grad.year.2", "grad.year.3", "grad.year.4", "grad.year.5", "grad.year.6", "grad.year.7", "grad.year.8", "grad.year.9", "grad.year.10", "grad.year.11"),
          new.mn.emp.record = ifelse(AnnualHoursWorked > 999, "Meaningful employment", mn.emp.record),
          new.mn.emp.record = ifelse(CalendarYear > 2023, "After 2023", new.mn.emp.record),
          new.mn.emp.record = ifelse(new.mn.emp.record == "MN emp record", "MN emp record - not meaningful", new.mn.emp.record),
@@ -307,7 +306,7 @@ Now, we want to determine if the locations of meaningful employment match the co
 <br>
 
 ```{r match employment with hs regions}
-emp.original.locations <- employment.updated %>%
+emp.original.locations <- employment.original %>%
   mutate(CalendarYear = as.integer(str_sub(TimeID, 1, 4)),
          CountyName = str_replace(CountyName, " County", ""),
          CountyName = str_replace(CountyName, "Saint Louis", "St. Louis"),
@@ -316,11 +315,13 @@ emp.original.locations <- employment.updated %>%
          CountyName = str_replace(CountyName, "City of St. Paul", "Ramsey"),
          CountyName = str_replace(CountyName, "Shakopee Mdewakanton Community", "Scott"),
          CountyName = str_replace(CountyName, "White Earth Tribal Counci", "Mahnomen")) %>%
+  left_join(counties.regions.1, by = c("CountyName" = "Name")) %>%
   rename(EconomicDevelopmentRegionName = edr) %>%
-  select(PersonID, CalendarYear, EmploymentOrganizationID, EconomicDevelopmentRegionName, CountyName) %>%
-  distinct(PersonID, CalendarYear, EmploymentOrganizationID, EconomicDevelopmentRegionName, CountyName) %>%
+  select(PersonID, CalendarYear, EmploymentOrganizationID, EconomicDevelopmentRegionName, CountyName, project.pr) %>%
+  distinct(PersonID, CalendarYear, EmploymentOrganizationID, EconomicDevelopmentRegionName, CountyName, project.pr) %>%
   rename(employment.county = CountyName,
-         emp.edr = EconomicDevelopmentRegionName) %>%
+         emp.edr = EconomicDevelopmentRegionName,
+         emp.pr = project.pr) %>%
   mutate(emp.edr = str_replace(emp.edr, "  ", " "),
          emp.edr = as.factor(emp.edr),
          employment.county = str_replace(employment.county, " County", ""),
@@ -368,11 +369,11 @@ grad.emp.location.match <- grad.locations %>%
   select(-edr.match) %>%
   rename(edr.match = new.edr.match) %>%
   mutate(region.match = new.mn.emp.record,
-         new.region.match = ifelse(region.match == "Meaningful employment" & emp.edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Meaningful emp - match", region.match),
+         new.region.match = ifelse(region.match == "Meaningful employment" & emp.pr %in% c("Central"), "Meaningful emp - match", region.match),
          new.region.match = ifelse(new.region.match == "Meaningful employment", "Meaningful emp - no match", new.region.match),
          new.region.match = fct_relevel(new.region.match, "Meaningful emp - match", "Meaningful emp - no match", "MN emp record - not meaningful", "No MN emp record", "After 2023")) %>%
   select(-region.match) %>%
-  rename(region.match = new.region.match) %>% 
+  rename(region.match = new.region.match) %>%
   mutate(state.match = new.mn.emp.record,
          new.state.match = ifelse(!is.na(emp.edr) & state.match == "Meaningful employment", "Meaningful emp - match",
                                   ifelse(employment.county == "Statewide (i.e. no fixed location)" & state.match == "Meaningful employment", "Meaningful emp - match", state.match)),
@@ -440,7 +441,7 @@ matrix.states <- grad.emp.location.match %>%
 ::: panel-tabset
 ## County Match
 
-About 15% of graduates have meaningful employment in the same county as their high school starting at around 5 years after graduating. The percentage of graduates that have meaningful employment, but not in the same county as their high school grows to over a third, while the percentage of individuals with no MN employment record grows to about 25%.
+About 13% of graduates have meaningful employment in the same county as their high school starting at around 5 years after graduating. The percentage of graduates that have meaningful employment, but not in the same county as their high school grows to over a third, while the percentage of individuals with no MN employment record grows to about 25%.
 
 ```{r county match matrix}
 
@@ -470,6 +471,44 @@ county.match.matrix.table <- matrix.states %>%
   pivot_wider(names_from = grad.year, values_from = pct.state)
 
 datatable(county.match.matrix.table, class = "cell-border stripe", filter = "top", rownames = FALSE,
+          options = list(columnDefs = list(list(className = "dt-center", targets = 1:16)))) %>%
+  formatPercentage(2:17)
+
+
+```
+
+## EDR Match
+
+At 5 years after graduation, the percentage of graduates that have meaningful employment in their EDR is around 20%. The percentage with meaningful employment outside of their EDR is 28% while 24% have no MN employment record.
+
+```{r EDR match matrix}
+
+edr.match.matrix.plot <- ggplot(data = filter(matrix.states, location == "edr.match"), aes(as.numeric(grad.year) - 1, pct.state, fill = match)) +
+  geom_area() +
+  labs(x="", y = "", color="", title = "Different employment states by subsequent years after high school\ngraduation")+
+  scale_y_continuous(labels=scales::percent)+
+  scale_x_continuous(breaks = seq(0, 11, 1)) +
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 5, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 18))
+
+
+girafe(ggobj = edr.match.matrix.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))      
+
+tags$br()
+
+tags$br()
+
+edr.match.matrix.table <- matrix.states %>%
+  filter(location == "edr.match") %>%
+  select(grad.year, match, pct.state) %>%
+  pivot_wider(names_from = grad.year, values_from = pct.state)
+
+datatable(edr.match.matrix.table, class = "cell-border stripe", filter = "top", rownames = FALSE,
           options = list(columnDefs = list(list(className = "dt-center", targets = 1:16)))) %>%
   formatPercentage(2:17)
 
@@ -516,7 +555,7 @@ datatable(region.match.matrix.table, class = "cell-border stripe", filter = "top
 
 ## State Match
 
-Half the graduates have meaningful employment in Minnesota while about 30% have no MN employment record.
+Half the graduates have meaningful employment in Minnesota while about 24% have no MN employment record.
 
 ```{r MN match matrix}
 
