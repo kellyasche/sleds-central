@@ -4,7 +4,7 @@ editor: visual
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(sf)
 library(ggrepel)
@@ -101,6 +101,15 @@ counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive
          mif = fct_relevel(mif, "NW", "NE", "WC", "EC", "SW", "SE", "TC"),
 Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
 
 color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
 
@@ -167,14 +176,6 @@ The next thing I want to do is put in the EDR and region of each of these employ
 <br>
 
 ```{r join with edr and regions}
-counties.regions.1 <- counties.regions %>%
-  mutate(statefp = "27",
-         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
-                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
-                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
-                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
-                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
-         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
 
 employment.updated <- employment.original %>%
   mutate(County = formatC(County, width = 3, flag = "0")) %>%
@@ -355,6 +356,8 @@ The dataset above provides only PersonIDs that had meaningful employment for at 
 
 Now we want to merge this with all the PersonID from the master dataset so we end up with a list that has each PersonID, a column that represents grad year, and grad year +2 and +7, and confirmation on whether they had meaninful employment during those years.
 
+<br>
+
 ```{r meaningful employment merge with master personid}
 master.personid.meaningful.emp <- meaningful.emp.grad.years %>%
   select(PersonID, grad.years, meaningful.emp) %>%
@@ -402,7 +405,7 @@ Here are the columns and labels that I need;
 <br>
 
 ```{r match employment with hs regions}
-emp.original.locations <- employment.updated %>%
+emp.original.locations <- employment.original %>%
   mutate(CalendarYear = as.integer(str_sub(TimeID, 1, 4)),
          CountyName = str_replace(CountyName, " County", ""),
          CountyName = str_replace(CountyName, "Saint Louis", "St. Louis"),
@@ -411,11 +414,13 @@ emp.original.locations <- employment.updated %>%
          CountyName = str_replace(CountyName, "City of St. Paul", "Ramsey"),
          CountyName = str_replace(CountyName, "Shakopee Mdewakanton Community", "Scott"),
          CountyName = str_replace(CountyName, "White Earth Tribal Counci", "Mahnomen")) %>%
-  select(PersonID, CalendarYear, EmploymentOrganizationID, CountyName, edr, project.pr) %>% 
-  distinct(PersonID, CalendarYear, EmploymentOrganizationID, CountyName, edr, project.pr) %>%
+  left_join(counties.regions.1, by = c("CountyName" = "Name")) %>%
+  rename(EconomicDevelopmentRegionName = edr) %>%
+  select(PersonID, CalendarYear, EmploymentOrganizationID, EconomicDevelopmentRegionName, CountyName, project.pr) %>%
+  distinct(PersonID, CalendarYear, EmploymentOrganizationID, EconomicDevelopmentRegionName, CountyName, project.pr) %>%
   rename(employment.county = CountyName,
-         emp.edr = edr,
-         emp.region = project.pr) %>%
+         emp.edr = EconomicDevelopmentRegionName,
+         emp.pr = project.pr) %>%
   mutate(emp.edr = str_replace(emp.edr, "  ", " "),
          emp.edr = as.factor(emp.edr),
          employment.county = str_replace(employment.county, " County", ""),
@@ -431,20 +436,22 @@ emp.original.locations <- employment.updated %>%
 meaningful.emp.locations <- meaningful.emp.grad.years %>%
   left_join(emp.original.locations, by = c("PersonID", "year" = "CalendarYear", "EmploymentOrganizationID")) %>%
   mutate(emp.edr = ifelse(employment.county == "Statewide (i.e. no fixed location)", "Unknown", as.character(emp.edr)),
-         emp.Dem_Desc = ifelse(employment.county == "Statewide (i.e. no fixed location)", "Unknown", emp.Dem_Desc),
+         emp.Dem_Desc = ifelse(employment.county == "Statewide (i.e. no fixed location)", "Unknown", as.character(emp.Dem_Desc)),
          emp.edr = ifelse(employment.county == "Hennepin", "EDR 11 - 7 County Twin Cities", emp.edr),
          emp.edr = ifelse(employment.county == "Ramsey", "EDR 11 - 7 County Twin Cities", emp.edr),
          emp.edr = ifelse(employment.county == "St. Louis", "EDR 3 - Arrowhead", emp.edr),
          emp.edr = ifelse(employment.county == "Unknown", "Unknown", emp.edr),
-         emp.Dem_Desc = ifelse(employment.county == "Unknown", "Unknown", emp.Dem_Desc),
-         emp.Dem_Desc = ifelse(employment.county == "NULL", "NULL", emp.Dem_Desc),
+         emp.Dem_Desc = ifelse(employment.county == "Unknown", "Unknown", as.character(emp.Dem_Desc)),
+         emp.Dem_Desc = ifelse(employment.county == "NULL", "NULL", as.character(emp.Dem_Desc)),
          emp.edr = ifelse(employment.county == "Mahnomen", "EDR 2 - Headwaters", emp.edr))
 
 grad.locations <- read_csv("Data/SLEDS/Masters/Master-10.csv") %>%
-  select(PersonID, county.name, Dem_Desc, edr) %>%
+  mutate(planning.region = "Central") %>%
+  select(PersonID, county.name, Dem_Desc, edr, planning.region) %>%
   rename(hs.county.name = county.name,
          hs.Dem_Desc = Dem_Desc,
-         hs.edr = edr)
+         hs.edr = edr,
+         hs.planning.region = planning.region)
 
 grad.emp.location.match <- grad.locations %>%
   right_join(meaningful.emp.locations, by = "PersonID") %>%
@@ -452,10 +459,9 @@ grad.emp.location.match <- grad.locations %>%
                                ifelse(employment.county %in%  c("Unknown", "Statewide (i.e. no fixed location)"), 0, -1)),
          edr.match = ifelse(emp.edr == hs.edr, 1,
                             ifelse(emp.edr == "Unknown", 0, -1)),
-         region.match = ifelse(emp.edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), 1,
+         region.match = ifelse(emp.pr %in% c("Central"), 1,
                                ifelse(emp.edr == "Unknown", 0, -1)),
-         state.match = 1) %>%
-  group_by() %>%
+         state.match = 1) %>% 
   group_by(PersonID, grad.years) %>%
   summarize(county.match = max(county.match),
          edr.match = max(edr.match),
@@ -527,8 +533,10 @@ kable(head(master.personid.grad.emp.location.match))
 
 Next we need to find a way to compare the CTE careerclusters with the actual industry from which they work. We are not able to compare majors which is a bummer. But, the careerclusters from CTE coursework does align somewhat with NAICS codes. Here's what it looks like;
 
+<br>
+
 ```{r career cluster and naics crosswalk table}
-careercluster.naics.cw <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY25/OHE Journey to meaningful employment/Data/SLEDS/Employment/career-cluster-naics.xlsx') %>%
+careercluster.naics.cw <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/Employment/career-cluster-naics.xlsx') %>%
   rename(cw.CareerCluster = `Career cluster code`,
          cw.CareerClusterName = `Career Cluster`,
          cw.emp.ind.code = 3,
@@ -630,11 +638,14 @@ kable(head(master.personid.grad.cc.cw.naics))
 
 The dataset above provides each PersonID with meaningful employment in the master dataset and whether they took a CTE course that matches the industry in which they worked at any of the grad years. There are `r comma(nrow(grad.cc.cw.naics))` rows and `r comma(ncol(grad.cc.cw.naics))` columns.
 
+<br>
+
 ```{r merge with master}
 master.10 <- read_csv("Data/SLEDS/Masters/Master-10.csv")
 
 master.11 <- master.10 %>%
-  left_join(master.personid.grad.cc.cw.naics, by = "PersonID")
+  left_join(master.personid.grad.cc.cw.naics, by = "PersonID") %>%
+  mutate(Dem_Desc = fct_relevel(Dem_Desc, "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
 
 kable(names(master.11))
 
@@ -769,6 +780,81 @@ CrossTable(summary.mn.emp.record.grad.year.7.ct.ruca$Dem_Desc, summary.mn.emp.re
 
 <br>
 
+Next let's break it down by EDR.
+
+The cross tabs indicate a relationship between EDR and percentage of individuals that have a MN employment record for each graduation year time frame. However, after reviewing the percentages I'm not seeing any important differences.
+
+<br>
+
+::: panel-tabset
+## EDR - Chart
+
+```{r mn employment record edr}
+summary.mn.emp.record.edr <- master.11 %>%
+  select(PersonID, edr, mn.emp.record.hs.grad.year, mn.emp.record.hs.grad.year.2, mn.emp.record.hs.grad.year.7) %>%
+  gather(key = "grad.year", value = "mn.emp.record", 3:5) %>%
+  group_by(grad.year, edr, mn.emp.record) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(edr, grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  complete(edr, grad.year, mn.emp.record, fill = list(n = 0, pct = 0)) %>%
+  mutate(data_id = as.character(seq(n())),
+         grad.year = ifelse(grad.year == "mn.emp.record.hs.grad.year", "Grad year",
+                            ifelse(grad.year == "mn.emp.record.hs.grad.year.2", "Grad year + 2", "Grad year +7")))
+
+summary.mn.emp.record.edr.plot <- ggplot(summary.mn.emp.record.edr, aes(grad.year, pct, fill = mn.emp.record, group = mn.emp.record)) +
+  facet_wrap(~edr, ncol = 2) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(grad.year, "\n", mn.emp.record, "\nPercent: ", percent(pct, accuracy = .1), sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5, position = position_dodge(width = .9)) +
+  labs(x="", y = "", color="", title = "Percent with MN employment record by year after graduation")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 5, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 16),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = summary.mn.emp.record.edr.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))      
+
+```
+
+## EDR - Cross-tabs
+
+```{r mn emp record summary edr crosstabs}
+summary.mn.emp.record.ct.edr <- master.11 %>%
+  select(edr, mn.emp.record.hs.grad.year, mn.emp.record.hs.grad.year.2, mn.emp.record.hs.grad.year.7) %>%
+  gather(key = "grad.year", value = "mn.emp.record", 2:4) %>%
+  mutate(edr = str_sub(edr, 1, 6)) %>%
+  mutate(grad.year = as.factor(grad.year),
+         edr = as.factor(edr),
+         mn.emp.record = as.factor(mn.emp.record))
+
+summary.mn.emp.record.grad.year.ct.edr <- summary.mn.emp.record.ct.edr %>%
+  filter(grad.year == "mn.emp.record.hs.grad.year")
+
+CrossTable(summary.mn.emp.record.grad.year.ct.edr$edr, summary.mn.emp.record.grad.year.ct.edr$mn.emp.record, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+summary.mn.emp.record.grad.year.2.ct.edr <- summary.mn.emp.record.ct.edr %>%
+  filter(grad.year == "mn.emp.record.hs.grad.year.2")
+
+CrossTable(summary.mn.emp.record.grad.year.2.ct.edr$edr, summary.mn.emp.record.grad.year.2.ct.edr$mn.emp.record, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+summary.mn.emp.record.grad.year.7.ct.edr <- summary.mn.emp.record.ct.edr%>%
+  filter(grad.year == "mn.emp.record.hs.grad.year.7")
+
+CrossTable(summary.mn.emp.record.grad.year.7.ct.edr$edr, summary.mn.emp.record.grad.year.7.ct.edr$mn.emp.record, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
 # Summary - meaningful employment
 
 First, let's check to see what percentage of individuals in the dataset had "meaningful" employment. This is defined as and individual having worked for an employer for 1,000 or more hours in any given year with that employer.
@@ -888,6 +974,78 @@ CrossTable(data.7$Dem_Desc, data.7$meaningful.emp.hs.grad.year.7, expected = TRU
 
 <br>
 
+Next lets check to see what this looks like by EDR.
+
+The cross tabs indicate a relationship. The biggest difference is that EDR 5 has a significantly lower percentage of graduates that have meaningful employment 7 years after graduation - 60% compared to 64% for EDR 7W.
+
+<br>
+
+::: panel-tabset
+## EDR - chart
+
+```{r summary meaningful emp edr}
+summary.meaningful.emp.edr <- master.11 %>%
+  select(edr, meaningful.emp.hs.grad.year, meaningful.emp.hs.grad.year.2, meaningful.emp.hs.grad.year.7) %>%
+  gather(key = "grad.year", value = "meaningful.emp", 2:4) %>%
+  filter(meaningful.emp != "After 2023") %>%
+  group_by(edr, grad.year, meaningful.emp) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(edr, grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  complete(grad.year, meaningful.emp, fill = list(n = 0, pct = 0)) %>%
+  mutate(data_id = as.character(seq(n())),
+         grad.year = ifelse(grad.year == "meaningful.emp.hs.grad.year", "Grad year",
+                            ifelse(grad.year == "meaningful.emp.hs.grad.year.2", "Grad year + 2", "Grad year +7")))
+
+summary.meaningful.emp.edr.plot <- ggplot(summary.meaningful.emp.edr, aes(grad.year, pct, fill = meaningful.emp, group = meaningful.emp)) +
+  facet_wrap(~edr, ncol = 2) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(grad.year, "\n", meaningful.emp, "\nPercent: ", percent(pct, accuracy = .1), sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "black", size = 5, position = position_dodge(width = .9)) +
+  labs(x="", y = "", color="", title = "Percent with meaningful employment by year after graduation")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 5, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 16),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = summary.meaningful.emp.edr.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))  
+
+```
+
+## EDR - cross-tabs
+
+```{r summary meaningful emp crosstabs edr}
+data <- master.11 %>%
+  select(edr, meaningful.emp.hs.grad.year) %>%
+  filter(meaningful.emp.hs.grad.year != "After 2023")
+
+data.2 <- master.11 %>%
+  select(edr, meaningful.emp.hs.grad.year.2) %>%
+  filter(meaningful.emp.hs.grad.year.2 != "After 2023")
+
+data.7 <- master.11 %>%
+  select(edr, meaningful.emp.hs.grad.year.7) %>%
+  filter(meaningful.emp.hs.grad.year.7 != "After 2023")
+
+
+CrossTable(data$edr, data$meaningful.emp.hs.grad.year, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.2$edr, data.2$meaningful.emp.hs.grad.year.2, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.7$edr, data.7$meaningful.emp.hs.grad.year.7, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
 # Summary - matching employment locations and high school locations
 
 First we will summarize the percentage of students that had an employment instance in a location that matches their high school graduation. We will only use PersonID that had meaningful employment for the following summaries.
@@ -896,7 +1054,7 @@ We will begin with counties, then look at EDR, planning region, employed within 
 
 <br>
 
-## High school grad and employment instance match
+## County employment match
 
 First, let's look what percentage of individuals had an employment instance where the employer was located in the same county as their high school.
 
@@ -951,10 +1109,12 @@ Crosstabs indicate a relationship.
 
 -   hs.grad.year.7: Same as previous years - 19.5% for town/rural mix vs. 10.3% for entirely urban.
 
--   <br>
+<br>
+
+### RUCA Cross tabs
 
 ::: panel-tabset
-## RUCA - Chart pct
+#### RUCA - Chart pct
 
 ```{r summary chart employed in county by ruca}
 
@@ -991,7 +1151,7 @@ girafe(ggobj = match.region.summary.total.county.ruca.plot, width_svg = 10, heig
                  opts_sizing(rescale = FALSE)) 
 ```
 
-## RUCA - cross-tabs
+#### RUCA - cross-tabs
 
 ```{r summary cross tabs employed in county by ruca}
 data <- master.11 %>%
@@ -1017,7 +1177,279 @@ CrossTable(data.7$Dem_Desc, data.7$hs.grad.year.7.county.match, expected = TRUE,
 
 <br>
 
-## Region grad location and employment match
+### EDR Cross tabs
+
+Next, let's check the differences by EDR.
+
+Crosstabs indicate a relationship. The biggest differnce is that EDR 7E has a significantly lower percentage of graduates that have meaninful employment in their county each year after graduating high school. By 7 years after graduating, only 11.6% have meaningful employment in their county compared to 20% in EDR 5, and 19% in EDR 7W.
+
+-   <br>
+
+::: panel-tabset
+#### EDR - Chart pct
+
+```{r summary chart employed in county by edr}
+
+match.region.summary.total.county.edr <- master.11 %>%
+  select(edr, hs.grad.year.county.match, hs.grad.year.2.county.match, hs.grad.year.7.county.match) %>%
+  gather(key = "hs.grad.year", value = "county.match", 2:4) %>%
+  filter(county.match != "After 2023") %>%
+  group_by(edr, hs.grad.year, county.match) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(edr, hs.grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = seq(n()),
+         hs.grad.year = str_sub(hs.grad.year, 1, 14),
+         hs.grad.year = str_replace(hs.grad.year, "hs.grad.year.c", "hs.grad.year"))
+
+match.region.summary.total.county.edr.plot <- ggplot(match.region.summary.total.county.edr, aes(hs.grad.year, pct, fill = county.match, group = county.match)) +
+  facet_wrap(~edr, ncol = 2) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(edr, "\n", hs.grad.year, "\nEmployment match high school county? - ", county.match, sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "white", size = 5, position = position_dodge(width = .9)) +
+  coord_flip() +
+  labs(x="", y = "", color="", title = "Percent of individuals with meaningful employment in high school county")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 18))
+
+
+girafe(ggobj = match.region.summary.total.county.edr.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+```
+
+#### EDR - cross-tabs
+
+```{r summary cross tabs employed in county by edr}
+data <- master.11 %>%
+  select(edr, hs.grad.year.county.match) %>%
+  filter(hs.grad.year.county.match != "After 2023")
+
+data.2 <- master.11 %>%
+  select(edr, hs.grad.year.2.county.match) %>%
+  filter(hs.grad.year.2.county.match != "After 2023")
+
+data.7 <- master.11 %>%
+  select(edr, hs.grad.year.7.county.match) %>%
+  filter(hs.grad.year.7.county.match != "After 2023")
+
+CrossTable(data$edr, data$hs.grad.year.county.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.2$edr, data.2$hs.grad.year.2.county.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.7$edr, data.7$hs.grad.year.7.county.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+```
+:::
+
+<br>
+
+## EDR employment match
+
+Next we will look at the percentage of individuals that have meaningful employment in the EDR the year they graduate, two years after graduating, and seven years after graduating.
+
+The chart below shows that 15.5% of individuals in the main dataset had meaningful employment in the edr the year of graduation. The percent increases to 25.3% of individuals seven years after graduating. All "After 2023" individuals were taken out.
+
+<br>
+
+```{r summary employment in edr match total}
+match.edr.summary.total.edr <- master.11 %>%
+  select(PersonID, hs.grad.year.edr.match, hs.grad.year.2.edr.match, hs.grad.year.7.edr.match) %>%
+  gather(key = "hs.grad.year", value = "edr.match", 2:4) %>%
+  filter(edr.match != "After 2023") %>%
+  group_by(hs.grad.year, edr.match) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(hs.grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = seq(n()),
+         hs.grad.year = str_sub(hs.grad.year, 1, 14),
+         hs.grad.year = str_replace(hs.grad.year, "hs.grad.year.e", "hs.grad.year"))
+
+match.edr.summary.total.edr.plot <- ggplot(match.edr.summary.total.edr, aes(hs.grad.year, pct, fill = edr.match, group = edr.match)) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(hs.grad.year, "\nEmployment match high school edr? - ", edr.match, sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "white", size = 5, position = position_dodge(width = .9)) +
+  coord_flip() +
+  labs(x="", y = "", color="", title = "Percent of individuals with meaningful employment in edr")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 18))
+
+
+girafe(ggobj = match.edr.summary.total.edr.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))      
+
+```
+
+<br>
+
+### RUCA Cross-tabs
+
+Next let's analyze by RUCA.
+
+Relationship confirmed for each timeyearX.
+
+Interestingly, it shows that the more rural districts have a higher percentage of graduates that have meaningful employment in their EDR. By seven years after graduating, 17% of town/rural mix graduates had meaningful employment, compared to 16% for urban/town/rural mix, and 12.3% for entirely urban.
+
+<br>
+
+::: panel-tabset
+#### RUCA - chart
+
+```{r summary edr location match by ruca}
+match.edr.summary.ruca.edr <- master.11 %>%
+  select(Dem_Desc, hs.grad.year.edr.match, hs.grad.year.2.edr.match, hs.grad.year.7.edr.match) %>%
+  gather(key = "hs.grad.year", value = "edr.match", 2:4) %>%
+  filter(edr.match != "After 2023") %>%
+  group_by(Dem_Desc, hs.grad.year, edr.match) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(Dem_Desc, hs.grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = seq(n()),
+         hs.grad.year = str_sub(hs.grad.year, 1, 14),
+         hs.grad.year = str_replace(hs.grad.year, "hs.grad.year.r", "hs.grad.year"))
+
+match.edr.summary.ruca.edr.plot <- ggplot(match.edr.summary.ruca.edr, aes(hs.grad.year, pct, fill = edr.match, group = edr.match)) +
+  facet_wrap(~Dem_Desc, ncol = 2) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(hs.grad.year, "\nEmployment match high school edr? - ", edr.match, sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "white", size = 5, position = position_dodge(width = .9)) +
+  coord_flip() +
+  labs(x="", y = "", color="", title = "Percent of individuals with meaningful employment in edr")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 18))
+
+
+girafe(ggobj = match.edr.summary.ruca.edr.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))      
+
+
+```
+
+#### RUCA - cross-tabs
+
+```{r summary edr location match by ruca cross tabs}
+data <- master.11 %>%
+  select(Dem_Desc, hs.grad.year.edr.match) %>%
+  filter(hs.grad.year.edr.match != "After 2023")
+
+data.2 <- master.11 %>%
+  select(Dem_Desc, hs.grad.year.2.edr.match) %>%
+  filter(hs.grad.year.2.edr.match != "After 2023")
+
+data.7 <- master.11 %>%
+  select(Dem_Desc, hs.grad.year.7.edr.match) %>%
+  filter(hs.grad.year.7.edr.match != "After 2023")
+
+
+CrossTable(data$Dem_Desc, data$hs.grad.year.edr.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.2$Dem_Desc, data.2$hs.grad.year.2.edr.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.7$Dem_Desc, data.7$hs.grad.year.7.edr.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+
+
+```
+:::
+
+<br>
+
+### EDR Cross-tabs
+
+Next let's analyze by EDR.
+
+Relationship confirmed for each timeyearX.
+
+Interestingly, it shows that the more rural districts have a higher percentage of graduates that have meaningful employment in their EDR. By seven years after graduating, 17% of town/rural mix graduates had meaningful employment, compared to 16% for urban/town/rural mix, and 12.3% for entirely urban.
+
+<br>
+
+::: panel-tabset
+#### EDR - chart
+
+```{r summary edr location match by edr}
+match.edr.summary.edr.edr <- master.11 %>%
+  select(edr, hs.grad.year.edr.match, hs.grad.year.2.edr.match, hs.grad.year.7.edr.match) %>%
+  gather(key = "hs.grad.year", value = "edr.match", 2:4) %>%
+  filter(edr.match != "After 2023") %>%
+  group_by(edr, hs.grad.year, edr.match) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(edr, hs.grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = seq(n()),
+         hs.grad.year = str_sub(hs.grad.year, 1, 14),
+         hs.grad.year = str_replace(hs.grad.year, "hs.grad.year.r", "hs.grad.year"))
+
+match.edr.summary.edr.edr.plot <- ggplot(match.edr.summary.edr.edr, aes(hs.grad.year, pct, fill = edr.match, group = edr.match)) +
+  facet_wrap(~edr, ncol = 2) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(hs.grad.year, "\nEmployment match high school edr? - ", edr.match, sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "white", size = 5, position = position_dodge(width = .9)) +
+  coord_flip() +
+  labs(x="", y = "", color="", title = "Percent of individuals with meaningful employment in edr")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 18))
+
+
+girafe(ggobj = match.edr.summary.edr.edr.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))      
+
+
+```
+
+#### EDR - cross-tabs
+
+```{r summary edr location match by edr cross tabs}
+data <- master.11 %>%
+  select(edr, hs.grad.year.edr.match) %>%
+  filter(hs.grad.year.edr.match != "After 2023")
+
+data.2 <- master.11 %>%
+  select(edr, hs.grad.year.2.edr.match) %>%
+  filter(hs.grad.year.2.edr.match != "After 2023")
+
+data.7 <- master.11 %>%
+  select(edr, hs.grad.year.7.edr.match) %>%
+  filter(hs.grad.year.7.edr.match != "After 2023")
+
+
+CrossTable(data$edr, data$hs.grad.year.edr.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.2$edr, data.2$hs.grad.year.2.edr.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.7$edr, data.7$hs.grad.year.7.edr.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+
+
+```
+:::
+
+<br>
+
+## Region employment match
 
 Next we will look at the percentage of individuals that have meaningful employment in the research region the year they graduate, two years after graduating, and seven years after graduating.
 
@@ -1061,6 +1493,8 @@ girafe(ggobj = match.region.summary.total.region.plot, width_svg = 10, height_sv
 
 <br>
 
+### RUCA Cross-tabs
+
 Next let's analyze by RUCA.
 
 Relationship confirmed for two years and seven years after graduating high school.
@@ -1070,7 +1504,7 @@ The chart has the exact same pattern as the percentage of students that work in 
 <br>
 
 ::: panel-tabset
-## RUCA - chart
+#### RUCA - chart
 
 ```{r summary region location match by ruca}
 match.region.summary.ruca.region <- master.11 %>%
@@ -1108,7 +1542,7 @@ girafe(ggobj = match.region.summary.ruca.region.plot, width_svg = 10, height_svg
 
 ```
 
-## RUCA - cross-tabs
+#### RUCA - cross-tabs
 
 ```{r summary region location match by ruca cross tabs}
 data <- master.11 %>%
@@ -1129,6 +1563,84 @@ CrossTable(data$Dem_Desc, data$hs.grad.year.region.match, expected = TRUE, prop.
 CrossTable(data.2$Dem_Desc, data.2$hs.grad.year.2.region.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
 
 CrossTable(data.7$Dem_Desc, data.7$hs.grad.year.7.region.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+
+
+```
+:::
+
+<br>
+
+### EDR Cross-tabs
+
+Next let's analyze by EDR.
+
+Relationship confirmed for two years and seven years after graduating high school.
+
+The chart shows that EDR 5 has a significantly higher percentage of graduates that have meaningful employment in the region compared to the other EDRs. By seven years after graduating high school, 35.2% of the graduates from EDR 5 had meaningful employment in Central Minnesota compared to 24.5% for EDR 7E and 30% from EDR 7W.
+
+<br>
+
+::: panel-tabset
+#### EDR - chart
+
+```{r summary region location match by edr}
+match.region.summary.edr.region <- master.11 %>%
+  select(edr, hs.grad.year.region.match, hs.grad.year.2.region.match, hs.grad.year.7.region.match) %>%
+  gather(key = "hs.grad.year", value = "region.match", 2:4) %>%
+  filter(region.match != "After 2023") %>%
+  group_by(edr, hs.grad.year, region.match) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(edr, hs.grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = seq(n()),
+         hs.grad.year = str_sub(hs.grad.year, 1, 14),
+         hs.grad.year = str_replace(hs.grad.year, "hs.grad.year.r", "hs.grad.year"))
+
+match.region.summary.edr.region.plot <- ggplot(match.region.summary.edr.region, aes(hs.grad.year, pct, fill = region.match, group = region.match)) +
+  facet_wrap(~edr, ncol = 2) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(hs.grad.year, "\nEmployment match high school region? - ", region.match, sep = ""))) +
+  geom_label(aes(label = percent(pct, accuracy = .1)), show.legend = FALSE, color = "white", size = 5, position = position_dodge(width = .9)) +
+  coord_flip() +
+  labs(x="", y = "", color="", title = "Percent of individuals with meaningful employment in region")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu"),
+                    guide = guide_legend(ncol = 3)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 18))
+
+
+girafe(ggobj = match.region.summary.edr.region.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))      
+
+
+```
+
+#### EDR - cross-tabs
+
+```{r summary region location match by edr cross tabs}
+data <- master.11 %>%
+  select(edr, hs.grad.year.region.match) %>%
+  filter(hs.grad.year.region.match != "After 2023")
+
+data.2 <- master.11 %>%
+  select(edr, hs.grad.year.2.region.match) %>%
+  filter(hs.grad.year.2.region.match != "After 2023")
+
+data.7 <- master.11 %>%
+  select(edr, hs.grad.year.7.region.match) %>%
+  filter(hs.grad.year.7.region.match != "After 2023")
+
+
+CrossTable(data$edr, data$hs.grad.year.region.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.2$edr, data.2$hs.grad.year.2.region.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
+
+CrossTable(data.7$edr, data.7$hs.grad.year.7.region.match, expected = TRUE, prop.t = FALSE, prop.c = FALSE, prop.chisq = FALSE)
 
 
 
