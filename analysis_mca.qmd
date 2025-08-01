@@ -804,27 +804,51 @@ The analysis above shows that the following variables would likely provide high 
 
 *Demographics*
 
--   Keep all - no modifications
+-   Eliminate:
+    -   LimitedEnglishProficiency
+    -   HomelessIndicator
+-   Modify
+    -   None
 
 *High school characteristics*
 
--   Keep all - no modifications
+-   Eliminate:
+    -   None
+-   Modify
+    -   None
 
 *High school accomplishments:*
 
--   Keep all - no modifications
+-   Eliminate
+    -   SAT.taken
+-   Modify
+    -   None
 
 *Post secondary*
 
--   Keep all - modify following
-    -   ps.grad.InstitutionSector: categories 2, 10, 11 & NA become "11"
-    -   highest.cred.level: categories Master's degree or higher and Bachelor's degree become "Bachelor's degree or higher".
+-   Eliminate
+    -   None
+-   Modify
+    -   ps.grad.InstitutionSector: collapse the following categories into one labeled as "11"
+        -   2 - private, not-for-profit, 4-year or above
+        -   3 - Private for-profit, 4-year or above
+        -   5 - Private, not-for-profit 2-year
+        -   6 - Private for-profit, 2-year
+        -   7 - Public, less than 2-year
+        -   8 - Private not-for-profit less than 2-year
+        -   9 - Private for-profit, less-than 2-year
+        -   10 - multiple sectors
+        -   NA
+    -   highest.cred.level: collapse the following into one labeled as "Bachelor degree or higher"
+        -   Bachelor degree
+        -   Master degree or higher
 
 <br>
 
 ```{r final master}
-master.final.after.mca <- master.ind.qual.var %>%
-  mutate(ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector %in% c("2", "10", "11") | is.na(ps.grad.InstitutionSector), "11", ps.grad.InstitutionSector),
+master.final.after.mca <- master.original %>%
+  select(-LimitedEnglishProficiencyIndicator, -HomelessIndicator, sat.taken) %>%
+  mutate(ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector %in% c("2", "3", "5", "6", "7", "8", "9", "10", "11") | is.na(ps.grad.InstitutionSector), "11", ps.grad.InstitutionSector),
          highest.cred.level = ifelse(highest.cred.level %in% c("Bachelor degree", "Master degree or higher"), "Bachelor degree or higher", as.character(highest.cred.level)))
 
 
