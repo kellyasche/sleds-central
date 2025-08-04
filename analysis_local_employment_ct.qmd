@@ -130,11 +130,11 @@ mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasch
 ```
 
 ```{r master dataset}
-master.original <- read_csv("Data/SLEDS/Masters/Master-final-after-mca.csv")
+master.original <- read_csv("Data/SLEDS/Masters/After analysis/Master-final-after-mca.csv")
 
 master.factor.names <- master.original %>%
-  select(grad.year.)
-
+  select(grad.year.covid, )
+names(master.factor.names)
 master.states <- read_csv("Data/SLEDS/Masters/States/annual-seven-states.csv") %>%
   filter(grad.year %in% c("grad.year.1", "grad.year.5", "grad.year.10")) %>%
   select(PersonID, grad.year, states) %>%

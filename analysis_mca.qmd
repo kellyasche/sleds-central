@@ -851,6 +851,8 @@ master.final.after.mca <- master.original %>%
   mutate(ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector %in% c("2", "3", "5", "6", "7", "8", "9", "10", "11") | is.na(ps.grad.InstitutionSector), "11", ps.grad.InstitutionSector),
          highest.cred.level = ifelse(highest.cred.level %in% c("Bachelor degree", "Master degree or higher"), "Bachelor degree or higher", as.character(highest.cred.level)))
 
+names(master.final.after.mca)
+
 write_csv(master.final.after.mca, "Data/SLEDS/Masters/After analysis/Master-final-after-mca.csv")
 
 ```
