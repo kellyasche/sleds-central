@@ -131,7 +131,7 @@ mn_counties <- st_read('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasch
 ```
 
 ```{r master original}
-master.original <- read_csv("Data/SLEDS/Masters/Master.csv")
+master.original <- read_csv("Data/SLEDS/Masters/Master-final-after-mca.csv")
 
 ```
 
@@ -141,13 +141,14 @@ There are many paths in which an individual can take after graduating high schoo
 
 The paths that we want to identify are the following;
 
-1.  Meaningful employment - same county as high school
-2.  Meaningful employment - same EDR as high school, but not the same county
-3.  Meaningful employment - in NE Minnesota, but not in the same EDR as their high school
-4.  Meaningful employment - in Minnesota, but not in Northeast Minnesota
-5.  Not meaningful employment or no MN Employment record - attending post-secondary
-6.  Not meaningful employment - not attending post-secondary
-7.  No MN employment record - not attending post-secondary
+1.  Meaningful employment
+    1.  Meaningful employment - same county as high school
+    2.  Meaningful employment - same EDR as high school, but not the same county
+    3.  Meaningful employment - in Central Minnesota, but not in the same EDR as their high school
+    4.  Meaningful employment - in Minnesota, but not in Central Minnesota
+2.  Not meaningful employment or no MN Employment record - attending post-secondary
+3.  Not meaningful employment - not attending post-secondary
+4.  No MN employment record - not attending post-secondary
 
 We are going to assess each PersonID on which of those pathways they are at the time of their high school graduation, and each subsequent year up to 2023.
 
@@ -180,7 +181,7 @@ The employment states dataset has `r comma(nrow(master.emp.states.yearly))` rows
 -   Meaningful employment - no geographic match
 -   Has MN emp record - not meaningful employment
 -   Has no MN employment record
--   the grad.year.x is after 2019.
+-   the grad.year.x is after 2023.
 
 Ultimately we want a dataset that has this information paired together with whether the PersonID was attending a post-secondary institution at each grad.year.x. So let's prep that data.
 
@@ -193,7 +194,7 @@ Okay, lets check out the National Student Clearinghouse enrollment data.
 <br>
 
 ```{r nsc enrollment originals, echo=TRUE}
-grads <- read_csv("Data/SLEDS/Masters/Master.csv") %>%
+grads <- read_csv("Data/SLEDS/Masters//After analysis/Master-final-after-mca.csv") %>%
   select(PersonID)
 
 nsc.enrollment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/NSCEnrollment/NSC_Enrollments.csv') %>%
@@ -338,7 +339,7 @@ seven.states <- ps.emp.states %>%
          states = ifelse(states == "0", "After 2023", states),
          states = ifelse(states == "1", "Meaningful emp County", states),
          states = ifelse(states == "2", "Meaningful emp EDR", states),
-         states = ifelse(states == "3", "Meaningful emp NE", states),
+         states = ifelse(states == "3", "Meaningful emp region", states),
          states = ifelse(states == "4", "Meaningful emp MN", states),
          states = ifelse(states == "5", "Attending ps", states),
          states = ifelse(states == "6", "Not meaningful, not attending ps", states),
@@ -349,9 +350,6 @@ seven.states <- ps.emp.states %>%
 kable(head(seven.states))
 
 kable(names(seven.states))
-
-
-write_csv(seven.states, "Data/SLEDS/Masters/States/annual-seven-states.csv")
 ```
 
 <br>
@@ -366,16 +364,16 @@ The new dataset has `r comma(nrow(seven.states))` rows and `r comma(ncol(seven.s
 6.  Not meaningful, not attending ps: this means they do have a MN employment record, but it isn't meaningful and they are not attending post-secondary.
 7.  No MN emp record - not attending ps: this means they do not have a MN employment record nor are they attending a post-secondary institution.
 
-The other designation is "After 2019" which will be filtered out whenever I analyze the dataset.
+The other designation is "After 2023" which will be filtered out whenever I analyze the dataset.
 
 Let's first take a look at the proportion of individuals that are in each state at each grad.year.x.
 
 The chart below shows the proportion of individuals in the dataset that are in each "state/path" for each grad.year.x. There are a couple of things to highlight.
 
-1.  The percentage of individuals that have meaningful employment is highest when looking at the county level in the early years after high school graduation. However, by 6 years after graduating, the percentage of individuals that graduated from a Southwest high school that have meaningful employment in Minnesota, but outside of the Southwest region balloons to nearly 21%, dwarfing all other meaningful employment within the Southwest region.
-2.  Not surprisingly, a very large majority of individuals (62%) attend post-secondary education the year they graduate high school and that declines steadily over the following 4 to 6 years.
-3.  The proportion of individuals that are employed but not meaningful, and are not attending post-secondary remains steady throughout the grad.year.x; \~15%.
-4.  The proportion of individuals that do not have a MN employment record and are not attending a post-secondary institution increases significantly by 4 years after graduation. By 11 years after graduation, over 36% of the individuals are in this category.
+1.  The percentage of individuals with meaningful employment in Central Minnesota peaks about 6 years after college with nearly a quarter of graduates working 1,000 hours or more that year for a single employer.
+2.  At 6 years after graduating, over half of the graduates have meaningful employment in Minnesota.
+3.  Graduates not reaching the meaningful employment threshold in Minnesota hovers around 15% after the first year of graduating high school.
+4.  Nearly 30% of graduates disappear from my dataset about 10 years after graduating. This means they are not going to post-secondary in the United States and do not have a Minnesota employment record.
 
 <br>
 
@@ -396,24 +394,6 @@ prop.states <- seven.states %>%
          x.loc = ifelse(states == "No MN emp record, not attending ps", cum.pct/2, x.loc)) %>%
   ungroup()
 
-test <- seven.states %>%
-  filter(states != "After 2023") %>%
-  filter(states == "No MN emp record, not attending ps")
-
-names(test)
-
-employment <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/Employment/Employment.csv') 
-
-
-employment.test <- employment %>%
-  select(PersonID, TimeID, CountyName, EmploymentOrganizationID, USIndustryCode) %>%
-  filter(PersonID == 2432)
-
-names(employment)
-
-master.test <- seven.states %>%
-  filter(PersonID == 2432)
-
 seven.states.plot <- ggplot(prop.states, aes(as.numeric(grad.year)-1, pct, fill = states, group = states)) +
   geom_area_interactive(aes(data_id = data_id, tooltip = paste("State: ", states, "\n", percent(pct, accuracy = .1), sep = ""))) +
   geom_label_repel(data = filter(prop.states, grad.year %in% c("grad.year.0", "grad.year.6", "grad.year.11")), aes(x = as.numeric(grad.year)-1, y = x.loc, label = paste(grad.year, "\n", percent(pct, accuracy = .1))), show.legend = FALSE) +
@@ -432,9 +412,3 @@ girafe(ggobj = seven.states.plot, width_svg = 10, height_svg = 10) %>%
                  opts_sizing(rescale = FALSE))      
 
 ```
-
-<br>
-
-From this I think there are 3 primary time.x that we should consider;
-
-grad.year.1 = one year after graduating high school grad.year.5 = six years after graduating high school grad.year.10 = eleven years after graduating
