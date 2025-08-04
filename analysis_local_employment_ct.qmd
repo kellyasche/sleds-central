@@ -1,0 +1,2821 @@
+---
+title: "Local Employment Cross-tabs"
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(fastDummies)
+library(car)
+library(glmnet)
+library(glmnetUtils)
+library(pscl)
+library(sjPlot)
+library(ggforce)
+```
+
+```{r themes and shapefiles, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+```
+
+```{r master dataset}
+master.original <- read_csv("Data/SLEDS/Masters/Master-final-after-mca.csv")
+
+master.factor.names <- master.original %>%
+  select(grad.year.)
+
+master.states <- read_csv("Data/SLEDS/Masters/States/annual-seven-states.csv") %>%
+  filter(grad.year %in% c("grad.year.1", "grad.year.5", "grad.year.10")) %>%
+  select(PersonID, grad.year, states) %>%
+  pivot_wider(names_from = grad.year, values_from = states)
+
+master <- master.states %>%
+  left_join(master.factor.names, by = "PersonID")
+
+kable(head(master))
+
+kable(names(master))
+```
+
+```{r independent and dependent variables}
+updated.factor.var.names <-  master.factor.names %>%
+  select(-PersonID, -edr) %>%
+  names() %>%
+  c("ps.grad.in.same.ruca", "ps.grad.in.same.edr", "ps.grad.in.MN")
+
+numeric.var.names <- master.original %>%
+  select(n.years.attended, ACTCompositeScore, avg.unemp.rate, `ACTE.SPED`:MCA.S, n.institutions, ps.grad.in.same.ruca, ps.grad.in.same.edr, ps.grad.in.MN, avg.unemp.rate, avg.wages.pct.state, total.cte.courses.taken) %>%
+  names()
+
+updated.independent.var.names <- c(updated.factor.var.names, numeric.var.names)
+
+cte.cc.var.names <- master.original %>%
+  select(ACTE.SPED:Youth.Apprenticeship) %>%
+  names()
+
+dep.var.names <- master %>%
+  select(PersonID, grad.year.1, grad.year.5, grad.year.10)
+
+updated.master <- master.original %>%
+  select(PersonID, all_of(updated.independent.var.names)) %>%
+  left_join(dep.var.names, by = "PersonID") %>%
+  mutate_at(vars(range.school:ps.grad.in.MN), as.factor) %>%
+  mutate_at(vars(grad.year.1:grad.year.10), as.factor) %>%
+  mutate(ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector %in% c("3", "6", "9"), "11", as.character(ps.grad.InstitutionSector)),
+         ps.grad.InstitutionSector = as.factor(ps.grad.InstitutionSector),
+         grad.year.1 = fct_relevel(grad.year.1, "Meaningful emp County", "Meaningful emp EDR", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps"),
+         grad.year.5 = fct_relevel(grad.year.5, "Meaningful emp County", "Meaningful emp EDR", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps"),
+         grad.year.10 = fct_relevel(grad.year.10, "Meaningful emp County", "Meaningful emp EDR", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps"),
+         highest.cred.level = ifelse(ps.grad.InstitutionSector == "Did not grad", "Some college", as.character(highest.cred.level)),
+         highest.cred.level = ifelse(ps.grad.InstitutionSector == "Never attended ps", "No college", as.character(highest.cred.level)),
+         highest.cred.level = as.factor(highest.cred.level)) %>%
+  droplevels()
+
+kable(head(updated.master))
+
+kable(names(updated.master))
+```
+
+<br>
+
+There are a number of "states" in which an individual in this dataset are assigned;
+
+1.  Has meaningful employment in the same county as their high school.
+2.  Has meaningful employment in the same EDR as their high school, but not county.
+3.  Has meaningful employment in Minnesota, but not in Southwest Minnesota.
+4.  Is attending post-secondary.
+5.  Has a MN employment record but it's not meaningful, and not attending post-secondary.
+6.  Does not have a MN employment record and is not attending post-secondary.
+
+There are three "times" in which we checked to see if the individual had meaningful employment within these geographies;
+
+1.  one year after graduating high school
+2.  five years after graduation, and
+3.  ten years after graduation.
+
+Meaningful employment is determined by whether an individual worked 1,000 hours for an employer during time X. In addition, if the individual is working for an employer but not meaningful at time X but worked 1,000 hours for that employer during another year it's still considered "meaningful".
+
+Due to time x potentially being passed the date of the latest data (2023) for some individuals, the analysis below will filter out all individuals where time x is after 2023.
+
+From the multiple correspondence analysis and the principle component analysis we determined that the following independent variables will be included in the analysis.
+
+```{r list of ind var}
+updated.master %>%
+  select(-PersonID, -grad.year.1, -grad.year.5, -grad.year.10) %>%
+  lapply(class) 
+
+```
+
+<br>
+
+# Methodology
+
+For this analysis we are keeping it simple. For categorical variables I’ll be using the Cramer’s v-square measure of association. The V\^2 value is from 0 to 1 with 0 meaning there’s no association and a value closer to 1 indicates a strong association.
+
+For the variables with continuous values I’ll be using the Wilcoxon two paired groups test. P-value will be used to determine whether we can reject the NULL hypothesis at a .01 level. I’ll also include boxplots to see in which direction there might be influence from the variables.
+
+We are going to split up the analysis into two different datasets. The first dataset will combine 3 of the previous states into one.
+
+-   Has meaningful employment anywhere in NE Minnesota, which combines the following states;
+    -   Meaningful emp County
+    -   Meaningful emp EDR
+
+The remaining states will stay the same.
+
+-   Has meaningful employment in Minnesota, but not in Northeast Minnesota
+-   Is attending a post-secondary institution.
+-   Has a MN employment record but it's not meaningful, and they are not attending post-secondary.
+-   Does not have a MN employment record and is not attending post-secondary.
+
+We have quite a few variables remaining, even after MCA analysis. So let's take a look at how we are going to proceed and group all of this together to see how these relationships work.
+
+-   Demographics
+    -   Gender
+    -   grad.year.covid
+    -   economic.status
+    -   SpecialEdStatus
+    -   RaceEthnicity
+    -   englisher.learner
+-   High school characteristics
+    -   Dem_Desc
+    -   avg.unemp.rate
+    -   avg.wage.pct.state
+-   High school accomplishments
+    -   pseo.participant
+    -   took.ACT
+    -   ap.exam
+    -   ACTCompositeScore
+    -   MCA scores
+        -   MCA.M
+        -   MCA.R
+        -   MCA.S
+    -   cte.achievement
+    -   avg.unemp.rate
+-   Post-secondary
+    -   attended.ps.within.first.year.hsgrad
+    -   attended.ps
+    -   ps.grad.
+    -   ps.grad.InstitutionSector
+    -   highest.cred.level
+    -   Combine post-secondary grad location
+        -   ps.grad.in.same.ruca
+
+        -   ps.grad.in.same.edr
+
+        -   ps.grad.in.MN
+
+# Meaningful employment in Northeast Minnesota
+
+```{r prep meaningful employment in NE MN}
+meaningful.emp.ne <- updated.master %>%
+  mutate(grad.year.1 = ifelse(grad.year.1 %in% c("Meaningful emp County", "Meaningful emp EDR"), "Meaningful emp NE", as.character(grad.year.1)),
+         grad.year.1 = as_factor(grad.year.1),
+         grad.year.1 = fct_relevel(grad.year.1, "Meaningful emp NE", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps", "After 2023"),
+         grad.year.5 = ifelse(grad.year.5 %in% c("Meaningful emp County", "Meaningful emp EDR"), "Meaningful emp NE", as.character(grad.year.5)),
+         grad.year.5 = as_factor(grad.year.5),
+         grad.year.5 = fct_relevel(grad.year.5, "Meaningful emp NE", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps", "After 2023"),
+         grad.year.10 = ifelse(grad.year.10 %in% c("Meaningful emp County", "Meaningful emp EDR"), "Meaningful emp NE", as.character(grad.year.10)),
+         grad.year.10 = as_factor(grad.year.10),
+         grad.year.10 = fct_relevel(grad.year.10, "Meaningful emp NE", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps", "After 2023"),
+         highest.cred.level = fct_relevel(highest.cred.level, "No college", "Some college", "Less than associate degree", "Associate degree", "Bachelor degree", "Master degree or higher"))
+
+write_csv(meaningful.emp.ne, "Data/SLEDS/Masters/After analysis/Master-meaningful-emp-ne.csv")
+```
+
+Let's first take a look at proportion of states in each of the time.X. The chart below shows that a majority of individuals are attending post-secondary (51%) one year after graduating high school. The further away from high school graduation results in a bit of an increase in the percentage of individuals who have meaningful employment in the region and in Minnesota, while a huge amount have no MN employment record.
+
+<br>
+
+```{r proportion of states meaningful emp SW}
+prop.states.meaningful.emp.ne <- meaningful.emp.ne %>%
+  select(grad.year.1, grad.year.5, grad.year.10) %>%
+  pivot_longer(names_to = "grad.year", values_to = "states", 1:3) %>%
+  group_by(grad.year, states) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  filter(states != "After 2023") %>%
+  group_by(grad.year) %>%
+  mutate(pct = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(data_id = seq(n()),
+         grad.year = fct_relevel(grad.year, "grad.year.1", "grad.year.5", "grad.year.10"))
+
+prop.states.meaningful.emp.ne.plot <- ggplot(prop.states.meaningful.emp.ne, aes(grad.year, pct, fill = states, group = states)) +
+  geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(grad.year, "\nState of individuals: ", states, "\nNumber of people in states: ", comma(n), "\nPercent of people in state: ", percent(pct, accuracy = .1), sep = ""))) +
+   labs(x="", y = "", color="", title = "Percent of people in each state")+
+  scale_y_continuous(labels=scales::percent)+
+  theme_bar+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu"),
+                    guide = guide_legend(ncol = 2)) +
+  theme(legend.position = "bottom",
+        text = element_text(size = 18))
+
+
+girafe(ggobj = prop.states.meaningful.emp.ne.plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE))      
+
+```
+
+<br>
+
+Let's examine the variables to see if there are any significant differences in the proportion of individuals in these states across the variable categories or values.
+
+<br>
+
+# Demographics
+
+In the demographics section we will examine the relationship between that paths taken by individuals and the following variables;
+
+-   Gender
+-   grad.year.covid
+-   economic.status
+-   SpecialEdStatus
+-   RaceEthnicity
+-   english.learner
+
+**Summary**
+
+*grad.year.covid*
+
+-   Post-covid-grads: attended post-secondary at significantly lower rates and had no MN employment record at significantly higher rates.
+
+*economic.status*
+
+-   Individuals that qualify for free or reduced lunch:
+    -   attend post-secondary at lower rates
+    -   do not have meaningful employment at higher rates
+    -   have no MN employment record at a higher rates - evens out over time
+
+*SpecialEdStatus*
+
+-   Individuals categorized as needing special education;
+    -   attend post-secondary at significantly lower rates
+    -   do not have meaningful employment at higher rates
+    -   have no MN employment record at higher rates. - evens out over time
+
+*RaceEthnicity*
+
+-   Attend post-secondary
+    -   Lower rates: American Indian, Black, Hispanic
+-   Have meaningful employment in the region
+    -   Lower rates: All races except white
+-   Have meaningful employment in MN
+    -   Lower rates: All races except white
+-   Do no have meaningful employment
+    -   Lower rates: Black and American Indian
+-   Do not have a MN employment record
+    -   All races except White at first.
+
+*english.learner*
+
+-   Lower rates: attend post-secondary
+-   Lower rates: do not have meaningful employment
+-   Higher rates: no MN employment record
+
+<br>
+
+## Grad.year.covid
+
+-   One year after graduating high school
+    -   Post-covid grads were attending post-secondary at a significantly lower rate than individuals who graduated before COVID
+
+    -   Post-covid grads do not have a MN employment record or attending post-secondary at a significantly higher rate.
+
+::: panel-tabset
+### One year after graduating
+
+```{r demographics grad.year.covid one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, grad.year.covid) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$grad.year.covid, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## economic.status
+
+-   One year after graduating high school, individuals that qualify for free or reduced lunch;
+    -   attend post-secondary at a significantly lower rate, and
+    -   do not have meaningful employment, and
+    -   have no MN employment record.
+-   5 years after graduating, individuals that qualify for free or reduced lunch;
+    -   attend post-secondary at a significantly lower rate, and
+    -   have no MN employment record.
+-   10 years after graduating, individuals that qualify for free or reduced lunch;
+    -   have meaningful employment in the region at a slightly lower rate, and
+    -   have non-meaningful employment at a higher rate.
+
+::: panel-tabset
+### One year after graduating
+
+```{r demographics economic.status one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, economic.status) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$economic.status, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r demographics economic.status five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, economic.status) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$economic.status, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r demographics economic.status ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, economic.status) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$economic.status, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## SpecialEdStatus
+
+-   One year after graduating high school, individuals that were categorized as needing special education;
+    -   attend post-secondary at a significantly lower rate, and
+    -   do not have meaningful employment at a higher rate, and
+    -   have no MN employment record at a significantly higher rate.
+-   5 years after graduating, individuals that were categorized as needing special education
+    -   attend post-secondary at a significantly lower rate, and
+    -   do no have meaningful employment at a higher rate, and
+    -   have no MN employment record at a significantly higher rate.
+-   10 years after graduating, individuals that were categorized as needing special education;
+    -   have meaningful employment in the state at a significantly lower rate, and
+    -   do not have meaningful employment at a higher rate.
+
+::: panel-tabset
+### One year after graduating
+
+```{r demographics SpecialEdStatus one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, SpecialEdStatus) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$SpecialEdStatus, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r demographics SpecialEdStatus five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, SpecialEdStatus) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$SpecialEdStatus, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r demographics SpecialEdStatus ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, SpecialEdStatus) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$SpecialEdStatus, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## RaceEthnicity
+
+-   One year after graduating high school,
+    -   American indian, Black and Hispanic individuals attend post-secondary at a significantly lower rate.
+    -   Black individuals do not have meaningful employment at a significantly higher rate.
+    -   All races except white have a significantly higher rate of not having a MN employment record.
+-   5 years after graduating;
+    -   Asian, Black and Hispanic individuals have meaningful employment in the region at a significantly lower rate.
+    -   American Indian and Hispanic individuals have meaningful employment in MN at a lower rate.
+    -   American Indian and Black individuals attend post-secondary at a lower rate.
+    -   American Indian and Black individuals do not have meaningful employment in Minnesota at a higher rate.
+    -   Hispanic, American Indian, and Asian individuals do not have a MN employment record at a higher rate.
+-   10 years after graduating;
+    -   All races except white have meaningful employment in the region at a significantly lower rate.
+    -   American Indian individuals have meaningful employment in MN at a significantly lower rate.
+    -   American Indian, Asian and Black individuals do not have meaningful employment in Minnesota at a higher rate.
+
+::: panel-tabset
+### One year after graduating
+
+```{r demographics RaceEthnicity one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, RaceEthnicity) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$RaceEthnicity, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r demographics RaceEthnicity five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, RaceEthnicity) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$RaceEthnicity, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r demographics RaceEthnicity ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, RaceEthnicity) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$RaceEthnicity, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## english.learner
+
+-   One year after graduating high school, individuals that were categorized as needing English learner classes;
+    -   attend post-secondary at a significantly lower rate, and
+    -   do not have meaningful employment at a higher rate, and
+    -   have no MN employment record at a significantly higher rate.
+-   5 years after graduating, individuals that were categorized as needing English learner classes;
+    -   attend post-secondary at a significantly lower rate, and
+    -   do no have meaningful employment at a higher rate, and
+    -   have no MN employment record at a significantly higher rate.
+-   10 years after graduating, individuals that were categorized as needing English learner classes;
+    -   have meaningful employment in the region at a significantly lower rate, and
+    -   have meaningful employment in the state at a significantly lower rate, and
+    -   had no MN employment record at a significantly higher rate.
+
+::: panel-tabset
+### One year after graduating
+
+```{r demographics english.learner one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, english.learner) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$english.learner, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r demographics english.learner five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, english.learner) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$english.learner, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r demographics english.learner ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, english.learner) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$english.learner, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+# High school characteristics
+
+We will take a look at the following variables;
+
+-   Dem_Desc
+-   range.school
+-   avg.unemp.rate
+-   avg.wage.pct.state
+
+The analysis highlights the following;
+
+*Dem_Desc*
+
+-   Graduates from more rural districts had significantly lower rates of having meaningful employment in the region, but significantly more likely to have meaningful employment in Minnesota.
+-   Town/rural mix individuals were significantly more likely to not have a MN employment record.
+
+*range.schools*
+
+-   Range graduates were significantly less likely to have meaningful employment in the region and in MN.
+-   Range graduates were significantly more likely to not have a MN employment record.
+
+*avg.unemp.rate*
+
+-   Eliminate variable
+
+*avg.wages.pct.state*
+
+-   Eliminate variable
+
+<br>
+
+## Dem_Desc
+
+-   One year after graduating
+    -   The more urban the district, the higher rate of having meaningful employment in the region.
+    -   Town/rural mix have a slightly higher rate of not having a MN employment record.
+-   Five years after graduating
+    -   The more rural the district, the significantly lower rates of having meaningful employment in the region.
+    -   Entirely rural is significantly more likely to have meaningful employment in MN
+    -   Entirely rural signifiacntly less likely to be attending post-secondary
+    -   Town/rural mix more likely to not have a MN employment record
+-   Ten years after graduating
+    -   The more rural the district, the significantly lower rates of having meaningful employment in the region.
+    -   Entirely rural significantly more likely to have meaningful employment in MN
+    -   More rural districts are significantly more likely to not have a MN employment record - especially the town/rural mix.
+
+::: panel-tabset
+### One year after graduating
+
+```{r hs characteristics Dem_Desc one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, Dem_Desc) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$Dem_Desc, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r hs characteristics Dem_Desc five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, Dem_Desc) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$Dem_Desc, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r hs characteristics Dem_Desc ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, Dem_Desc) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$Dem_Desc, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## range.school
+
+One year after graduating
+
+-   Range schools were significantly more likely to have graduates attend post-secondary.
+-   Range schools were a bit less likely to not have a MN employment record.
+
+Five years after graduating
+
+-   Range schools were slightly less likely to have meaningful employment in region.
+-   Range graduates were slightly less likely to have meaningful employment in MN.
+-   Range graduates were slightly more likely to be attending post-secondary.
+-   Range graduates were significantly less likely to not have meaningful employment.
+-   Range graduates were significantly more likely to not have a MN employment record.
+
+Ten years after graduating
+
+-   Range graduates were slightly less likely to have meaningful employment in region.
+-   Range graduates were significantly less likely to not have meaninful employment in MN.
+-   Range graduates were significantly more likely to not have a MN employment record.
+
+::: panel-tabset
+### One year after graduating
+
+```{r hs characteristics range.school one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, range.school) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$range.school, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r hs characteristics range.school five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, range.school) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$range.school, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r hs characteristics range.school ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, range.school) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$range.school, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## avg.unemp.rate
+
+-   One year after graduating
+    -   The individuals attending post-secondary had slightly higher unemployment rates.
+-   Five years after graduating
+    -   Not much
+-   Ten years after graduating
+    -   Not much
+
+::: panel-tabset
+### One year after graduating
+
+```{r hs characteristics avg.unemp.rate one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, avg.unemp.rate) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.1) %>%
+  mutate(q1 = quantile(avg.unemp.rate, .25),
+         q3 = quantile(avg.unemp.rate, .75),
+         iqr = IQR(avg.unemp.rate),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(avg.unemp.rate > low.outlier,
+         avg.unemp.rate < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.1) %>%
+  summarize(Min = quantile(avg.unemp.rate, .0),
+            Q1 = quantile(avg.unemp.rate, .25),
+            Median = median(avg.unemp.rate),
+            Q3 = quantile(avg.unemp.rate, .75),
+            Max = quantile(avg.unemp.rate, 1),
+            Mean = mean(avg.unemp.rate)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.1, avg.unemp.rate, fill = grad.year.1, group = grad.year.1)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.1, y = 25, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of average unemployment by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 30))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(avg.unemp.rate ~ grad.year.1, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Five years after graduating
+
+```{r hs characteristics avg.unemp.rate five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, avg.unemp.rate) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.5) %>%
+  mutate(q1 = quantile(avg.unemp.rate, .25),
+         q3 = quantile(avg.unemp.rate, .75),
+         iqr = IQR(avg.unemp.rate),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(avg.unemp.rate > low.outlier,
+         avg.unemp.rate < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.5) %>%
+  summarize(Min = quantile(avg.unemp.rate, .0),
+            Q1 = quantile(avg.unemp.rate, .25),
+            Median = median(avg.unemp.rate),
+            Q3 = quantile(avg.unemp.rate, .75),
+            Max = quantile(avg.unemp.rate, 1),
+            Mean = mean(avg.unemp.rate)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.5, avg.unemp.rate, fill = grad.year.5, group = grad.year.5)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.5, y = 25, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of average unemployment by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 30))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(avg.unemp.rate ~ grad.year.5, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Ten years after graduating
+
+```{r hs characteristics avg.unemp.rate ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, avg.unemp.rate) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.10) %>%
+  mutate(q1 = quantile(avg.unemp.rate, .25),
+         q3 = quantile(avg.unemp.rate, .75),
+         iqr = IQR(avg.unemp.rate),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(avg.unemp.rate > low.outlier,
+         avg.unemp.rate < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.10) %>%
+  summarize(Min = quantile(avg.unemp.rate, .0),
+            Q1 = quantile(avg.unemp.rate, .25),
+            Median = median(avg.unemp.rate),
+            Q3 = quantile(avg.unemp.rate, .75),
+            Max = quantile(avg.unemp.rate, 1),
+            Mean = mean(avg.unemp.rate)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.10, avg.unemp.rate, fill = grad.year.10, group = grad.year.10)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.10, y = 25, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of average unemployment by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 30))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(avg.unemp.rate ~ grad.year.10, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+:::
+
+<br>
+
+## avg.wages.pct.state
+
+-   One year after graduating
+    -   The individuals graduating from districts with slightly lower wages had meaningful employment in MN, but not the region.
+-   Five years after graduating
+    -   Not much
+-   Ten years after graduating
+    -   Not much
+
+::: panel-tabset
+### One year after graduating
+
+```{r hs characteristics avg.wages.pct.state one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, avg.wages.pct.state) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.1) %>%
+  mutate(q1 = quantile(avg.wages.pct.state, .25),
+         q3 = quantile(avg.wages.pct.state, .75),
+         iqr = IQR(avg.wages.pct.state),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(avg.wages.pct.state > low.outlier,
+         avg.wages.pct.state < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.1) %>%
+  summarize(Min = quantile(avg.wages.pct.state, .0),
+            Q1 = quantile(avg.wages.pct.state, .25),
+            Median = median(avg.wages.pct.state),
+            Q3 = quantile(avg.wages.pct.state, .75),
+            Max = quantile(avg.wages.pct.state, 1),
+            Mean = mean(avg.wages.pct.state)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.1, avg.wages.pct.state, fill = grad.year.1, group = grad.year.1)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.1, y = 1.25, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of wages as percent of state wages by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 1.5))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(avg.wages.pct.state ~ grad.year.1, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Five years after graduating
+
+```{r hs characteristics avg.wages.pct.state five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, avg.wages.pct.state) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.5) %>%
+  mutate(q1 = quantile(avg.wages.pct.state, .25),
+         q3 = quantile(avg.wages.pct.state, .75),
+         iqr = IQR(avg.wages.pct.state),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(avg.wages.pct.state > low.outlier,
+         avg.wages.pct.state < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.5) %>%
+  summarize(Min = quantile(avg.wages.pct.state, .0),
+            Q1 = quantile(avg.wages.pct.state, .25),
+            Median = median(avg.wages.pct.state),
+            Q3 = quantile(avg.wages.pct.state, .75),
+            Max = quantile(avg.wages.pct.state, 1),
+            Mean = mean(avg.wages.pct.state)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.5, avg.wages.pct.state, fill = grad.year.5, group = grad.year.5)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.5, y = 1.25, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of wages as percent of state wages by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 1.5))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(avg.wages.pct.state ~ grad.year.5, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Ten years after graduating
+
+```{r hs characteristics avg.wages.pct.state ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, avg.wages.pct.state) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.10) %>%
+  mutate(q1 = quantile(avg.wages.pct.state, .25),
+         q3 = quantile(avg.wages.pct.state, .75),
+         iqr = IQR(avg.wages.pct.state),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(avg.wages.pct.state > low.outlier,
+         avg.wages.pct.state < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.10) %>%
+  summarize(Min = quantile(avg.wages.pct.state, .0),
+            Q1 = quantile(avg.wages.pct.state, .25),
+            Median = median(avg.wages.pct.state),
+            Q3 = quantile(avg.wages.pct.state, .75),
+            Max = quantile(avg.wages.pct.state, 1),
+            Mean = mean(avg.wages.pct.state)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.10, avg.wages.pct.state, fill = grad.year.10, group = grad.year.10)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.10, y = 1.25, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of wages as percent of state wages by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 1.5))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(avg.wages.pct.state ~ grad.year.10, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+:::
+
+<br>
+
+# High School Accomplishments
+
+We are going to analyze the following variables;
+
+-   pseo.participant
+-   took.ACT
+-   ap.exam
+-   ACTCompositeScore
+-   MCA scores
+    -   MCA.M
+    -   MCA.R
+    -   MCS.S
+-   cte.achievement
+-   n.cte.courses.taken
+-   avg.unemp.rate
+
+The analysis provides the following insights;
+
+-   Higher performing students with all the tests tended to
+    -   attend post-secondary at significantly higher rates
+    -   have meaningful workforce participation in Minnesota at higher rates.
+-   Students that attended PSEO all tended to
+    -   attend post-secondary at significantly higher rates
+    -   have meaningful workforce participation in Minnesota at higher rates
+-   Students involved in CTE tended to;
+    -   Have meaningful workforce participation in Minnesota at higher rates
+    -   Not attend post-secondary at higher rates.
+
+<br>
+
+## pseo.participant
+
+-   One year after graduating, PSEO participants are;
+    -   Less likely to have meaningful employment in the region and Minnesota.
+    -   Significantly more likely to attend post-secondary.
+    -   Significantly less likely to not have meaningful employment
+    -   Significantly less likely to not have a MN employment record.
+-   Five years after graduating, PSEO participants are;
+    -   Less likely to have meaningful employment in the region.
+    -   Slightly more likely to have meaningful employment in Minnesota.
+    -   Significantly more likely to attend post-secondary.
+    -   Significantly less likely to not have meaningful employment
+    -   Significantly less likely to not have a MN employment record.
+-   Ten years after graduating
+    -   Significantly more likely to have meaningful employment in Minnesota.
+    -   Significantly less likely to not have a MN employment record.
+
+::: panel-tabset
+### One year after graduating
+
+```{r hs accomplishments pseo.participant one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, pseo.participant) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$pseo.participant, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r hs accomplishments pseo.participant five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, pseo.participant) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$pseo.participant, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r hs accomplishments pseo.participant ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, pseo.participant) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$pseo.participant, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## took.ACT
+
+-   One year after graduating, individuals that took the ACT are;
+    -   Significantly more likely to attend post-secondary.
+    -   Significantly less likely to not have meaningful employment
+    -   Significantly less likely to not have a MN employment record.
+-   Five years after graduating, individuals that took the ACT are;
+    -   Slightly more likely to have meaningful employment in Minnesota.
+    -   Significantly more likely to attend post-secondary.
+    -   Significantly less likely to not have a MN employment record.
+-   Ten years after graduating, individuals that took the ACT are;
+    -   Significantly more likely to have meaningful employment in Minnesota.
+
+::: panel-tabset
+### One year after graduating
+
+```{r hs accomplishments took.ACT one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, took.ACT) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$took.ACT, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r hs accomplishments took.ACT five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, took.ACT) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$took.ACT, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r hs accomplishments took.ACT ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, took.ACT) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$took.ACT, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## ACTCompositeScore
+
+-   One year after graduating
+    -   Individuals attending post-secondary had higher scores.
+    -   Individuals with meaningful workforce participation in the region had lower scores.
+-   Five years after graduating
+    -   Individuals with meaningful wf participation in the region had lower scores.
+    -   Individuals with meaningful employment in Minnesota had higher scores
+    -   Individuals attending post-secondary had higher scores
+-   Ten years after graduating
+    -   Individuals with meaningful workforce participation in Minnesota had higher scores
+    -   Individuals with no MN employment record had higher scores.
+
+::: panel-tabset
+### One year after graduating
+
+```{r hs accomplishments ACTCompositeScore one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, ACTCompositeScore) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.1) %>%
+  mutate(q1 = quantile(ACTCompositeScore, .25),
+         q3 = quantile(ACTCompositeScore, .75),
+         iqr = IQR(ACTCompositeScore),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(ACTCompositeScore > low.outlier,
+         ACTCompositeScore < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.1) %>%
+  summarize(Min = quantile(ACTCompositeScore, .0),
+            Q1 = quantile(ACTCompositeScore, .25),
+            Median = median(ACTCompositeScore),
+            Q3 = quantile(ACTCompositeScore, .75),
+            Max = quantile(ACTCompositeScore, 1),
+            Mean = mean(ACTCompositeScore)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.1, ACTCompositeScore, fill = grad.year.1, group = grad.year.1)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.1, y = 40, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of ACT composite score by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 45))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(ACTCompositeScore ~ grad.year.1, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Five years after graduating
+
+```{r hs accomplishments ACTCompositeScore five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, ACTCompositeScore) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.5) %>%
+  mutate(q1 = quantile(ACTCompositeScore, .25),
+         q3 = quantile(ACTCompositeScore, .75),
+         iqr = IQR(ACTCompositeScore),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(ACTCompositeScore > low.outlier,
+         ACTCompositeScore < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.5) %>%
+  summarize(Min = quantile(ACTCompositeScore, .0),
+            Q1 = quantile(ACTCompositeScore, .25),
+            Median = median(ACTCompositeScore),
+            Q3 = quantile(ACTCompositeScore, .75),
+            Max = quantile(ACTCompositeScore, 1),
+            Mean = mean(ACTCompositeScore)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.5, ACTCompositeScore, fill = grad.year.5, group = grad.year.5)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.5, y = 40, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of ACT composite score by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 45))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(ACTCompositeScore ~ grad.year.5, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Ten years after graduating
+
+```{r hs accomplishments ACTCompositeScore ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, ACTCompositeScore) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.10) %>%
+  mutate(q1 = quantile(ACTCompositeScore, .25),
+         q3 = quantile(ACTCompositeScore, .75),
+         iqr = IQR(ACTCompositeScore),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(ACTCompositeScore > low.outlier,
+         ACTCompositeScore < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.10) %>%
+  summarize(Min = quantile(ACTCompositeScore, .0),
+            Q1 = quantile(ACTCompositeScore, .25),
+            Median = median(ACTCompositeScore),
+            Q3 = quantile(ACTCompositeScore, .75),
+            Max = quantile(ACTCompositeScore, 1),
+            Mean = mean(ACTCompositeScore)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.10, ACTCompositeScore, fill = grad.year.10, group = grad.year.10)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.10, y = 40, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of ACT composite score by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 40))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(ACTCompositeScore ~ grad.year.10, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+:::
+
+<br>
+
+## MCA.R
+
+-   One year after graduating
+    -   Individuals attending post-secondary had higher scores.
+-   Five years after graduating
+    -   Individuals with meaningful employment in Minnesota had higher scores
+    -   Individuals attending post-secondary had higher scores
+-   Ten years after graduating
+    -   Individuals with no meaningful employment had significantly lower scores.
+
+::: panel-tabset
+### One year after graduating
+
+```{r hs accomplishments MCA.R one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, MCA.R) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.1) %>%
+  mutate(q1 = quantile(MCA.R, .25),
+         q3 = quantile(MCA.R, .75),
+         iqr = IQR(MCA.R),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(MCA.R > low.outlier,
+         MCA.R < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.1) %>%
+  summarize(Min = quantile(MCA.R, .0),
+            Q1 = quantile(MCA.R, .25),
+            Median = median(MCA.R),
+            Q3 = quantile(MCA.R, .75),
+            Max = quantile(MCA.R, 1),
+            Mean = mean(MCA.R)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.1, MCA.R, fill = grad.year.1, group = grad.year.1)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.1, y = 5, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of MCA-Reading score by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 6))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(MCA.R ~ grad.year.1, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Five years after graduating
+
+```{r hs accomplishments MCA.R five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, MCA.R) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.5) %>%
+  mutate(q1 = quantile(MCA.R, .25),
+         q3 = quantile(MCA.R, .75),
+         iqr = IQR(MCA.R),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(MCA.R > low.outlier,
+         MCA.R < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.5) %>%
+  summarize(Min = quantile(MCA.R, .0),
+            Q1 = quantile(MCA.R, .25),
+            Median = median(MCA.R),
+            Q3 = quantile(MCA.R, .75),
+            Max = quantile(MCA.R, 1),
+            Mean = mean(MCA.R)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.5, MCA.R, fill = grad.year.5, group = grad.year.5)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.5, y = 5, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of MCA-Reading score by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 6))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(MCA.R ~ grad.year.5, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Ten years after graduating
+
+```{r hs accomplishments MCA.R ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, MCA.R) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.10) %>%
+  mutate(q1 = quantile(MCA.R, .25),
+         q3 = quantile(MCA.R, .75),
+         iqr = IQR(MCA.R),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(MCA.R > low.outlier,
+         MCA.R < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.10) %>%
+  summarize(Min = quantile(MCA.R, .0),
+            Q1 = quantile(MCA.R, .25),
+            Median = median(MCA.R),
+            Q3 = quantile(MCA.R, .75),
+            Max = quantile(MCA.R, 1),
+            Mean = mean(MCA.R)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.10, MCA.R, fill = grad.year.10, group = grad.year.10)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.10, y = 5, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of MCA-Reading score by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 6))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(MCA.R ~ grad.year.10, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+:::
+
+<br>
+
+## MCA.S
+
+-   One year after graduating
+    -   Individuals attending post-secondary had higher scores.
+-   Five years after graduating
+    -   Individuals with meaningful employment in Minnesota had higher scores
+    -   Individuals attending post-secondary had higher scores
+-   Ten years after graduating
+    -   Individuals with no meaningful employment had significantly lower scores.
+    -   Individuals with meaningful employment in Minnesota had higher scores.
+
+::: panel-tabset
+### One year after graduating
+
+```{r hs accomplishments MCA.S one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, MCA.S) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.1) %>%
+  mutate(q1 = quantile(MCA.S, .25),
+         q3 = quantile(MCA.S, .75),
+         iqr = IQR(MCA.S),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(MCA.S > low.outlier,
+         MCA.S < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.1) %>%
+  summarize(Min = quantile(MCA.S, .0),
+            Q1 = quantile(MCA.S, .25),
+            Median = median(MCA.S),
+            Q3 = quantile(MCA.S, .75),
+            Max = quantile(MCA.S, 1),
+            Mean = mean(MCA.S)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.1, MCA.S, fill = grad.year.1, group = grad.year.1)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.1, y = 5, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of MCA-Science score by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 6))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(MCA.S ~ grad.year.1, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Five years after graduating
+
+```{r hs accomplishments MCA.S five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, MCA.S) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.5) %>%
+  mutate(q1 = quantile(MCA.S, .25),
+         q3 = quantile(MCA.S, .75),
+         iqr = IQR(MCA.S),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(MCA.S > low.outlier,
+         MCA.S < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.5) %>%
+  summarize(Min = quantile(MCA.S, .0),
+            Q1 = quantile(MCA.S, .25),
+            Median = median(MCA.S),
+            Q3 = quantile(MCA.S, .75),
+            Max = quantile(MCA.S, 1),
+            Mean = mean(MCA.S)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.5, MCA.S, fill = grad.year.5, group = grad.year.5)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.5, y = 5, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of MCA-Science score by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 6))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(MCA.S ~ grad.year.5, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Ten years after graduating
+
+```{r hs accomplishments MCA.S ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, MCA.S) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.10) %>%
+  mutate(q1 = quantile(MCA.S, .25),
+         q3 = quantile(MCA.S, .75),
+         iqr = IQR(MCA.S),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(MCA.S > low.outlier,
+         MCA.S < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.10) %>%
+  summarize(Min = quantile(MCA.S, .0),
+            Q1 = quantile(MCA.S, .25),
+            Median = median(MCA.S),
+            Q3 = quantile(MCA.S, .75),
+            Max = quantile(MCA.S, 1),
+            Mean = mean(MCA.S)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.10, MCA.S, fill = grad.year.10, group = grad.year.10)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.10, y = 5, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of MCA-Science score by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 6))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(MCA.S ~ grad.year.10, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+:::
+
+<br>
+
+## MCA.M
+
+-   One year after graduating
+    -   Individuals attending post-secondary had higher scores.
+-   Five years after graduating
+    -   Individuals with meaningful employment in Minnesota had higher scores
+    -   Individuals attending post-secondary had higher scores
+-   Ten years after graduating
+    -   Individuals with no meaningful employment had significantly lower scores.
+    -   Individuals with meaningful employment in Minnesota had higher scores.
+
+::: panel-tabset
+### One year after graduating
+
+```{r hs accomplishments MCA.M one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, MCA.M) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.1) %>%
+  mutate(q1 = quantile(MCA.M, .25),
+         q3 = quantile(MCA.M, .75),
+         iqr = IQR(MCA.M),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(MCA.M > low.outlier,
+         MCA.M < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.1) %>%
+  summarize(Min = quantile(MCA.M, .0),
+            Q1 = quantile(MCA.M, .25),
+            Median = median(MCA.M),
+            Q3 = quantile(MCA.M, .75),
+            Max = quantile(MCA.M, 1),
+            Mean = mean(MCA.M)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.1, MCA.M, fill = grad.year.1, group = grad.year.1)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.1, y = 5, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of MCA-Math score by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 6))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(MCA.M ~ grad.year.1, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Five years after graduating
+
+```{r hs accomplishments MCA.M five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, MCA.M) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.5) %>%
+  mutate(q1 = quantile(MCA.M, .25),
+         q3 = quantile(MCA.M, .75),
+         iqr = IQR(MCA.M),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(MCA.M > low.outlier,
+         MCA.M < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.5) %>%
+  summarize(Min = quantile(MCA.M, .0),
+            Q1 = quantile(MCA.M, .25),
+            Median = median(MCA.M),
+            Q3 = quantile(MCA.M, .75),
+            Max = quantile(MCA.M, 1),
+            Mean = mean(MCA.M)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.5, MCA.M, fill = grad.year.5, group = grad.year.5)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.5, y = 5, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of MCA-Math score by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 6))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(MCA.M ~ grad.year.5, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Ten years after graduating
+
+```{r hs accomplishments MCA.M ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, MCA.M) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.10) %>%
+  mutate(q1 = quantile(MCA.M, .25),
+         q3 = quantile(MCA.M, .75),
+         iqr = IQR(MCA.M),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(MCA.M > low.outlier,
+         MCA.M < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.10) %>%
+  summarize(Min = quantile(MCA.M, .0),
+            Q1 = quantile(MCA.M, .25),
+            Median = median(MCA.M),
+            Q3 = quantile(MCA.M, .75),
+            Max = quantile(MCA.M, 1),
+            Mean = mean(MCA.M)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.10, MCA.M, fill = grad.year.10, group = grad.year.10)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.10, y = 5, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of MCA-Math score by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 6))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(MCA.M ~ grad.year.10, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+:::
+
+<br>
+
+## cte.achievement
+
+-   One year after graduating, individuals that took more CTE were;
+    -   Significantly more likely to have meaningful employment in the region
+    -   Significantly less likely to attend post-secondary.
+    -   Significantly more likely to not have a MN employment record.
+-   Five years after graduating, individuals that took the AP exam are;
+    -   Significantly more likely to have meaningful employment in region.
+    -   Significantly less likely to attend post-secondary
+-   Ten years after graduating, individuals that took the AP exam are;
+    -   Significantly more likely to have meaningful employment in region.
+
+::: panel-tabset
+### One year after graduating
+
+```{r hs accomplishments cte.achievement one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, cte.achievement) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$cte.achievement, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r hs accomplishments cte.achievement five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, cte.achievement) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$cte.achievement, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r hs accomplishments cte.achievement ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, cte.achievement) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$cte.achievement, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## total.cte.courses.taken
+
+-   One year after graduating
+    -   Individuals with meaningful employment in the region had taken a higher number of CTE courses
+    -   Individuals attending post-secondary had taken a lower number of CTE courses.
+-   Five years after graduating
+    -   Individuals with meaningful employment in Minnesota had taken a higher number of CTE courses
+-   Ten years after graduating
+    -   Individuals with meaningful employment in Minnesota had taken a higher number of CTE courses
+
+::: panel-tabset
+### One year after graduating
+
+```{r hs accomplishments total.cte.courses.taken one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, total.cte.courses.taken) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.1) %>%
+  mutate(q1 = quantile(total.cte.courses.taken, .25),
+         q3 = quantile(total.cte.courses.taken, .75),
+         iqr = IQR(total.cte.courses.taken),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(total.cte.courses.taken > low.outlier,
+         total.cte.courses.taken < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.1) %>%
+  summarize(Min = quantile(total.cte.courses.taken, .0),
+            Q1 = quantile(total.cte.courses.taken, .25),
+            Median = median(total.cte.courses.taken),
+            Q3 = quantile(total.cte.courses.taken, .75),
+            Max = quantile(total.cte.courses.taken, 1),
+            Mean = mean(total.cte.courses.taken)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.1, total.cte.courses.taken, fill = grad.year.1, group = grad.year.1)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.1, y = 5, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of number of CTE courses by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 6))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(total.cte.courses.taken ~ grad.year.1, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Five years after graduating
+
+```{r hs accomplishments total.cte.courses.taken five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, total.cte.courses.taken) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.5) %>%
+  mutate(q1 = quantile(total.cte.courses.taken, .25),
+         q3 = quantile(total.cte.courses.taken, .75),
+         iqr = IQR(total.cte.courses.taken),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(total.cte.courses.taken > low.outlier,
+         total.cte.courses.taken < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.5) %>%
+  summarize(Min = quantile(total.cte.courses.taken, .0),
+            Q1 = quantile(total.cte.courses.taken, .25),
+            Median = median(total.cte.courses.taken),
+            Q3 = quantile(total.cte.courses.taken, .75),
+            Max = quantile(total.cte.courses.taken, 1),
+            Mean = mean(total.cte.courses.taken)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.5, total.cte.courses.taken, fill = grad.year.5, group = grad.year.5)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.5, y = 5, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of number of CTE courses by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 6))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(total.cte.courses.taken ~ grad.year.5, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### Ten years after graduating
+
+```{r hs accomplishments total.cte.courses.taken ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, total.cte.courses.taken) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  drop_na() %>%
+  group_by(grad.year.10) %>%
+  mutate(q1 = quantile(total.cte.courses.taken, .25),
+         q3 = quantile(total.cte.courses.taken, .75),
+         iqr = IQR(total.cte.courses.taken),
+         low.outlier = q1 - 1.5*iqr,
+         high.outlier = q3 + 1.5*iqr) %>%
+  filter(total.cte.courses.taken > low.outlier,
+         total.cte.courses.taken < high.outlier) %>%
+  ungroup()
+
+labels <- data %>%
+  group_by(grad.year.10) %>%
+  summarize(Min = quantile(total.cte.courses.taken, .0),
+            Q1 = quantile(total.cte.courses.taken, .25),
+            Median = median(total.cte.courses.taken),
+            Q3 = quantile(total.cte.courses.taken, .75),
+            Max = quantile(total.cte.courses.taken, 1),
+            Mean = mean(total.cte.courses.taken)) %>%
+  ungroup()
+
+plot <- ggplot(data, aes(grad.year.10, total.cte.courses.taken, fill = grad.year.10, group = grad.year.10)) +
+  geom_boxplot_interactive() +
+  geom_label(data = labels, aes(x = grad.year.10, y = 5, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  labs(x="", y = "", color="", title = "Boxplots of number of CTE courses by employment state")+
+  scale_y_continuous(labels=scales::comma,
+                     limits = c(0, 6))+
+  scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
+  theme_bar+
+  theme(legend.position = "none",
+        text = element_text(size = 18),
+        axis.text.x = element_text(angle = 25, hjust = .9))
+
+
+girafe(ggobj = plot, width_svg = 10, height_svg = 10) %>%
+  girafe_options(opts_selection(type = "none"),
+                 opts_sizing(rescale = FALSE)) 
+
+
+summary <- aov(total.cte.courses.taken ~ grad.year.10, data = data)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+:::
+
+<br>
+
+# Post-secondary
+
+We will analyze the following variables;
+
+-   attended.ps.within.first.year.hsgrad
+-   attended.ps
+-   ps.grad
+-   ps.grad.InstitutionSector
+-   highest.cred.level
+-   ps.grad.location
+
+The analysis provides the following insights;
+
+-   Meaningful employment in the region, long-term
+    -   More likely:
+        -   Attended or graduated
+        -   Graduated from a public, 2-year
+        -   Less than associated degree or an associate degree
+        -   Graduated in region
+    -   Less likely:
+        -   Did not attend or graduated
+        -   Graduated from any 4-year or any for-profit
+        -   Bachelors degree or higher & No college
+        -   Outside region, worse if outside Minnesota
+-   Meaningful employment in MN, long-term
+    -   More likely:
+        -   Attended or graduated.
+        -   Graduated from any 4-year or any for-profit
+        -   Bachelor degree or higher
+        -   Graduated in Minnesota
+    -   Less likely
+        -   Did not attend or graduate
+        -   Graduated from a public 2-year
+        -   No college or some college, associate degree, less than associate degree
+-   Not meaningful
+    -   More likely:
+        -   Did not attend or graduate
+        -   Graduated from a for-profit
+    -   Less likely:
+        -   Graduated from post-secondary
+        -   ASsociate or higher
+-   No MN employment record
+    -   More likely:
+        -   Did not attend or graduate
+        -   Graduated from a for-profit, or public 4-year
+        -   Master degree or higher
+        -   Outside Minnesota
+    -   Less likely:
+        -   Graduated
+        -   Graduated from a 2-year
+        -   Associate degree, less than associate degree
+        -   In region
+
+<br>
+
+## attended.ps.within.first.year.hsgrad
+
+-   One year after graduating;
+    -   Individuals that did not attend college, or attended not immediately after graduating college were significantly more likely to have meaningful employment in the region.
+    -   These individuals were significantly more likely to not have meaningful employment.
+    -   Significantly more likely to not have a MN employment record.
+-   Five years after graduating;
+    -   Significantly more likely to not have meaningful employment
+    -   Individuals who did not attend post-secondary were significantly more likely to not have a MN employment record
+-   Ten years after graduating;
+    -   individuals that never attended post-secondary were significantly less likely to have meaningful employment in the region.
+    -   Individuals that did not attend post-secondary were significantly more likely to not have a MN employment record.
+
+::: panel-tabset
+### One year after graduating
+
+```{r post-secondary attended.ps.within.first.year.hsgrad one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, attended.ps.within.first.year.hsgrad) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$attended.ps.within.first.year.hsgrad, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r post-secondary attended.ps.within.first.year.hsgrad five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, attended.ps.within.first.year.hsgrad) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$attended.ps.within.first.year.hsgrad, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r post-secondary attended.ps.within.first.year.hsgrad ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, attended.ps.within.first.year.hsgrad) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$attended.ps.within.first.year.hsgrad, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## attended.ps
+
+-   One year after graduating; individuals that did not attend post-secondary were;
+    -   more likely to have meaningful employment in the region.
+    -   Significantly more likely to not have meaningful employment
+    -   Significantly more likely to not have a MN employment record
+-   Five years after graduating; individuals that did not attend post-secondary were;
+    -   More likely to not have meaningful employment
+    -   Significantly more likely to not have a MN employment record
+-   Ten years after graduating; individuals that did not attend post-secondary were;
+    -   Less likely to have meaningful employment in region or Minnesota
+    -   Significantly more likely to not have a MN employment record.
+
+::: panel-tabset
+### One year after graduating
+
+```{r post-secondary attended.ps one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, attended.ps) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$attended.ps, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r post-secondary attended.ps five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, attended.ps) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$attended.ps, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r post-secondary attended.ps ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, attended.ps) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$attended.ps, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## ps.grad
+
+-   One year after graduating; individuals that graduated from post-secondary were;
+    -   less likely to have meaningful employment in the region.
+    -   Significantly more likely to attend post-secondary
+    -   Significantly less likely to not have meaningful employment
+    -   Significantly more likely to not have a MN employment record
+-   Five years after graduating; individuals that did not graduate from post-secondary were;
+    -   More likely to have meaningful employment in Minnesota
+    -   Significantly less likely to not have meaningful employment
+    -   Significantly less likely to not have a MN employment record
+-   Ten years after graduating; individuals that did not attend post-secondary were;
+    -   Slightly more likely to have meaningful employment in the region or in Minnesota
+
+::: panel-tabset
+### One year after graduating
+
+```{r post-secondary ps.grad one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, ps.grad) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  filter(ps.grad != "Attending ps") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$ps.grad, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r post-secondary ps.grad five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, ps.grad) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  filter(ps.grad != "Attending ps") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$ps.grad, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r post-secondary ps.grad ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, ps.grad) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  filter(ps.grad != "Attending ps") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$ps.grad, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## ps.grad.InstitutionSector
+
+A quick reminder on what the codes mean;
+
+-   1 - Public, 4-year or above
+-   2 - Private not-for-profit, 4-year or above
+-   4 - Public, 2-year
+-   10 - went to multiple sectors
+-   11 - Includes all of the following
+    -   3 - Private for-profit, 4-year or above
+    -   6 - Private for-profit, 2-year
+    -   9 - Private for-profit, less-than-2-year
+
+<!-- -->
+
+-   One year after graduating;
+    -   Have meaningful employment in region
+        -   Less likely: 1, 2
+        -   More likely: 4
+    -   Meaningful emp in MN
+        -   Less likely: 2
+    -   No MN employment record
+        -   More likely: 11 (low numbers though)
+-   Five years after graduating;
+    -   Have meaningful employment in region
+        -   Less likely: 1, 2
+        -   More likely: 4
+    -   Meaningful emp in MN
+        -   Less likely: 4
+        -   More likely: 1, 11, 2
+    -   Not meaningful
+        -   Less likely: 10
+    -   No MN employment record
+        -   Less likely: 10
+        -   More likely: 11, 2
+-   Ten years after graduating;
+    -   Have meaningful employment in region
+        -   Less likely: 1, 2, 11,
+        -   More likely: 4
+    -   Meaningful emp in MN
+        -   Less likely: 4, 11
+        -   More likely: 1, 2
+    -   Not meaningful
+        -   More likely: 11 (low numbers)
+    -   No MN employment record
+        -   Less likely:
+        -   More likely: 11
+
+::: panel-tabset
+### One year after graduating
+
+```{r post-secondary ps.grad.InstitutionSector one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, ps.grad.InstitutionSector) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  filter(ps.grad.InstitutionSector != "Did not grad") %>%
+  filter(ps.grad.InstitutionSector != "Never attended ps") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$ps.grad.InstitutionSector, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r post-secondary ps.grad.InstitutionSector five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, ps.grad.InstitutionSector) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  filter(ps.grad.InstitutionSector != "Did not grad") %>%
+  filter(ps.grad.InstitutionSector != "Never attended ps") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$ps.grad.InstitutionSector, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r post-secondary ps.grad.InstitutionSector ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, ps.grad.InstitutionSector) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  filter(ps.grad.InstitutionSector != "Did not grad") %>%
+  filter(ps.grad.InstitutionSector != "Never attended ps") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$ps.grad.InstitutionSector, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## highest.cred.level
+
+-   One year after graduating;
+    -   Have meaningful employment in region
+        -   Less likely: Bachelor degree or higher
+        -   More likely: No college, Associate degree
+    -   Meaningful emp in MN
+        -   Less likely: Bachelor or higher
+        -   More likely: No college
+    -   Not meaningful
+        -   Less likely: Less than associate degree or higher
+        -   More likely: No college
+    -   No MN employment record
+        -   Less likely: Some college or higher
+        -   More likely: No college
+-   Five years after graduating;
+    -   Have meaningful employment in region
+        -   Less likely: Bachelor degree or higher
+        -   More likely: Less than associate degree to associate degree
+    -   Meaningful emp in MN
+        -   Less likely: Bachelor degree
+        -   More likely: Master degree or higher
+    -   Not meaningful
+        -   Less likely: Master degree or higher
+        -   More likely: No college or some college
+    -   No MN employment record
+        -   Less likely: Associate degree or higher
+        -   More likely: No college
+-   Ten years after graduating;
+    -   Have meaningful employment in region
+        -   Less likely: Master degree, No college
+        -   More likely: Associate degree, Less than associate degree
+    -   Meaningful emp in MN
+        -   Less likely: No college, some college, Associate degree, Less than associate degree
+        -   More likely: Bachelor degree or higher
+    -   Not meaningful
+        -   Less likely: Associate degree or higher
+        -   More likely: Some college
+    -   No MN employment record
+        -   Less likely: Less than Associate degree
+        -   More likely:
+
+::: panel-tabset
+### One year after graduating
+
+```{r post-secondary highest.cred.level one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, highest.cred.level) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$highest.cred.level, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r post-secondary highest.cred.level five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, highest.cred.level) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$highest.cred.level, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r post-secondary highest.cred.level ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, highest.cred.level) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$highest.cred.level, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## ps.grad.location
+
+-   One year after graduating;
+
+    -   Have meaningful employment in region
+        -   Less likely: In MN, Inside and outside MN, Outside MN
+        -   More likely: In region
+    -   Meaningful emp in MN
+        -   Less likely: Outside Minnesota
+        -   More likely:
+    -   Not meaningful
+        -   Less likely: Inside and outside region, Inside and outside Minnesota
+        -   More likely: Outside Minnesota
+    -   No MN employment record
+        -   Less likely: Inside and outside region
+        -   More likely: Inside and outside Minnesota, outside Minnesota
+
+-   Five years after graduating;
+
+    -   Have meaningful employment in region
+        -   Less likely: In MN, Inside and outside MN, Outside MN
+        -   More likely: In region
+    -   Meaningful emp in MN
+        -   Less likely: In region, inside and outside region, inside and outside MN, outside MN
+        -   More likely: In Minnesota
+    -   Not meaningful
+        -   Less likely: Inside and outside region, Inside and outside Minnesota
+        -   More likely:
+    -   No MN employment record
+        -   Less likely: Inside and outside region, Inside and outside MN
+        -   More likely: outside Minnesota
+
+-   Ten years after graduating;
+
+    -   Have meaningful employment in region
+        -   Less likely: In MN, Inside and outside MN, Outside Minnesota
+        -   More likely: In region
+    -   Meaningful emp in MN
+        -   Less likely: In region
+        -   More likely: In Minnesota, Inside and outside Minnesota
+    -   Not meaningful
+        -   Less likely: Inside and outside region, Inside and outside Minnesota, outside Minnesota
+        -   More likely:
+    -   No MN employment record
+        -   Less likely: In region
+        -   More likely: Inside and outside Minnesota, Outside minnesota
+
+::: panel-tabset
+### One year after graduating
+
+```{r post-secondary ps.grad.location one year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.1, ps.grad.in.same.edr, ps.grad.in.MN) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  mutate(ps.grad.location = ifelse(ps.grad.in.same.edr == "In same EDR", "In region",
+                                   ifelse(ps.grad.in.same.edr == "Outside EDR" & ps.grad.in.MN == "In Minnesota", "In state",
+                                          ifelse(ps.grad.in.same.edr == "Inside and outside same EDR" & ps.grad.in.MN == "In Minnesota", "In state",
+                                                 ifelse(ps.grad.in.MN == "Outside MN", "Outside Minnesota",
+                                                        ifelse(ps.grad.in.same.edr == "Inside and outside same EDR", "Inside and outside region",
+                                                        ifelse(ps.grad.in.MN == "Inside and outside MN", "Inside and outside MN", as.character(ps.grad.in.MN)))))))) %>%
+  droplevels() %>%
+  filter(!ps.grad.location %in% c("Did not grad", "Never attended ps")) %>%
+  mutate(ps.grad.location = fct_relevel(ps.grad.location, "In region", "Inside and outside region", "In MN", "Inside and outside MN", "Outside Minnesota"))
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$ps.grad.location, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r post-secondary ps.grad.location five year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.5, ps.grad.in.same.edr, ps.grad.in.MN) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  mutate(ps.grad.location = ifelse(ps.grad.in.same.edr == "In same EDR", "In region",
+                                   ifelse(ps.grad.in.same.edr == "Outside EDR" & ps.grad.in.MN == "In Minnesota", "In state",
+                                          ifelse(ps.grad.in.same.edr == "Inside and outside same EDR" & ps.grad.in.MN == "In Minnesota", "In state",
+                                                 ifelse(ps.grad.in.MN == "Outside MN", "Outside Minnesota",
+                                                        ifelse(ps.grad.in.same.edr == "Inside and outside same EDR", "Inside and outside region",
+                                                        ifelse(ps.grad.in.MN == "Inside and outside MN", "Inside and outside MN", as.character(ps.grad.in.MN)))))))) %>%
+  droplevels() %>%
+  filter(!ps.grad.location %in% c("Did not grad", "Never attended ps")) %>%
+  mutate(ps.grad.location = fct_relevel(ps.grad.location, "In region", "Inside and outside region", "In MN", "Inside and outside MN", "Outside Minnesota"))
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$ps.grad.location, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r post-secondary ps.grad.location ten year}
+data <- meaningful.emp.ne %>%
+  select(grad.year.10, ps.grad.in.same.edr, ps.grad.in.MN) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  mutate(ps.grad.location = ifelse(ps.grad.in.same.edr == "In same EDR", "In region",
+                                   ifelse(ps.grad.in.same.edr == "Outside EDR" & ps.grad.in.MN == "In Minnesota", "In state",
+                                          ifelse(ps.grad.in.same.edr == "Inside and outside same EDR" & ps.grad.in.MN == "In Minnesota", "In state",
+                                                 ifelse(ps.grad.in.MN == "Outside MN", "Outside Minnesota",
+                                                        ifelse(ps.grad.in.same.edr == "Inside and outside same EDR", "Inside and outside region",
+                                                        ifelse(ps.grad.in.MN == "Inside and outside MN", "Inside and outside MN", as.character(ps.grad.in.MN)))))))) %>%
+  droplevels() %>%
+  filter(!ps.grad.location %in% c("Did not grad", "Never attended ps")) %>%
+  mutate(ps.grad.location = fct_relevel(ps.grad.location, "In region", "Inside and outside region", "In MN", "Inside and outside MN", "Outside Minnesota"))
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$ps.grad.location, 
+         title = "Test", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+# Variables to keep
+
+Okay, after this analysis, here is what we will move forward with;
+
+-   Demographics
+    -   Gender
+    -   grad.year.covid
+    -   economic.status
+    -   SpecialEdStatus
+    -   RaceEthnicity
+    -   english.learner
+-   High school characteristics
+    -   Dem_Desc
+-   High school accomplishments
+    -   pseo.participant
+    -   took.ACT
+    -   ap.exam
+    -   ACTCompositeScore
+    -   MCA.M
+    -   MCA.R
+    -   MCA.S
+    -   cte.achievement
+    -   n.cte.courses.taken
+-   Post-secondary
+    -   ps.grad
+    -   ps.grad.InstitutionSector
+    -   highest.cred.level
+    -   ps.grad.location
+
+```{r create new master after analysis}
+master.after.ct <- meaningful.emp.ne %>%
+  mutate(ps.grad.location = ifelse(ps.grad.in.same.edr == "In same EDR", "In region",
+                                   ifelse(ps.grad.in.same.edr == "Outside EDR" & ps.grad.in.MN == "In Minnesota", "In state",
+                                          ifelse(ps.grad.in.same.edr == "Inside and outside same EDR" & ps.grad.in.MN == "In Minnesota", "In state",
+                                                 ifelse(ps.grad.in.MN == "Outside MN", "Outside Minnesota",
+                                                        ifelse(ps.grad.in.same.edr == "Inside and outside same EDR", "Inside and outside region",
+                                                        ifelse(ps.grad.in.MN == "Inside and outside MN", "Inside and outside MN", as.character(ps.grad.in.MN)))))))) %>%
+  select(PersonID, grad.year.covid, economic.status, range.school, pseo.participant, SpecialEdStatus, RaceEthnicity, Dem_Desc, took.ACT, cte.achievement, english.learner, ps.grad, ps.grad.InstitutionSector, highest.cred.level, ps.grad.location, ACTCompositeScore, MCA.M, MCA.R, MCA.S, total.cte.courses.taken,grad.year.1, grad.year.5, grad.year.10)
+  
+write_csv(master.after.ct, "Data/SLEDS/Masters/After analysis/Master-after-ct.csv")
+```
