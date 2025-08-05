@@ -267,14 +267,12 @@ We have quite a few variables remaining, even after MCA analysis. So let's take 
     -   ACTCompositeScore
     -   ap.exam
     -   sat.taken
-    -   ACTCompositeScore
     -   MCA scores
         -   MCA.M
         -   MCA.R
         -   MCA.S
     -   cte.achievement
     -   total.cte.courses.taken
-    -   avg.unemp.rate
 -   Post-secondary
     -   attended.ps.within.first.year.hsgrad
     -   attended.ps
@@ -361,15 +359,23 @@ In the demographics section we will examine the relationship between that paths 
 
 ## **Summary**
 
-| Demographic | Association Strength | Highlights |
-|---------------|:---------:|--------------------------------------------|
-| Gender | Weak to negligible | Females start with higher PS enrollment; males steadily overtake in employment. Disconnection grows for both. |
-| grad.year.covid | Weak | Post-COVID grads attend post-secondary at a lower rate. |
-| economic.status | Moderate to negligible | Low-income students are less likely to pursue PS, and consistently more likely to lack MN employment or be disconnected. |
-| SpecialEdStatus | Moderate to negligible | SPED students consistently show lower engagement in PS and work, and higher disconnection. |
-| RaceEthnicity | Negligible | White and Asian/PI grads show strongest MN employment; Black, Hispanic, and AI groups show consistently higher disconnection risk. |
-| non.english.home | Negligible | Students from non-English-speaking homes have **lower postsecondary enrollment** and are increasingly underrepresented in the MN workforce by year 10, with a high percentage lacking MN employment records. |
-| english.learner | Weak to negligible | English learners start with significantly lower PS participation and grow increasingly disconnected from MN employment systems over time. |
++------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Demographic      | Association Strength   | Highlights                                                                                                                                                                                                   |
++==================+:======================:+==============================================================================================================================================================================================================+
+| Gender           | Weak to negligible     | Females start with higher PS enrollment; males steadily overtake in employment. Disconnection grows for both.                                                                                                |
++------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| grad.year.covid  | Weak                   | Post-COVID grads attend post-secondary at a lower rate.                                                                                                                                                      |
++------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| economic.status  | Moderate to negligible | Low-income students are less likely to pursue PS, and consistently more likely to lack MN employment or be disconnected.                                                                                     |
++------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| SpecialEdStatus  | Moderate to negligible | SPED students consistently show lower engagement in PS and work, and higher disconnection.                                                                                                                   |
++------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| RaceEthnicity    | Negligible             | White and Asian/PI grads show strongest MN employment; Black, Hispanic, and AI groups show consistently higher disconnection risk.                                                                           |
++------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| non.english.home | Negligible             | Students from non-English-speaking homes have **lower postsecondary enrollment** and are increasingly underrepresented in the MN workforce by year 10, with a high percentage lacking MN employment records. |
++------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| english.learner  | Weak to negligible     | English learners start with significantly lower PS participation and grow increasingly disconnected from MN employment systems over time.                                                                    |
++------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 <br>
 
@@ -865,13 +871,19 @@ This is the summary provided by ChatGPT when asked to analyze and interpret.
 
 ### Gender Trends Over Time
 
-| Outcome | 1 Year (F) | 5 Year (F) | 10 Year (F) | 1 Year (M) | 5 Year (M) | 10 Year (M) |
-|-----------|----------|----------|----------|----------|----------|----------|
-| Attending PS | 55.3% | 17.8% | \~0.0% | 43.7% | 13.4% | 0.0% |
-| Meaningful Emp in MN | 6.8% | 24.2% | 28.6% | 8.2% | 24.9% | 31.8% |
-| Meaningful Emp in Region | 10.9% | 19.9% | 21.5% | 15.3% | 24.1% | 24.8% |
-| No MN Emp Record, Not in PS | 7.7% | 17.1% | 30.3% | 11.9% | 19.1% | 28.4% |
-| Not Meaningful, Not in PS | 19.3% | 20.9% | 19.6% | 20.9% | 18.5% | 15.1% |
++-----------------------------+------------+------------+-------------+------------+------------+-------------+
+| Outcome                     | 1 Year (F) | 5 Year (F) | 10 Year (F) | 1 Year (M) | 5 Year (M) | 10 Year (M) |
++=============================+============+============+=============+============+============+=============+
+| Attending PS                | 55.3%      | 17.8%      | \~0.0%      | 43.7%      | 13.4%      | 0.0%        |
++-----------------------------+------------+------------+-------------+------------+------------+-------------+
+| Meaningful Emp in MN        | 6.8%       | 24.2%      | 28.6%       | 8.2%       | 24.9%      | 31.8%       |
++-----------------------------+------------+------------+-------------+------------+------------+-------------+
+| Meaningful Emp in Region    | 10.9%      | 19.9%      | 21.5%       | 15.3%      | 24.1%      | 24.8%       |
++-----------------------------+------------+------------+-------------+------------+------------+-------------+
+| No MN Emp Record, Not in PS | 7.7%       | 17.1%      | 30.3%       | 11.9%      | 19.1%      | 28.4%       |
++-----------------------------+------------+------------+-------------+------------+------------+-------------+
+| Not Meaningful, Not in PS   | 19.3%      | 20.9%      | 19.6%       | 20.9%      | 18.5%      | 15.1%       |
++-----------------------------+------------+------------+-------------+------------+------------+-------------+
 
 **Trend**: Females start with higher PS enrollment; males steadily overtake in employment. Disconnection grows for both.
 
@@ -879,13 +891,19 @@ This is the summary provided by ChatGPT when asked to analyze and interpret.
 
 ### Economic Status Trends Over Time
 
-| Outcome | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
-|------------|----------|----------|----------|----------|----------|----------|
-| Attending PS | 57.4% | 17.8% | \~0.0% | 32.6% | 11.1% | \~0.0% |
-| Meaningful Emp in MN | 6.7% | 26.2% | 32.6% | 9.2% | 21.1% | 25.0% |
-| Meaningful Emp in Region | 11.7% | 21.4% | 22.8% | 16.2% | 23.4% | 23.8% |
-| No MN Emp Record, Not in PS | 8.1% | 17.0% | 28.7% | 13.5% | 20.4% | 30.7% |
-| Not Meaningful, Not in PS | 16.1% | 17.6% | 15.9% | 28.5% | 24.1% | 20.5% |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Outcome                     | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
++=============================+==========+==========+===========+==========+==========+===========+
+| Attending PS                | 57.4%    | 17.8%    | \~0.0%    | 32.6%    | 11.1%    | \~0.0%    |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Meaningful Emp in MN        | 6.7%     | 26.2%    | 32.6%     | 9.2%     | 21.1%    | 25.0%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Meaningful Emp in Region    | 11.7%    | 21.4%    | 22.8%     | 16.2%    | 23.4%    | 23.8%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| No MN Emp Record, Not in PS | 8.1%     | 17.0%    | 28.7%     | 13.5%    | 20.4%    | 30.7%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Not Meaningful, Not in PS   | 16.1%    | 17.6%    | 15.9%     | 28.5%    | 24.1%    | 20.5%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
 
 **Trend**: Low-income students are less likely to pursue PS, and consistently more likely to lack MN employment or be disconnected.
 
@@ -893,13 +911,19 @@ This is the summary provided by ChatGPT when asked to analyze and interpret.
 
 ### Special Education Trends Over Time
 
-| Outcome | 1 Yr (No SPED) | 5 Yr | 10 Yr | 1 Yr (SPED) | 5 Yr | 10 Yr |
-|-------------|----------|----------|----------|----------|----------|----------|
-| Attending PS | 54.2% | 17.0% | \~0.0% | 19.8% | 6.4% | 0.0% |
-| Meaningful Emp in MN | 7.3% | 25.6% | 31.5% | 8.6% | 17.6% | 21.2% |
-| Meaningful Emp in Region | 12.7% | 21.7% | 23.0% | 15.9% | 24.1% | 24.0% |
-| No MN Emp Record, Not in PS | 8.1% | 17.2% | 29.0% | 21.0% | 24.5% | 31.5% |
-| Not Meaningful, Not in PS | 17.8% | 18.5% | 16.5% | 34.8% | 27.5% | 23.3% |
++-----------------------------+----------------+--------+--------+-------------+--------+--------+
+| Outcome                     | 1 Yr (No SPED) | 5 Yr   | 10 Yr  | 1 Yr (SPED) | 5 Yr   | 10 Yr  |
++=============================+================+========+========+=============+========+========+
+| Attending PS                | 54.2%          | 17.0%  | \~0.0% | 19.8%       | 6.4%   | 0.0%   |
++-----------------------------+----------------+--------+--------+-------------+--------+--------+
+| Meaningful Emp in MN        | 7.3%           | 25.6%  | 31.5%  | 8.6%        | 17.6%  | 21.2%  |
++-----------------------------+----------------+--------+--------+-------------+--------+--------+
+| Meaningful Emp in Region    | 12.7%          | 21.7%  | 23.0%  | 15.9%       | 24.1%  | 24.0%  |
++-----------------------------+----------------+--------+--------+-------------+--------+--------+
+| No MN Emp Record, Not in PS | 8.1%           | 17.2%  | 29.0%  | 21.0%       | 24.5%  | 31.5%  |
++-----------------------------+----------------+--------+--------+-------------+--------+--------+
+| Not Meaningful, Not in PS   | 17.8%          | 18.5%  | 16.5%  | 34.8%       | 27.5%  | 23.3%  |
++-----------------------------+----------------+--------+--------+-------------+--------+--------+
 
 **Trend**: SPED students consistently show lower engagement in PS and work, and higher disconnection.
 
@@ -907,25 +931,37 @@ This is the summary provided by ChatGPT when asked to analyze and interpret.
 
 ### Race/Ethnicity Snapshot
 
-| Race | Attending PS (1yr) | Emp MN (10yr) | No MN Record (10yr) | Not Meaningful (10yr) |
-|--------------|--------------|--------------|--------------|--------------|
-| American Indian (AI) | 26.0% | 21.6% | 32.1% | 27.3% |
-| Asian/PI | 52.0% | 30.2% | 40.2% | 15.6% |
-| Black | 38.7% | 25.3% | 36.0% | 25.2% |
-| Hispanic | 31.2% | 25.1% | 40.2% | 17.5% |
-| White | 51.1% | 30.5% | 28.8% | 17.0% |
++----------------------+--------------------+---------------+---------------------+-----------------------+
+| Race                 | Attending PS (1yr) | Emp MN (10yr) | No MN Record (10yr) | Not Meaningful (10yr) |
++======================+====================+===============+=====================+=======================+
+| American Indian (AI) | 26.0%              | 21.6%         | 32.1%               | 27.3%                 |
++----------------------+--------------------+---------------+---------------------+-----------------------+
+| Asian/PI             | 52.0%              | 30.2%         | 40.2%               | 15.6%                 |
++----------------------+--------------------+---------------+---------------------+-----------------------+
+| Black                | 38.7%              | 25.3%         | 36.0%               | 25.2%                 |
++----------------------+--------------------+---------------+---------------------+-----------------------+
+| Hispanic             | 31.2%              | 25.1%         | 40.2%               | 17.5%                 |
++----------------------+--------------------+---------------+---------------------+-----------------------+
+| White                | 51.1%              | 30.5%         | 28.8%               | 17.0%                 |
++----------------------+--------------------+---------------+---------------------+-----------------------+
 
 **Trend**: White and Asian/PI grads show strongest MN employment; Black, Hispanic, and AI groups show consistently higher disconnection risk.
 
 ### Non-English speakers at home
 
-| Outcome | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
-|------------|----------|----------|----------|----------|----------|----------|
-| Attending PS | 50.0% | 15.7% | \~0.0% | 36.4% | 13.9% | 0.0% |
-| Meaningful Emp in MN | 7.4% | 24.7% | 30.4% | 10.5% | 19.4% | 23.2% |
-| Meaningful Emp in Region | 13.1% | 22.2% | 23.4% | 14.0% | 17.0% | 13.6% |
-| No MN Emp Record, Not in PS | 9.5% | 17.7% | 28.9% | 18.6% | 30.4% | 47.7% |
-| Not Meaningful, Not in PS | 20.1% | 19.7% | 17.4% | 20.5% | 19.3% | 15.5% |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Outcome                     | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
++=============================+==========+==========+===========+==========+==========+===========+
+| Attending PS                | 50.0%    | 15.7%    | \~0.0%    | 36.4%    | 13.9%    | 0.0%      |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Meaningful Emp in MN        | 7.4%     | 24.7%    | 30.4%     | 10.5%    | 19.4%    | 23.2%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Meaningful Emp in Region    | 13.1%    | 22.2%    | 23.4%     | 14.0%    | 17.0%    | 13.6%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| No MN Emp Record, Not in PS | 9.5%     | 17.7%    | 28.9%     | 18.6%    | 30.4%    | 47.7%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Not Meaningful, Not in PS   | 20.1%    | 19.7%    | 17.4%     | 20.5%    | 19.3%    | 15.5%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
 
 **Trend**: Students from non-English-speaking homes have **lower postsecondary enrollment** and are increasingly underrepresented in the MN workforce by year 10, with a high percentage lacking MN employment records.
 
@@ -933,13 +969,19 @@ This is the summary provided by ChatGPT when asked to analyze and interpret.
 
 ### English learners
 
-| Outcome | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
-|------------|----------|----------|----------|----------|----------|----------|
-| Attending PS | 51.3% | 16.1% | \~0.0% | 23.6% | 7.2% | 0.0% |
-| Meaningful Emp in MN | 7.4% | 25.0% | 30.6% | 9.5% | 17.9% | 18.5% |
-| Meaningful Emp in Region | 12.9% | 22.1% | 23.3% | 15.7% | 21.5% | 17.6% |
-| No MN Emp Record, Not in PS | 8.9% | 17.4% | 28.9% | 22.1% | 29.1% | 43.1% |
-| Not Meaningful, Not in PS | 19.4% | 19.4% | 17.2% | 29.1% | 24.3% | 20.8% |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Outcome                     | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
++=============================+==========+==========+===========+==========+==========+===========+
+| Attending PS                | 51.3%    | 16.1%    | \~0.0%    | 23.6%    | 7.2%     | 0.0%      |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Meaningful Emp in MN        | 7.4%     | 25.0%    | 30.6%     | 9.5%     | 17.9%    | 18.5%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Meaningful Emp in Region    | 12.9%    | 22.1%    | 23.3%     | 15.7%    | 21.5%    | 17.6%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| No MN Emp Record, Not in PS | 8.9%     | 17.4%    | 28.9%     | 22.1%    | 29.1%    | 43.1%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Not Meaningful, Not in PS   | 19.4%    | 19.4%    | 17.2%     | 29.1%    | 24.3%    | 20.8%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
 
 **Trend**: English learners start with significantly lower PS participation and grow increasingly disconnected from MN employment systems over time.
 
@@ -963,12 +1005,17 @@ We will take a look at the following variables;
 
 ## Summary
 
-| High School Characteristics | Association Strength | Highlights |
-|---------------|:-----------:|--------------------------------------------|
-| Dem_Desc | Negligible | Rural graduates had a higher rate of having meaningful employment in the region while urban graduates had a higher rate of meaningful employment in Minnesota. |
-| EDR | Negligible | EDR 5 had a higher rate of meaningful employment in the region and not having a MN employment record. |
-| avg.unemp.rate | Moderate | Higher unemployment was associated with a slight **increase in postsecondary attendance** and a **decrease in meaningful employment**, particularly within Minnesota. While these effects were small, they remained consistent across all three time points. |
-| avg.wages.pct.state | Most important | Individuals from **higher-wage counties** were significantly more likely to have **meaningful employment within Minnesota**, even years after graduation. Conversely, they were less likely to attend post-secondary school immediately after graduation. |
++-----------------------------+----------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| High School Characteristics | Association Strength | Highlights                                                                                                                                                                                                                                                   |
++=============================+:====================:+==============================================================================================================================================================================================================================================================+
+| Dem_Desc                    | Negligible           | Rural graduates had a higher rate of having meaningful employment in the region while urban graduates had a higher rate of meaningful employment in Minnesota.                                                                                               |
++-----------------------------+----------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| EDR                         | Negligible           | EDR 5 had a higher rate of meaningful employment in the region and not having a MN employment record.                                                                                                                                                        |
++-----------------------------+----------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| avg.unemp.rate              | Moderate             | Higher unemployment was associated with a slight **increase in postsecondary attendance** and a **decrease in meaningful employment**, particularly within Minnesota. While these effects were small, they remained consistent across all three time points. |
++-----------------------------+----------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| avg.wages.pct.state         | Most important       | Individuals from **higher-wage counties** were significantly more likely to have **meaningful employment within Minnesota**, even years after graduation. Conversely, they were less likely to attend post-secondary school immediately after graduation.    |
++-----------------------------+----------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 <br>
 
@@ -1536,54 +1583,71 @@ We are going to analyze the following variables;
 
 -   pseo.participant
 -   took.ACT
--   ap.exam
 -   ACTCompositeScore
+-   ap.exam
+-   sat.taken
 -   MCA scores
     -   MCA.M
     -   MCA.R
     -   MCS.S
 -   cte.achievement
--   n.cte.courses.taken
--   avg.unemp.rate
+-   total.cte.courses.taken
 
-The analysis provides the following insights;
+**Summary**
 
--   Higher performing students with all the tests tended to
-    -   attend post-secondary at significantly higher rates
-    -   have meaningful workforce participation in Minnesota at higher rates.
--   Students that attended PSEO all tended to
-    -   attend post-secondary at significantly higher rates
-    -   have meaningful workforce participation in Minnesota at higher rates
--   Students involved in CTE tended to;
-    -   Have meaningful workforce participation in Minnesota at higher rates
-    -   Not attend post-secondary at higher rates.
++-----------------------------+---------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+| High School Accomplishments | Association strength      | Highlights                                                                                                                                      |
++=============================+===========================+=================================================================================================================================================+
+| pseo.participant            | Moderate to negligible    | Graduates that participated in PSEO were significantly more likely to attend post-secondary                                                     |
++-----------------------------+---------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+| took.ACT                    | Relatively strong to weak | Graduates that took the ACT were significantly more likely to attend post-secondary.                                                            |
+|                             |                           |                                                                                                                                                 |
+|                             |                           | Graduates that did not take the ACT were significantly more likely to have meaningful employment in the region (not in MN), or be disconnected. |
++-----------------------------+---------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+| ACTCompositeScore           | Moderate                  | **Post-secondary attendees** scored highest, and **those with no MN employment record** scored lowest.                                          |
+|                             |                           |                                                                                                                                                 |
+|                             |                           | ACT performance appears to strongly predict **educational continuation and labor market engagement**.                                           |
++-----------------------------+---------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+| ap.exam                     |                           |                                                                                                                                                 |
++-----------------------------+---------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+| MCA.                        |                           |                                                                                                                                                 |
++-----------------------------+---------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+|                             |                           |                                                                                                                                                 |
++-----------------------------+---------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+|                             |                           |                                                                                                                                                 |
++-----------------------------+---------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+|                             |                           |                                                                                                                                                 |
++-----------------------------+---------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+|                             |                           |                                                                                                                                                 |
++-----------------------------+---------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
+|                             |                           |                                                                                                                                                 |
++-----------------------------+---------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+
 
 <br>
 
 ## pseo.participant
 
--   One year after graduating, PSEO participants are;
-    -   Less likely to have meaningful employment in the region and Minnesota.
-    -   Significantly more likely to attend post-secondary.
-    -   Significantly less likely to not have meaningful employment
-    -   Significantly less likely to not have a MN employment record.
--   Five years after graduating, PSEO participants are;
-    -   Less likely to have meaningful employment in the region.
-    -   Slightly more likely to have meaningful employment in Minnesota.
-    -   Significantly more likely to attend post-secondary.
-    -   Significantly less likely to not have meaningful employment
-    -   Significantly less likely to not have a MN employment record.
--   Ten years after graduating
-    -   Significantly more likely to have meaningful employment in Minnesota.
-    -   Significantly less likely to not have a MN employment record.
+There is a statistically significant association between whether a graduate partilcipates in PSEO and their employment state. But the association started as moderate and ended as negligible.
+
+Through all the years, graduates that participated in PSEO were significantly more likely to attend post-secondary.
 
 ::: panel-tabset
 ### One year after graduating
 
+There is a statistically significant, moderate association between a whether a graduate has taken PSEO and the employment state.
+
+Graduates that took PSEO courses;
+
+-   had lower rates of meaningful employment in the region
+-   had SIGNIFICANTLY higher rates of attending post-secondary
+-   had significantly lower rates of not having meaningful employment
+-   had significantly lower rates of not having a MN employment record.
+
 ```{r hs accomplishments pseo.participant one year}
 data <- meaningful.emp.central %>%
   select(grad.year.1, pseo.participant) %>%
-  filter(grad.year.1 != "After 2023") %>%
+  filter(grad.year.1 != "After 2023",
+         pseo.participant != is.na(pseo.participant)) %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$pseo.participant, 
@@ -1594,10 +1658,17 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$pseo.participant,
 
 ### Five years after graduating
 
+There is a statistically significant, weak association between a whether a graduate has taken PSEO and the employment state.
+
+Graduates that took PSEO courses;
+
+-   had higher rates of attending post-secondary
+
 ```{r hs accomplishments pseo.participant five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, pseo.participant) %>%
-  filter(grad.year.5 != "After 2023") %>%
+  filter(grad.year.5 != "After 2023",
+         pseo.participant != is.na(pseo.participant)) %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$pseo.participant, 
@@ -1608,10 +1679,17 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$pseo.participant,
 
 ### Ten years after graduating
 
+There is a statistically significant, negligible association between a whether a graduate has taken PSEO and the employment state.
+
+Graduates that took PSEO courses;
+
+-   slightly lower rates of not having meaningful employmernt.
+
 ```{r hs accomplishments pseo.participant ten year}
 data <- meaningful.emp.central %>%
   select(grad.year.10, pseo.participant) %>%
-  filter(grad.year.10 != "After 2023") %>%
+  filter(grad.year.10 != "After 2023",
+         pseo.participant != is.na(pseo.participant)) %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$pseo.participant, 
@@ -1625,19 +1703,21 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$pseo.participant,
 
 ## took.ACT
 
--   One year after graduating, individuals that took the ACT are;
-    -   Significantly more likely to attend post-secondary.
-    -   Significantly less likely to not have meaningful employment
-    -   Significantly less likely to not have a MN employment record.
--   Five years after graduating, individuals that took the ACT are;
-    -   Slightly more likely to have meaningful employment in Minnesota.
-    -   Significantly more likely to attend post-secondary.
-    -   Significantly less likely to not have a MN employment record.
--   Ten years after graduating, individuals that took the ACT are;
-    -   Significantly more likely to have meaningful employment in Minnesota.
+There is a statistically significant association between whether a graduate takes the ACT and their employment state. The association started as relatively strong and ended as weak.
+
+Through all the years, graduates that took the ACT were significantly more likely to attend post-secondary. Graduates that did not take the ACT were significantly more likely to have meaningful employment in the region (not in MN), or be disconnected.
 
 ::: panel-tabset
 ### One year after graduating
+
+There is a statistically significant, relatively strong association between a whether a graduate has taken the ACT and the employment state.
+
+Graduates that;
+
+-   did not take the ACT had higher rates of meaningful employment in the region
+-   took the ACT had SIGNIFICANTLY higher rates of attending post-secondary
+-   did not take the ACT had SIGNIFICANTLY higher rates of not having meaningful employment
+-   did not take the ACT had significantly higher rates of not having a MN employment record.
 
 ```{r hs accomplishments took.ACT one year}
 data <- meaningful.emp.central %>%
@@ -1653,6 +1733,16 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$took.ACT,
 
 ### Five years after graduating
 
+There is a statistically significant, moderate association between a whether a graduate has taken the ACT and the employment state.
+
+Graduates that;
+
+-   did not take the ACT had higher rates of meaningful employment in the region
+-   did not take the ACT had lower rates of meaningful employment in MN
+-   did not take the ACT had SIGNIFICANTLY lower rates of attending post-secondary
+-   did not take the ACT had SIGNIFICANTLY higher rates of not having meaningful employment
+-   did not take the ACT had significantly higher rates of not having a MN employment record.
+
 ```{r hs accomplishments took.ACT five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, took.ACT) %>%
@@ -1666,6 +1756,13 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$took.ACT,
 ```
 
 ### Ten years after graduating
+
+There is a statistically significant, weak association between a whether a graduate has taken the ACT and the employment state.
+
+Graduates that;
+
+-   did not take the ACT had higher rates of meaningful employment in the region
+-   did not take the ACT had lower rates of meaningful employment in MN
 
 ```{r hs accomplishments took.ACT ten year}
 data <- meaningful.emp.central %>%
@@ -1684,19 +1781,26 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$took.ACT,
 
 ## ACTCompositeScore
 
--   One year after graduating
-    -   Individuals attending post-secondary had higher scores.
-    -   Individuals with meaningful workforce participation in the region had lower scores.
--   Five years after graduating
-    -   Individuals with meaningful wf participation in the region had lower scores.
-    -   Individuals with meaningful employment in Minnesota had higher scores
-    -   Individuals attending post-secondary had higher scores
--   Ten years after graduating
-    -   Individuals with meaningful workforce participation in Minnesota had higher scores
-    -   Individuals with no MN employment record had higher scores.
+There is a statistically significant association between the ACT Compite Score of a graduate and their employment state.
+
+Through all the years, the main trend was;
+
+-   Graduates with meaningful employment in the region had lowest ACT Composite Scores than all other states.
+-   Graduates with meaningful employment in MN had second lowest ACT Composite Scores
+-   No MN employment record had high ACT Composite Scores as the years progressed.
+-   Graduates attending post-secondary had the highest.
 
 ::: panel-tabset
 ### One year after graduating
+
+The p-value indicates a significant difference between one of the groups.
+
+Graduates that;
+
+-   attended post-secondary had ACT Composite Scores 300% higher than graduates who had meaningful employment participation in the region or in Minnesota.
+-   had meaningful employment had ACT Composite Scores 31% higher than graduates with meaningful employment in the region.
+-   Graduates with no meaningful employment had an ACT Composite Score 58% higher than graduates with meaningful employment in the region, 27% higher than graduates with employment in Minnesota, and scores 274% lower than graduates who attended post-secondary.
+-   Graduates with no MN employment record has ACT Composite Scores 138% higher than graduates with meaningful employment in the region, 107% higher than graduates with meaningful employment in MN, 194% lower than graduates attending post-secondary, and 80% higher than graduates with no meaningful employment.
 
 ```{r hs accomplishments ACTCompositeScore one year}
 data <- meaningful.emp.central %>%
@@ -1751,6 +1855,15 @@ TukeyHSD(summary)
 
 ### Five years after graduating
 
+The p-value indicates a significant difference between one of the groups.
+
+Graduates that;
+
+-   attended post-secondary had ACT Composite Scores 250% higher than graduates who had meaningful employment participation in the region, 52% higher than graduates with meaningful employment in Minnesota.
+-   had meaningful employment had ACT Composite Scores 197% higher than graduates with meaningful employment in the region.
+-   Graduates with no meaningful employment had an ACT Composite Score 108% higher than graduates with meaningful employment in the region, 89% lower than graduates with employment in Minnesota, and scores 141% lower than graduates who attended post-secondary.
+-   Graduates with no MN employment record has ACT Composite Scores 200% higher than graduates with meaningful employment in the region, 4% higher than graduates with meaningful employment in MN, 48% lower than graduates attending post-secondary, and 93% higher than graduates with no meaningful employment.
+
 ```{r hs accomplishments ACTCompositeScore five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, ACTCompositeScore) %>%
@@ -1803,6 +1916,14 @@ TukeyHSD(summary)
 ```
 
 ### Ten years after graduating
+
+The p-value indicates a significant difference between one of the groups.
+
+Graduates that;
+
+-   had meaningful employment in MN had ACT Composite Scores 144% higher than graduates with meaningful employment in the region.
+-   Graduates with no meaningful employment had an ACT Composite Score 66% higher than graduates with meaningful employment in the region, 78% lower than graduates with employment in Minnesota.
+-   Graduates with no MN employment record had ACT Composite Scores 174% higher than graduates with meaningful employment in the region, 31% higher than graduates with meaningful employment in MN, and 109% higher than graduates with no meaningful employment.
 
 ```{r hs accomplishments ACTCompositeScore ten year}
 data <- meaningful.emp.central %>%
@@ -1860,16 +1981,37 @@ TukeyHSD(summary)
 
 ## MCA.R
 
--   One year after graduating
-    -   Individuals attending post-secondary had higher scores.
--   Five years after graduating
-    -   Individuals with meaningful employment in Minnesota had higher scores
-    -   Individuals attending post-secondary had higher scores
--   Ten years after graduating
-    -   Individuals with no meaningful employment had significantly lower scores.
+MCA Reading scores were consistently associated with post-graduation outcomes across one, five, and ten years. Clear academic gradients were observed, though the strength and pattern of these associations shifted over time.
+
+**Year 1**:\
+
+Students attending *post-secondary* had the highest scores, followed by those with *meaningful employment*. Students with no MN employment record or not meaningful employment scored significantly lower.
+
+**Year 5**:\
+
+The top performers were those with *meaningful employment in Minnesota*, followed closely by *post-secondary attendees*. Those disconnected from both education and meaningful employment continued to score lower.
+
+**Year 10**:\
+
+*Meaningful MN employment* remained strongly associated with higher scores. Interestingly, individuals with *no MN employment record* also had high scores—comparable to those in MN employment—suggesting potential out-of-state or untracked employment. Students in *not meaningful employment* remained the lowest-performing group.
+
+**Summary:**\
+
+Higher MCA Reading scores are consistently linked to stronger early and long-term outcomes—particularly *meaningful employment in Minnesota* and *post-secondary enrollment*. The association weakens slightly by Year 10, but academic achievement remains a clear differentiator, especially for those disengaged from both education and the workforce.
 
 ::: panel-tabset
 ### One year after graduating
+
+The p-value indicates a significant difference between one of the groups.
+
+-   **Attending post-secondary** students had the highest reading scores overall. Their scores were **0.28 to 0.64 points higher** than those in any other group.
+-   **Students with meaningful employment** (either in Minnesota or the region) had moderately high scores, but still lower than those attending post-secondary.
+    -   Those with **meaningful employment in MN** scored **0.04 points higher** than those employed regionally.
+-   The **lowest scores** were found among students who:
+    -   Had **no MN employment record** and were **not attending post-secondary**, or
+    -   Had **not meaningful employment** and were **not attending**.
+    -   These groups scored approximately **0.58–0.64 points lower** than post-secondary attendees.
+-   All pairwise comparisons were statistically significant. The results show a **clear academic gradient**, where higher MCA Reading scores were associated with more favorable early outcomes.
 
 ```{r hs accomplishments MCA.R one year}
 data <- meaningful.emp.central %>%
@@ -1924,6 +2066,13 @@ TukeyHSD(summary)
 
 ### Five years after graduating
 
+-   **Meaningful employment in Minnesota** was associated with the **highest reading scores** at Year 5, with scores **0.18 points higher** than those with meaningful employment in the region.
+-   **Post-secondary attendees** also had relatively high scores, about **0.28 points higher** than those in regional employment, and **0.10 points higher** than those with meaningful MN employment.
+-   **Students not meaningfully employed or not in post-secondary** showed **mixed results**:
+    -   Their scores were slightly **higher than those in regional employment** (+0.04), but still **lower than those in MN employment** (−0.14) and **post-secondary attendees** (−0.24).
+-   **Those with no MN employment record and not in post-secondary** scored **below every group except those not meaningfully employed**, with scores **\~0.13 lower than regional employment**, **\~0.05 lower than MN employment**, and **\~0.15 lower than post-secondary attendees**.
+-   The **smallest difference** was between the two lower-performing groups: students with no MN record scored **0.09 points higher** than those with not meaningful employment.
+
 ```{r hs accomplishments MCA.R five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, MCA.R) %>%
@@ -1976,6 +2125,15 @@ TukeyHSD(summary)
 ```
 
 ### Ten years after graduating
+
+-   **Meaningful employment in Minnesota** was associated with the **highest MCA Reading scores** at Year 10.
+    -   Scores were **0.37 points higher** than those with meaningful employment in the region.
+-   **Students with no MN employment record and not in post-secondary** also had **elevated scores** — nearly **identical** to those with meaningful MN employment.
+    -   This group scored **0.37 points higher** than those in regional employment.
+-   **Students with not meaningful employment and not in post-secondary** had the **lowest reading scores overall**.
+    -   Their scores were **0.36 points lower** than those with no MN record and **0.36 points lower** than those with MN employment.
+    -   The difference between them and those with regional employment, however, was **not statistically significant** (+0.01, p = 0.82).
+-   The **difference between no MN employment record and meaningful MN employment** was **not statistically significant** either (+0.006, p = 0.92), suggesting similar reading performance between these two groups.
 
 ```{r hs accomplishments MCA.R ten year}
 data <- meaningful.emp.central %>%
@@ -2033,17 +2191,47 @@ TukeyHSD(summary)
 
 ## MCA.S
 
--   One year after graduating
-    -   Individuals attending post-secondary had higher scores.
--   Five years after graduating
-    -   Individuals with meaningful employment in Minnesota had higher scores
-    -   Individuals attending post-secondary had higher scores
--   Ten years after graduating
-    -   Individuals with no meaningful employment had significantly lower scores.
-    -   Individuals with meaningful employment in Minnesota had higher scores.
+MCA Science scores consistently aligned with post-graduation outcomes, showing clear academic gradients that persisted over time. While some differences narrowed by Year 10, the overall pattern remained stable.
+
+**Year 1**
+
+-   **Post-secondary attendees** had the **highest Science scores**, followed by those with **meaningful MN employment**.
+-   Students with **not meaningful employment** or **no MN employment record** scored significantly lower.
+-   Most group differences were statistically significant, indicating a strong early link between academic performance and immediate outcomes.
+
+**Year 5**
+
+-   **Post-secondary** and **meaningful MN employment** continued to be associated with the **highest Science scores**.
+
+-   Students with **no MN record** scored below these top groups but still significantly higher than those not meaningfully employed.
+
+-   The difference between **not meaningful employment** and **regional employment** was not significant, suggesting convergence at lower performance levels.
+
+**Year 10**
+
+-   **Meaningful MN employment** remained tied to the **highest scores**.
+
+<!-- -->
+
+-   Interestingly, those with **no MN record** also had relatively high scores—nearly on par with MN-employed peers—suggesting out-of-state or untracked employment among academically stronger individuals.
+
+-   Students with **not meaningful employment** consistently had the **lowest Science scores**, though differences with other low-engagement groups became statistically insignificant in some cases
+
+**Summary**\
+
+MCA Science scores are strongly predictive of positive post-graduation outcomes—particularly **post-secondary participation** and **meaningful employment in Minnesota**. By Year 10, the distinction between high- and low-performing groups softens slightly, but academic achievement in high school remains a clear marker of long-term engagement in education or the workforce.
 
 ::: panel-tabset
 ### One year after graduating
+
+-   **Post-secondary attendees** had the **highest Science scores**, averaging nearly **0.45 points higher** than those with meaningful regional employment and **\~0.55 points higher** than those with not meaningful employment.
+-   **Meaningful employment in Minnesota** was associated with moderately high scores. These were **0.42 points lower than post-secondary attendees** but slightly higher than those with regional employment.
+-   **Not meaningful employment** was linked to **significantly lower scores**, trailing post-secondary attendees by over **0.54 points**.
+-   **No MN employment record** students had scores slightly below most other groups, but the difference with regional employment was **not statistically significant**.
+
+**Conclusion:**\
+
+Higher MCA Science scores are strongly linked to **post-secondary enrollment** and **meaningful employment**, particularly within Minnesota. The results suggest that Science proficiency in high school aligns closely with early academic and workforce engagement.
 
 ```{r hs accomplishments MCA.S one year}
 data <- meaningful.emp.central %>%
@@ -2098,6 +2286,17 @@ TukeyHSD(summary)
 
 ### Five years after graduating
 
+-   **Post-secondary attendees** and those with **meaningful employment in Minnesota** had the **highest Science scores**.
+    -   Post-secondary students scored **0.39 points higher** than those with regional employment and **0.15 points higher** than those with MN employment.
+-   **Meaningful employment in Minnesota** was associated with **strong Science scores**, scoring **0.24 points above** regional employment and well above all non-engaged groups.
+-   **Students with no MN employment record** scored **below MN-employed peers** but still **0.17 points above** those with regional employment.
+-   **Students with not meaningful employment and not attending post-secondary** had the **lowest scores overall**, nearly **0.39 points below** post-secondary attendees and **0.24 points below** those with MN employment.
+-   The difference between **not meaningful employment** and **regional employment** was **not statistically significant**, suggesting similar performance levels.
+
+**Conclusion:**\
+
+By Year 5, Science scores continue to track with more favorable outcomes, especially **post-secondary education** and **meaningful MN employment**. Academic engagement in high school appears to differentiate those more securely attached to the labor force or continuing education.
+
 ```{r hs accomplishments MCA.S five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, MCA.S) %>%
@@ -2150,6 +2349,15 @@ TukeyHSD(summary)
 ```
 
 ### Ten years after graduating
+
+-   **Meaningful employment in Minnesota** was associated with the **highest Science scores**, averaging **0.23 points higher** than those in regional employment.
+-   **Students with no MN employment record** also had **elevated scores**, about **0.18 points above** those in regional employment and **only 0.05 points below** those with MN employment.
+-   The difference between **not meaningful employment** and **regional employment** was **not statistically significant** (p = 0.67), suggesting similar academic profiles.
+-   **Students not meaningfully employed and not in post-secondary** had the **lowest scores**, scoring **0.24 points below** MN-employed peers and **0.20 points below** those with no MN record.
+
+**Conclusion:**\
+
+By Year 10, high school Science performance continues to differentiate individuals in **meaningful MN employment** or possibly **out-of-state or untracked employment**. Those disengaged from both the labor force and post-secondary education remain the lowest-performing group. While gaps persist, some distinctions—particularly between lower-performing categories—have narrowed over time.
 
 ```{r hs accomplishments MCA.S ten year}
 data <- meaningful.emp.central %>%
@@ -2207,17 +2415,49 @@ TukeyHSD(summary)
 
 ## MCA.M
 
--   One year after graduating
-    -   Individuals attending post-secondary had higher scores.
--   Five years after graduating
-    -   Individuals with meaningful employment in Minnesota had higher scores
-    -   Individuals attending post-secondary had higher scores
--   Ten years after graduating
-    -   Individuals with no meaningful employment had significantly lower scores.
-    -   Individuals with meaningful employment in Minnesota had higher scores.
+MCA Math scores consistently aligned with students' post-graduation pathways across one, five, and ten years. The results show a strong academic gradient, especially in the early years, with slight narrowing of differences by Year 10.
+
+**Year 1**
+
+-   **Post-secondary attendees** had the **highest Math scores**, outperforming all other groups by wide margins—**0.64 points above** regional employment and **0.83 points above** those with no MN employment record.
+
+-   **Meaningful MN employment** was associated with moderately high scores, while **not meaningful employment** and **no MN employment** were linked to the **lowest performance**.
+
+**Year 5**
+
+-   The pattern persisted, with **post-secondary** and **meaningful MN employment** groups maintaining the highest scores.
+
+-   Gaps between top and bottom groups remained large—up to **0.65 points**.
+
+-   Students not meaningfully employed continued to score significantly lower than their peers.
+
+**Year 10**
+
+-   **Meaningful MN employment** remained the top-performing group.
+
+-   Interestingly, those with **no MN employment record** had **relatively high scores**, suggesting potential out-of-state or untracked employment among academically stronger individuals.
+
+-   The difference between **not meaningful employment** and **regional employment** was no longer significant, indicating convergence among lower-performing groups.
+
+**Summary**\
+
+MCA Math scores are the **strongest and most persistent academic predictor** of long-term employment and education outcomes. Higher scores are consistently associated with **post-secondary education** and **meaningful employment**, especially within Minnesota. Although some differences among lower-performing groups narrow over time, Math achievement in high school remains a **clear differentiator** well into adulthood.
 
 ::: panel-tabset
 ### One year after graduating
+
+-   **Post-secondary attendees** had the **highest Math scores by far**, scoring:
+    -   **0.64 points higher** than those with meaningful regional employment
+    -   **0.77–0.83 points higher** than those not meaningfully employed or with no MN employment record
+-   **Meaningful employment in Minnesota** was associated with **moderately high scores**:
+    -   Slightly higher than regional employment (**+0.04 points**)
+
+    -   Roughly **0.17–0.23 points higher** than non-engaged groups
+-   **Not meaningful employment** and **no MN employment record** were linked to the **lowest Math scores**, with all gaps statistically significant.
+
+**Conclusion:**\
+
+Math scores showed the **strongest early academic differentiation** of any subject so far. Students pursuing **post-secondary education** or engaged in **meaningful employment**—especially in Minnesota—scored significantly higher than those disconnected from both education and stable employment.
 
 ```{r hs accomplishments MCA.M one year}
 data <- meaningful.emp.central %>%
@@ -2272,6 +2512,28 @@ TukeyHSD(summary)
 
 ### Five years after graduating
 
+-   **Post-secondary attendees** continued to have the **highest Math scores**, scoring:
+
+    -   **0.60 points above** those with regional employment
+    -   **0.33 points above** those with meaningful MN employment
+    -   Over **0.65 points above** those with not meaningful employment
+
+-   **Meaningful MN employment** was again associated with strong academic performance, with scores:
+
+    -   **0.27 points above** regional employment
+
+    -   **0.32 points above** those not meaningfully employed
+
+    -   **0.17 points above** those with no MN employment record
+
+-   **Students not meaningfully employed and not attending post-secondary** had the **lowest Math scores**, significantly below all other groups.
+
+-   **Students with no MN employment record** had **moderate scores**, higher than non-engaged peers but lower than those in meaningful employment.
+
+**Conclusion:**\
+
+By Year 5, MCA Math scores remain a powerful predictor of post-school engagement. The highest scores are concentrated among those in **post-secondary** or **meaningful MN employment**, while the lowest scores continue to cluster among those **disconnected from both education and stable employment**.
+
 ```{r hs accomplishments MCA.M five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, MCA.M) %>%
@@ -2324,6 +2586,18 @@ TukeyHSD(summary)
 ```
 
 ### Ten years after graduating
+
+-   **Meaningful employment in Minnesota** was linked to the **highest Math scores**, scoring:
+    -   **0.29 points higher** than regional employment
+    -   **0.30 points higher** than those not meaningfully employed
+    -   **0.07 points higher** than those with no MN employment record
+-   **Students with no MN employment record** also had **elevated scores**, **0.22 points above** regional employment and **0.23 points above** those not meaningfully employed.
+-   The difference between **not meaningful employment** and **regional employment** was **not statistically significant**, suggesting convergence among lower-scoring groups.
+-   Students who were **not meaningfully employed and not in post-secondary** had the **lowest scores**, consistent with patterns in earlier years.
+
+**Conclusion:**\
+
+At Year 10, MCA Math scores continue to reflect long-term outcomes. Individuals in **meaningful MN employment** or with **no MN record** had the highest scores, while those disengaged from both education and employment consistently showed the lowest academic performance. Gaps between lower-performing groups narrowed, but high-achieving students remained concentrated in stable employment outcomes.
 
 ```{r hs accomplishments MCA.M ten year}
 data <- meaningful.emp.central %>%
@@ -2381,18 +2655,58 @@ TukeyHSD(summary)
 
 ## cte.achievement
 
--   One year after graduating, individuals that took more CTE were;
-    -   Significantly more likely to have meaningful employment in the region
-    -   Significantly less likely to attend post-secondary.
-    -   Significantly more likely to not have a MN employment record.
--   Five years after graduating, individuals that took the AP exam are;
-    -   Significantly more likely to have meaningful employment in region.
-    -   Significantly less likely to attend post-secondary
--   Ten years after graduating, individuals that took the AP exam are;
-    -   Significantly more likely to have meaningful employment in region.
+This section summarizes the association between **Career and Technical Education (CTE) achievement** and **employment or education outcomes** at one, five, and ten years after high school. While all three chi-square tests were statistically significant, the **Cramér’s V values** suggest a consistently **very weak relationship**:
+
+-   **Year 1:** Cramér’s V = 0.091
+-   **Year 5:** Cramér’s V = 0.069
+-   **Year 10:** Cramér’s V = 0.054
+
+**Key trends over time:**
+
+**Year 1:**
+
+-   **CTE Concentrators/Completers** were more likely to enter **regional or meaningful MN employment** early.
+-   **Non-CTE students** were more likely to pursue **post-secondary education**, with over half still enrolled one year after graduation.
+-   Early workforce engagement was more common among those with higher CTE involvement.
+
+**Year 5:**
+
+-   Differences began to narrow, but **CTE Concentrators/Completers** remained more likely to be in **regional or MN employment**.
+-   **Non-CTE students** continued to show higher levels of **post-secondary engagement**, though to a lesser extent than at Year 1.
+-   The association between CTE status and outcomes weakened overall.
+
+**Year 10:**
+
+-   Outcome distributions became **similar across all CTE groups**.
+-   **Meaningful MN employment** was the most common outcome regardless of CTE status (\~30%).
+-   **Non-CTE students** were slightly more likely to have **no MN employment record**, suggesting possible migration or untracked employment.
+
+**Conclusion:**\
+
+CTE achievement is **modestly associated** with earlier post-graduation outcomes, especially around **regional employment and post-secondary enrollment**. However, by ten years out, differences by CTE status largely **diminish**, indicating that **CTE pathways may shape short-term trajectories**, but **long-term outcomes converge** across student groups.
 
 ::: panel-tabset
 ### One year after graduating
+
+This cross-tabulation examines the relationship between **CTE achievement level** and **employment or education outcomes** one year after high school. The association is statistically significant:\
+
+**χ² = 2155.68**, **df = 8**, **p \< 0.001**, **Cramér’s V = 0.091**.
+
+**Key takeaways:**
+
+-   The **Cramér’s V of 0.091** indicates a **very weak** association between CTE achievement and post-graduation outcomes. While statistically significant (due to large sample size), the effect size is small.
+-   **CTE Concentrators/Completers** were:
+    -   **More likely to be employed regionally** (16.4%) compared to participants (12.6%) and non-CTE students (9.6%)
+
+    -   **Slightly more likely to have meaningful MN employment** (9.2% vs. 7% participants and 5.9% non-CTE)
+
+    -   **Less likely to be attending post-secondary** (42.6%) than participants (51.9%) or non-CTE students (55.8%)
+-   **CTE Participants** and **Non-CTE students** were more likely to pursue **post-secondary education**, especially non-CTE students (55.8%).
+-   Differences in the lowest engagement categories (not meaningful or no MN employment) were relatively small across CTE groups.
+
+**Conclusion:**\
+
+While CTE achievement is **weakly associated** with post-graduation outcomes, **CTE concentrators/completers appear more likely to enter the workforce early**, especially in **regional or meaningful MN employment**. In contrast, **non-CTE students are more likely to pursue post-secondary education**. These findings support the notion that CTE pathways are more strongly aligned with **early workforce entry**, particularly in local or regional labor markets.
 
 ```{r hs accomplishments cte.achievement one year}
 data <- meaningful.emp.central %>%
@@ -2408,6 +2722,21 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$cte.achievement,
 
 ### Five years after graduating
 
+This table shows the relationship between **CTE achievement level** and **employment or education outcomes** five years after high school graduation. The results are statistically significant:\
+
+**χ² = 900.39**, **df = 8**, **p \< 0.001**, **Cramér’s V = 0.069**.
+
+**Key takeaways:**
+
+-   The **Cramér’s V of 0.069** indicates a **very weak association**, though statistically significant due to the large sample size. This suggests **CTE achievement has limited influence** on outcomes by Year 5.
+-   **CTE Concentrators/Completers** remain **more likely to be employed regionally** (25.2%) or in **meaningful MN employment** (25.4%) compared to other groups.
+-   **CTE Participants** and **Non-CTE students** had **higher post-secondary attendance rates** (16.3% and 18.5%, respectively) than CTE Concentrators/Completers (12%).
+-   Differences across **low-engagement categories** (not meaningful employment or no MN employment record) were **small across all CTE groups**, ranging from 17% to 20%.
+
+**Conclusion:**\
+
+By Year 5, **CTE Concentrators/Completers are more workforce-oriented**, particularly toward **regional or meaningful MN employment**. Meanwhile, **Non-CTE students are more likely to remain engaged in post-secondary education**. However, the overall strength of the relationship is **weak**, indicating that while CTE pathways may steer students toward employment, many other factors likely influence long-term outcomes.
+
 ```{r hs accomplishments cte.achievement five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, cte.achievement) %>%
@@ -2421,6 +2750,25 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$cte.achievement,
 ```
 
 ### Ten years after graduating
+
+This table displays the relationship between **CTE achievement level** and **employment outcomes** ten years after high school graduation. The association is statistically significant:\
+
+**χ² = 299.54**, **df = 8**, **Fisher’s p \< 0.001**, **Cramér’s V = 0.054**.
+
+**Key takeaways:**
+
+-   The **Cramér’s V of 0.054** indicates a **very weak association** between CTE achievement and employment outcomes by Year 10.
+-   **Meaningful MN employment** was the most common outcome for all groups, with:
+    -   30.5% of **CTE Concentrators/Completers**
+    -   30.6% of **CTE Participants**
+    -   29.6% of **Non-CTE students**
+-   **Regional employment** was more common among **CTE Concentrators/Completers** (25.7%) than among **Participants** (23.7%) and **Non-CTE students** (19.9%).
+-   The **“No MN employment record”** category was most frequent among **Non-CTE students** (33.3%), compared to 26.6% and 28.1% in the CTE groups.
+-   Virtually no one was **still attending post-secondary** at Year 10 (as expected).
+
+**Conclusion:**\
+
+By Year 10, the relationship between **CTE achievement and long-term outcomes** is **minimal**. Employment outcomes are **similar across CTE and non-CTE groups**, though **CTE Concentrators/Completers remain slightly more likely to be employed regionally**, while **Non-CTE students are more likely to have no MN employment record**. This suggests that **initial CTE pathways may influence early employment decisions**, but **long-term patterns converge**, and other factors likely drive employment location and quality over time.
 
 ```{r hs accomplishments cte.achievement ten year}
 data <- meaningful.emp.central %>%
@@ -2439,16 +2787,51 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$cte.achievement,
 
 ## total.cte.courses.taken
 
--   One year after graduating
-    -   Individuals with meaningful employment in the region had taken a higher number of CTE courses
-    -   Individuals attending post-secondary had taken a lower number of CTE courses.
--   Five years after graduating
-    -   Individuals with meaningful employment in Minnesota had taken a higher number of CTE courses
--   Ten years after graduating
-    -   Individuals with meaningful employment in Minnesota had taken a higher number of CTE courses
+This section summarizes how the **average number of CTE courses taken in high school** varies by employment and education outcomes at one, five, and ten years after graduation. Across all three years, the results show **statistically significant** patterns, though **effect sizes shrink over time**.
+
+**Year 1**
+
+-   **Regional employment** is associated with the **highest CTE course counts**.
+-   **Post-secondary attendees** took significantly **fewer** CTE courses than any other group (–1.55 vs. regional employment).
+-   Those **not meaningfully employed** and those with **no MN employment record** took **moderately fewer** courses than regional workers, but **more than post-secondary students**.
+-   CTE coursework appears to align with **early entry into the workforce**, especially regionally.
+
+**Year 5**
+
+-   **Regional employment** still corresponds to **higher CTE participation**, but differences begin to narrow.
+-   **Post-secondary attendees** continue to have the **lowest CTE course counts**.
+-   **Meaningful vs. not meaningful employment** groups now show **no significant difference** in CTE participation, suggesting possible convergence.
+-   **CTE appears to support earlier labor market engagement**, but distinctions across employment types begin to blur.
+
+**Year 10**
+
+-   **Regional employees** maintain the highest average number of CTE courses.
+-   Differences between **meaningful** and **not meaningful employment** are **no longer significant**.
+-   Those with **no MN employment record** consistently had the **lowest CTE course counts**, reinforcing patterns of longer-term disconnection.
+-   Overall, the relationship between CTE course-taking and employment weakens over time, suggesting that **long-term labor outcomes are shaped by more than high school coursework alone**.
+
+**Summary**
+
+TE course-taking in high school is **strongly linked to early post-graduation employment**, particularly in the **regional labor market**. However, these associations **diminish by Year 10**, with **converging patterns** among most employment categories. The **most consistent pattern** is that individuals **disconnected from the MN employment system** tend to have had the **lowest CTE engagement** in high school.
 
 ::: panel-tabset
 ### One year after graduating
+
+his ANOVA examines differences in the **average number of CTE courses taken** across employment and education outcomes one year after graduation. Most group comparisons are statistically significant (**p \< 0.001**).
+
+**Key takeaways:**
+
+-   Individuals in **regional employment** took the **most CTE courses**, on average.
+-   **Post-secondary attendees** took **1.55 fewer CTE courses** than those employed in the region. They also took:
+    -   **1.48 fewer** than those with meaningful MN employment
+    -   **1.01 fewer** than those not meaningfully employed
+    -   **0.64 fewer** than those with no MN employment record
+-   Individuals with **no MN employment record** and those **not meaningfully employed** took **moderately fewer CTE courses** than those employed regionally, but **more** than post-secondary attendees.
+-   The only non-significant difference was between **regional employment** and **meaningful MN employment**, where CTE course counts were statistically similar (**p = 0.26**)
+
+**Conclusion:**\
+
+CTE course-taking is **highest among those entering the regional workforce** and **lowest among post-secondary students**. This suggests that CTE coursework may be aligned more with **early labor market entry** than with **continued education**, even just one year out from high school.
 
 ```{r hs accomplishments total.cte.courses.taken one year}
 data <- meaningful.emp.central %>%
@@ -2503,6 +2886,23 @@ TukeyHSD(summary)
 
 ### Five years after graduating
 
+This ANOVA analyzes differences in the **average number of CTE courses taken** across employment and education outcomes five years after high school. Most pairwise comparisons are **statistically significant (p \< 0.001)**, with some patterns shifting slightly from Year 1.
+
+**Key takeaways:**
+
+-   **Individuals employed regionally** continued to take the **most CTE courses**, on average.
+-   Compared to regional employees:
+    -   Those with **meaningful MN employment** took **0.35 fewer CTE courses**
+    -   **Post-secondary attendees** took **1.22 fewer**
+    -   Those **not meaningfully employed** took **0.38 fewer**
+    -   Individuals with **no MN employment record** took **0.94 fewer**
+-   The difference between **meaningful MN employment** and **not meaningful employment** was **not statistically significant** (*p = 0.79*), indicating similar CTE course participation between those two groups by Year 5.
+-   **Post-secondary attendees** took significantly **fewer CTE courses** than all other groups — consistent with Year 1 patterns.
+
+**Conclusion:**\
+
+At Year 5, CTE course-taking remains **most strongly associated with regional employment**, though the gap between **meaningful** and **not meaningful employment** has narrowed. This suggests that while CTE coursework may continue to support **early regional workforce engagement**, its influence on longer-term employment distinctions may diminish over time. Post-secondary students remain clearly on a different academic track, taking substantially fewer CTE courses in high school.
+
 ```{r hs accomplishments total.cte.courses.taken five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, total.cte.courses.taken) %>%
@@ -2555,6 +2955,22 @@ TukeyHSD(summary)
 ```
 
 ### Ten years after graduating
+
+This ANOVA explores how the number of **CTE courses taken in high school** relates to employment outcomes ten years post-graduation. Most group comparisons are statistically significant (**p \< 0.001**), though overall patterns suggest **narrowing distinctions** over time.
+
+**Key takeaways:**
+
+-   **Individuals employed regionally** continued to have the **highest CTE course counts**, maintaining the trend observed in earlier years.
+-   Compared to regional employees:
+    -   Those with **meaningful MN employment** took **0.57 fewer CTE courses**
+    -   Those **not meaningfully employed** took **0.52 fewer**
+    -   Those with **no MN employment record** took **0.85 fewer**
+-   The **difference between meaningful MN employment and not meaningful employment** was **not statistically significant** (*p = 0.615*), suggesting these two groups had **similar CTE participation** by Year 10.
+-   Students with **no MN employment record** had the **lowest CTE course participation**, significantly lower than all other groups.
+
+**Conclusion:**\
+
+By Year 10, the **strongest CTE connection remains with regional employment**. However, distinctions between those with and without meaningful MN employment have largely **disappeared** in terms of CTE course-taking. Individuals with **no MN employment record** consistently had the **lowest levels of CTE engagement**, suggesting long-term disengagement from both high school career preparation and in-state employment.
 
 ```{r hs accomplishments total.cte.courses.taken ten year}
 data <- meaningful.emp.central %>%
@@ -2609,6 +3025,16 @@ TukeyHSD(summary)
 :::
 
 <br>
+
+## ChatGPT
+
+```{r high school accomplishments chatgpt}
+hs.accomplishments.chatgpt <- meaningful.emp.central %>%
+  select(PersonID, pseo.participant, took.ACT, ACTCompositeScore, MCA.R, MCA.S, MCA.M, cte.achievement, total.cte.courses.taken, grad.year.1, grad.year.5, grad.year.10)
+
+write_csv(hs.accomplishments.chatgpt, "Data/ChatGPT/hs-accomplishments-chatgpt.csv")
+
+```
 
 # Post-secondary
 
