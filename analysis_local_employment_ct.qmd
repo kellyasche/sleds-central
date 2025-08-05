@@ -921,19 +921,19 @@ This is the summary provided by ChatGPT when asked to analyze and interpret.
 
 ### Special Education Trends Over Time
 
-+-----------------------------+----------------+-------+--------+-------------+-------+-------+
-| Outcome                     | 1 Yr (No SPED) | 5 Yr  | 10 Yr  | 1 Yr (SPED) | 5 Yr  | 10 Yr |
-+=============================+================+=======+========+=============+=======+=======+
-| Attending PS                | 54.2%          | 17.0% | \~0.0% | 19.8%       | 6.4%  | 0.0%  |
-+-----------------------------+----------------+-------+--------+-------------+-------+-------+
-| Meaningful Emp in MN        | 7.3%           | 25.6% | 31.5%  | 8.6%        | 17.6% | 21.2% |
-+-----------------------------+----------------+-------+--------+-------------+-------+-------+
-| Meaningful Emp in Region    | 12.7%          | 21.7% | 23.0%  | 15.9%       | 24.1% | 24.0% |
-+-----------------------------+----------------+-------+--------+-------------+-------+-------+
-| No MN Emp Record, Not in PS | 8.1%           | 17.2% | 29.0%  | 21.0%       | 24.5% | 31.5% |
-+-----------------------------+----------------+-------+--------+-------------+-------+-------+
-| Not Meaningful, Not in PS   | 17.8%          | 18.5% | 16.5%  | 34.8%       | 27.5% | 23.3% |
-+-----------------------------+----------------+-------+--------+-------------+-------+-------+
++-----------------------------+----------------+--------+--------+-------------+--------+--------+
+| Outcome                     | 1 Yr (No SPED) | 5 Yr   | 10 Yr  | 1 Yr (SPED) | 5 Yr   | 10 Yr  |
++=============================+================+========+========+=============+========+========+
+| Attending PS                | 54.2%          | 17.0%  | \~0.0% | 19.8%       | 6.4%   | 0.0%   |
++-----------------------------+----------------+--------+--------+-------------+--------+--------+
+| Meaningful Emp in MN        | 7.3%           | 25.6%  | 31.5%  | 8.6%        | 17.6%  | 21.2%  |
++-----------------------------+----------------+--------+--------+-------------+--------+--------+
+| Meaningful Emp in Region    | 12.7%          | 21.7%  | 23.0%  | 15.9%       | 24.1%  | 24.0%  |
++-----------------------------+----------------+--------+--------+-------------+--------+--------+
+| No MN Emp Record, Not in PS | 8.1%           | 17.2%  | 29.0%  | 21.0%       | 24.5%  | 31.5%  |
++-----------------------------+----------------+--------+--------+-------------+--------+--------+
+| Not Meaningful, Not in PS   | 17.8%          | 18.5%  | 16.5%  | 34.8%       | 27.5%  | 23.3%  |
++-----------------------------+----------------+--------+--------+-------------+--------+--------+
 
 **Trend**: SPED students consistently show lower engagement in PS and work, and higher disconnection.
 
@@ -1015,6 +1015,13 @@ We will take a look at the following variables;
 
 ## Summary
 
+| Col1 | Col2 | Col3 |
+|------|------|------|
+|      |      |      |
+|      |      |      |
+|      |      |      |
+|      |      |      |
+
 <br>
 
 ## Dem_Desc
@@ -1092,23 +1099,94 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$Dem_Desc,
 
 <br>
 
-## avg.unemp.rate
+## EDR
 
-There is a statistically significant association between an graduate's RUCA category and their employment state, but the association was negligible.
+There is a statistically significant association between an graduate's EDR and their employment state, but the association was negligible.
 
-Through all the years, the more rural a graduate was, the higher the rate of having meaningful employment in the region, while urban individuals had a significantly higher rate of meaningful employment in Minnesota.
+Through all the years, graduates from EDR 5 had an increasingly higher rate of meaningful employment in the region and a significantly higher rate of not having a MN employment rate.
 
 ::: panel-tabset
 ### One year after graduating
 
-There is a statistically significant, negligible association between a graduate's RUCA category and the employment state.
+There is a statistically significant, negligible association between a graduate's EDR and the employment state.
 
 Graduates from;
 
--   more rural areas had a higher rate of having meaningful employment in the region.
--   more urban area had a higher rate of having meaningful employment in MN.
--   more rural areas had a lower rate of attending post-secondary.
--   more rural areas had a higher rate of not having a MN employment record.
+-   EDR 5 had a slightly higher rate ofhaving meaningful employment in the region.
+-   EDR 5 had a slightly lower rate of attending post-secondary.
+
+```{r hs characteristics edr one year}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, edr) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$edr, 
+         title = "", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+There is a statistically significant, negligible association between a graduate's EDR and the employment state.
+
+Graduates from;
+
+-   EDR 5 had a higher rate of having meaningful employment in the region.
+-   EDR 5 had a lower rate of having meaningful employment in Minnesota.
+-   EDR 7E had a higher rate of having meaningful employment in Minnesota
+-   EDR 5 had a higher rate of not having a MN employment rate.
+
+```{r hs characteristics edr five year}
+data <- meaningful.emp.central %>%
+  select(grad.year.5, edr) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$edr, 
+         title = "", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+There is a statistically significant, negligible association between a graduate's EDR and the employment state.
+
+Graduates from;
+
+-   EDR 5 had a higher rate of having meaningful employment in the region.
+-   EDR 5 had a significantly lower rate of having meaningful employment in Minnesota.
+
+```{r hs characteristics edr ten year}
+data <- meaningful.emp.central %>%
+  select(grad.year.10, edr) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$edr, 
+         title = "", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## avg.unemp.rate
+
+There is a statistically significant association between an the unemployment rate of a school district's county and a graduates employment state.
+
+Through all the years, the main trend was that graduates without meaningful employment or no MN employment record came from schools with significantly higher unemployment rates than graduates that have meaningful employment in the region or Minnesota, or attended post-secondary.
+
+::: panel-tabset
+The p-value indicates a significant difference between one of the groups.
+
+Graduates that;
+
+-   had no meaningful employment or no MN employment record came from districts with 30%+ higher unemployment rates than graduates that meaningful employment in the region or Minnesota.
+-   had no meaningful employment or no MN employment record came from districts with 20%+ higher unemployment rates than graduates attending post-secondary.
 
 ```{r hs characteristics avg.unemp.rate one year}
 data <- meaningful.emp.central %>%
@@ -1158,14 +1236,16 @@ summary <- aov(avg.unemp.rate ~ grad.year.1, data = data)
 summary(summary)
 
 TukeyHSD(summary)
-
-hs.characteristics.chatgpt <- meaningful.emp.central %>%
-  select(PersonID, Dem_Desc, edr, avg.unemp.rate, avg.wages.pct.state, grad.year.1, grad.year.5, grad.year.10)
-
-write_csv(hs.characteristics.chatgpt, "Data/ChatGPT/hs-characteristics-chatgpt.csv")
 ```
 
 ### Five years after graduating
+
+The p-value indicates a significant difference between one of the groups.
+
+Graduates that;
+
+-   had no meaningful employment or no MN employment record came from districts with over 10% higher unemployment rates.
+-   had no meaningful employment came from districts with 12% higher unemployment rates than graduates that are attending post-secondary.
 
 ```{r hs characteristics avg.unemp.rate five year}
 data <- meaningful.emp.central %>%
@@ -1194,7 +1274,7 @@ labels <- data %>%
 
 plot <- ggplot(data, aes(grad.year.5, avg.unemp.rate, fill = grad.year.5, group = grad.year.5)) +
   geom_boxplot_interactive() +
-  geom_label(data = labels, aes(x = grad.year.5, y = 25, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  geom_label(data = labels, aes(x = grad.year.5, y = 15, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
   labs(x="", y = "", color="", title = "Boxplots of average unemployment by employment state")+
   scale_y_continuous(labels=scales::comma,
                      limits = c(0, 30))+
@@ -1219,6 +1299,13 @@ TukeyHSD(summary)
 ```
 
 ### Ten years after graduating
+
+The p-value indicates a significant difference between one of the groups.
+
+Graduates that;
+
+-   had no meaningful employment or MN employment record came from districts with 18% higher unemployment rates compared to graduates with meaningful employment in the region or in MN.
+-   had no MN employment record came from districts with 11% lower unemployment rates than graduates with no meaningful employment.
 
 ```{r hs characteristics avg.unemp.rate ten year}
 data <- meaningful.emp.central %>%
@@ -1276,15 +1363,19 @@ TukeyHSD(summary)
 
 ## avg.wages.pct.state
 
--   One year after graduating
-    -   The individuals graduating from districts with slightly lower wages had meaningful employment in MN, but not the region.
--   Five years after graduating
-    -   Not much
--   Ten years after graduating
-    -   Not much
+There is a statistically significant association between an the unemployment rate of a school district's county and a graduates employment state.
+
+Through all the years, the main trend was that graduates without meaningful employment or no MN employment record came from schools with significantly higher unemployment rates than graduates that have meaningful employment in the region or Minnesota, or attended post-secondary.
 
 ::: panel-tabset
 ### One year after graduating
+
+The p-value indicates a significant difference between one of the groups.
+
+Graduates that;
+
+-   had no meaningful employment or no MN employment record came from districts with -1% difference between the percent of state wages of graduates that have meaningful employment in the region or Minnesota.
+-   had meaningful employment in MN or were attending post-secondary came from districts with a 1.2% difference in the percent of state wages of graduates who had meaningful employment in the region.
 
 ```{r hs characteristics avg.wages.pct.state one year}
 data <- meaningful.emp.central %>%
@@ -1339,6 +1430,13 @@ TukeyHSD(summary)
 
 ### Five years after graduating
 
+The p-value indicates a significant difference between one of the groups.
+
+Graduates that;
+
+-   had no meaningful employment or no MN employment record came from districts with -1% difference between the percent of state wages of graduates that have meaningful employment in the region or Minnesota.
+-   had meaningful employment in MN or were attending post-secondary came from districts with a 1.2% difference in the percent of state wages of graduates who had meaningful employment in the region.
+
 ```{r hs characteristics avg.wages.pct.state five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, avg.wages.pct.state) %>%
@@ -1392,6 +1490,13 @@ TukeyHSD(summary)
 
 ### Ten years after graduating
 
+The p-value indicates a significant difference between one of the groups.
+
+Graduates that;
+
+-   had no meaningful employment or no MN employment record came from districts with -5%+ difference between the percent of state wages of graduates that have meaningful employment in Minnesota.
+-   had meaningful employment in MN or were attending post-secondary came from districts with a 1.5% difference in the percent of state wages of graduates who had meaningful employment in the region.
+
 ```{r hs characteristics avg.wages.pct.state ten year}
 data <- meaningful.emp.central %>%
   select(grad.year.10, avg.wages.pct.state) %>%
@@ -1443,6 +1548,37 @@ TukeyHSD(summary)
 
 ```
 :::
+
+## ChatGPT
+
+This is the summary provided by ChatGPT when asked to analyze and interpret.
+
+### Urbanization Level (`dem_desc`)
+
+Rurality of the high school district showed a small but growing influence on employment outcomes over time. Graduates from **town/rural mix** districts were more likely to have **regional employment** and less likely to attend **postsecondary** one year after graduation. Conversely, those from **entirely urban** districts were more likely to be enrolled in postsecondary or employed within Minnesota. The strength of this association increased slightly by year 10.\
+
+### Economic Development Region (`edr`)
+
+The high school’s economic region had a consistent but weak association with employment outcomes. Students from **EDR 7W (Central)** were more likely to attend postsecondary or secure **MN-based employment**, while those from **EDR 5 (North Central)** were more likely to be employed **regionally** or have **no MN employment record**. These patterns remained stable from year 1 through year 10.\
+
+### County Unemployment Rate (`avg.unemp.rate`)
+
+County-level unemployment rates had a modest impact. Higher unemployment was associated with a slight **increase in postsecondary attendance** and a **decrease in meaningful employment**, particularly within Minnesota. While these effects were small, they remained consistent across all three time points.\
+
+### County Wages as % of State Average (`avg.wages.pct.state`)
+
+This variable was the most predictive across the board. Individuals from **higher-wage counties** were significantly more likely to have **meaningful employment within Minnesota**, even years after graduation. Conversely, they were less likely to attend postsecondary school immediately after graduation. This relationship was both strong and persistent across years 1, 5, and 10.\
+
+### Overall Insights
+
+Among the four variables, **county wage levels** stood out as the most influential predictor of long-term employment outcomes. While **urbanization** and **economic region** showed weak but meaningful patterns, their predictive power was notably lower. **Unemployment rate** had a smaller and more stable effect, influencing early decisions such as whether to work or pursue further education.
+
+```{r high school characteristics chatgpt}
+hs.characteristics.chatgpt <- meaningful.emp.central %>%
+  select(PersonID, Dem_Desc, edr, avg.unemp.rate, avg.wages.pct.state, grad.year.1, grad.year.5, grad.year.10)
+
+write_csv(hs.characteristics.chatgpt, "Data/ChatGPT/hs-characteristics-chatgpt.csv")
+```
 
 <br>
 
