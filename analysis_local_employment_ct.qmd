@@ -4,7 +4,7 @@ editor: visual
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(sf)
 library(ggrepel)
@@ -133,8 +133,8 @@ mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasch
 master.original <- read_csv("Data/SLEDS/Masters/After analysis/Master-final-after-mca.csv")
 
 master.factor.names <- master.original %>%
-  select(grad.year.covid, )
-names(master.factor.names)
+  select(PersonID, Dem_Desc, edr, grad.year.covid, Gender, economic.status, pseo.participant, SpecialEdStatus, non.english.home, RaceEthnicity, took.ACT, ap.exam, cte.achievement, english.learner, sat.taken, attended.ps, attended.ps.within.first.year.hsgrad, ps.grad, ps.grad.InstitutionSector, highest.cred.level) 
+
 master.states <- read_csv("Data/SLEDS/Masters/States/annual-seven-states.csv") %>%
   filter(grad.year %in% c("grad.year.1", "grad.year.5", "grad.year.10")) %>%
   select(PersonID, grad.year, states) %>%
@@ -150,14 +150,14 @@ kable(names(master))
 
 ```{r independent and dependent variables}
 updated.factor.var.names <-  master.factor.names %>%
-  select(-PersonID, -edr) %>%
+  select(-PersonID) %>%
   names() %>%
-  c("ps.grad.in.same.ruca", "ps.grad.in.same.edr", "ps.grad.in.MN")
+  c("ps.grad.in.same.ruca", "ps.grad.in.same.edr", "ps.grad.in.same.pr", "ps.grad.in.MN")
 
 numeric.var.names <- master.original %>%
-  select(n.years.attended, ACTCompositeScore, avg.unemp.rate, `ACTE.SPED`:MCA.S, n.institutions, ps.grad.in.same.ruca, ps.grad.in.same.edr, ps.grad.in.MN, avg.unemp.rate, avg.wages.pct.state, total.cte.courses.taken) %>%
+  select(ACTCompositeScore, total.cte.courses.taken, `ACTE.SPED`:Youth.Apprenticeship,  MCA.M:MCA.S, n.institutions, avg.unemp.rate, wages.3year.avg, avg.wages.pct.state) %>%
   names()
-
+  
 updated.independent.var.names <- c(updated.factor.var.names, numeric.var.names)
 
 cte.cc.var.names <- master.original %>%
@@ -170,16 +170,15 @@ dep.var.names <- master %>%
 updated.master <- master.original %>%
   select(PersonID, all_of(updated.independent.var.names)) %>%
   left_join(dep.var.names, by = "PersonID") %>%
-  mutate_at(vars(range.school:ps.grad.in.MN), as.factor) %>%
+  mutate_at(vars(Dem_Desc:ps.grad.in.MN), as.factor) %>%
   mutate_at(vars(grad.year.1:grad.year.10), as.factor) %>%
-  mutate(ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector %in% c("3", "6", "9"), "11", as.character(ps.grad.InstitutionSector)),
-         ps.grad.InstitutionSector = as.factor(ps.grad.InstitutionSector),
-         grad.year.1 = fct_relevel(grad.year.1, "Meaningful emp County", "Meaningful emp EDR", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps"),
-         grad.year.5 = fct_relevel(grad.year.5, "Meaningful emp County", "Meaningful emp EDR", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps"),
-         grad.year.10 = fct_relevel(grad.year.10, "Meaningful emp County", "Meaningful emp EDR", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps"),
+  mutate(grad.year.1 = fct_relevel(grad.year.1, "Meaningful emp County", "Meaningful emp EDR", "Meaningful emp region", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps"),
+         grad.year.5 = fct_relevel(grad.year.5, "Meaningful emp County", "Meaningful emp EDR", "Meaningful emp region", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps"),
+         grad.year.10 = fct_relevel(grad.year.10, "Meaningful emp County", "Meaningful emp EDR", "Meaningful emp region", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps"),
          highest.cred.level = ifelse(ps.grad.InstitutionSector == "Did not grad", "Some college", as.character(highest.cred.level)),
          highest.cred.level = ifelse(ps.grad.InstitutionSector == "Never attended ps", "No college", as.character(highest.cred.level)),
-         highest.cred.level = as.factor(highest.cred.level)) %>%
+         highest.cred.level = as.factor(highest.cred.level),
+         Dem_Desc = fct_relevel(Dem_Desc, "Town/rural mix", "Urban/town/rural mix", "Entirely urban")) %>%
   droplevels()
 
 kable(head(updated.master))
@@ -191,12 +190,13 @@ kable(names(updated.master))
 
 There are a number of "states" in which an individual in this dataset are assigned;
 
-1.  Has meaningful employment in the same county as their high school.
-2.  Has meaningful employment in the same EDR as their high school, but not county.
-3.  Has meaningful employment in Minnesota, but not in Southwest Minnesota.
-4.  Is attending post-secondary.
-5.  Has a MN employment record but it's not meaningful, and not attending post-secondary.
-6.  Does not have a MN employment record and is not attending post-secondary.
+1.  Has meaningful employment
+    1.  In the same county as their high school.
+    2.  In the same EDR as their high school, but not county.
+    3.  In Minnesota, but not in Central Minnesota.
+2.  Is attending post-secondary.
+3.  Has a MN employment record but it's not meaningful, and not attending post-secondary.
+4.  Does not have a MN employment record and is not attending post-secondary.
 
 There are three "times" in which we checked to see if the individual had meaningful employment within these geographies;
 
@@ -217,23 +217,31 @@ updated.master %>%
 
 ```
 
-<br>
-
 # Methodology
 
 For this analysis we are keeping it simple. For categorical variables I’ll be using the Cramer’s v-square measure of association. The V\^2 value is from 0 to 1 with 0 meaning there’s no association and a value closer to 1 indicates a strong association.
+
+| **Cramér’s V Value** | **Interpretation**               |
+|----------------------|----------------------------------|
+| 0.00–0.10            | Negligible association           |
+| 0.10–0.20            | Weak                             |
+| 0.20–0.40            | Moderate                         |
+| 0.40–0.60            | Relatively strong                |
+| 0.60–0.80            | Strong                           |
+| 0.80–1.00            | Very strong (possibly redundant) |
 
 For the variables with continuous values I’ll be using the Wilcoxon two paired groups test. P-value will be used to determine whether we can reject the NULL hypothesis at a .01 level. I’ll also include boxplots to see in which direction there might be influence from the variables.
 
 We are going to split up the analysis into two different datasets. The first dataset will combine 3 of the previous states into one.
 
--   Has meaningful employment anywhere in NE Minnesota, which combines the following states;
+-   Has meaningful employment anywhere in Central Minnesota, which combines the following states;
     -   Meaningful emp County
     -   Meaningful emp EDR
+    -   Meaningful emp region
 
 The remaining states will stay the same.
 
--   Has meaningful employment in Minnesota, but not in Northeast Minnesota
+-   Has meaningful employment in Minnesota, but not in Central Minnesota
 -   Is attending a post-secondary institution.
 -   Has a MN employment record but it's not meaningful, and they are not attending post-secondary.
 -   Does not have a MN employment record and is not attending post-secondary.
@@ -246,21 +254,26 @@ We have quite a few variables remaining, even after MCA analysis. So let's take 
     -   economic.status
     -   SpecialEdStatus
     -   RaceEthnicity
+    -   non.english.home
     -   englisher.learner
 -   High school characteristics
     -   Dem_Desc
+    -   edr
     -   avg.unemp.rate
     -   avg.wage.pct.state
 -   High school accomplishments
     -   pseo.participant
     -   took.ACT
+    -   ACTCompositeScore
     -   ap.exam
+    -   sat.taken
     -   ACTCompositeScore
     -   MCA scores
         -   MCA.M
         -   MCA.R
         -   MCA.S
     -   cte.achievement
+    -   total.cte.courses.taken
     -   avg.unemp.rate
 -   Post-secondary
     -   attended.ps.within.first.year.hsgrad
@@ -270,35 +283,34 @@ We have quite a few variables remaining, even after MCA analysis. So let's take 
     -   highest.cred.level
     -   Combine post-secondary grad location
         -   ps.grad.in.same.ruca
-
         -   ps.grad.in.same.edr
-
+        -   ps.grad.in.same.pr
         -   ps.grad.in.MN
-
-# Meaningful employment in Northeast Minnesota
-
-```{r prep meaningful employment in NE MN}
-meaningful.emp.ne <- updated.master %>%
-  mutate(grad.year.1 = ifelse(grad.year.1 %in% c("Meaningful emp County", "Meaningful emp EDR"), "Meaningful emp NE", as.character(grad.year.1)),
-         grad.year.1 = as_factor(grad.year.1),
-         grad.year.1 = fct_relevel(grad.year.1, "Meaningful emp NE", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps", "After 2023"),
-         grad.year.5 = ifelse(grad.year.5 %in% c("Meaningful emp County", "Meaningful emp EDR"), "Meaningful emp NE", as.character(grad.year.5)),
-         grad.year.5 = as_factor(grad.year.5),
-         grad.year.5 = fct_relevel(grad.year.5, "Meaningful emp NE", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps", "After 2023"),
-         grad.year.10 = ifelse(grad.year.10 %in% c("Meaningful emp County", "Meaningful emp EDR"), "Meaningful emp NE", as.character(grad.year.10)),
-         grad.year.10 = as_factor(grad.year.10),
-         grad.year.10 = fct_relevel(grad.year.10, "Meaningful emp NE", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps", "After 2023"),
-         highest.cred.level = fct_relevel(highest.cred.level, "No college", "Some college", "Less than associate degree", "Associate degree", "Bachelor degree", "Master degree or higher"))
-
-write_csv(meaningful.emp.ne, "Data/SLEDS/Masters/After analysis/Master-meaningful-emp-ne.csv")
-```
-
-Let's first take a look at proportion of states in each of the time.X. The chart below shows that a majority of individuals are attending post-secondary (51%) one year after graduating high school. The further away from high school graduation results in a bit of an increase in the percentage of individuals who have meaningful employment in the region and in Minnesota, while a huge amount have no MN employment record.
 
 <br>
 
+# Meaningful employment in Central Minnesota
+
+```{r prep meaningful employment in Central MN}
+meaningful.emp.central <- updated.master %>%
+  mutate(grad.year.1 = ifelse(grad.year.1 %in% c("Meaningful emp County", "Meaningful emp EDR"), "Meaningful emp region", as.character(grad.year.1)),
+         grad.year.1 = as_factor(grad.year.1),
+         grad.year.1 = fct_relevel(grad.year.1, "Meaningful emp region", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps", "After 2023"),
+         grad.year.5 = ifelse(grad.year.5 %in% c("Meaningful emp County", "Meaningful emp EDR"), "Meaningful emp region", as.character(grad.year.5)),
+         grad.year.5 = as_factor(grad.year.5),
+         grad.year.5 = fct_relevel(grad.year.5, "Meaningful emp region", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps", "After 2023"),
+         grad.year.10 = ifelse(grad.year.10 %in% c("Meaningful emp County", "Meaningful emp EDR"), "Meaningful emp region", as.character(grad.year.10)),
+         grad.year.10 = as_factor(grad.year.10),
+         grad.year.10 = fct_relevel(grad.year.10, "Meaningful emp region", "Meaningful emp MN", "Attending ps", "Not meaningful, not attending ps", "No MN emp record, not attending ps", "After 2023"),
+         highest.cred.level = fct_relevel(highest.cred.level, "No college", "Some college", "Less than Associate Degree", "Associate degree", "Bachelor degree or higher"))
+
+write_csv(meaningful.emp.central, "Data/SLEDS/Masters/After analysis/Master-meaningful-emp-central.csv")
+```
+
+Let's first take a look at proportion of states in each of the time.X. The chart below shows that half of the graduates are attending post-secondary (50%) one year after graduating high school. The further away from high school graduation results in a bit of an increase in the percentage of individuals who have meaningful employment in the region and in Minnesota, while about a quarter of graduates do not have a MN employment record and are not going to post-secondary.
+
 ```{r proportion of states meaningful emp SW}
-prop.states.meaningful.emp.ne <- meaningful.emp.ne %>%
+prop.states.meaningful.emp.central <- meaningful.emp.central %>%
   select(grad.year.1, grad.year.5, grad.year.10) %>%
   pivot_longer(names_to = "grad.year", values_to = "states", 1:3) %>%
   group_by(grad.year, states) %>%
@@ -311,7 +323,7 @@ prop.states.meaningful.emp.ne <- meaningful.emp.ne %>%
   mutate(data_id = seq(n()),
          grad.year = fct_relevel(grad.year, "grad.year.1", "grad.year.5", "grad.year.10"))
 
-prop.states.meaningful.emp.ne.plot <- ggplot(prop.states.meaningful.emp.ne, aes(grad.year, pct, fill = states, group = states)) +
+prop.states.meaningful.emp.central.plot <- ggplot(prop.states.meaningful.emp.central, aes(grad.year, pct, fill = states, group = states)) +
   geom_col_interactive(position = "dodge", aes(data_id = data_id, tooltip = paste(grad.year, "\nState of individuals: ", states, "\nNumber of people in states: ", comma(n), "\nPercent of people in state: ", percent(pct, accuracy = .1), sep = ""))) +
    labs(x="", y = "", color="", title = "Percent of people in each state")+
   scale_y_continuous(labels=scales::percent)+
@@ -322,7 +334,7 @@ prop.states.meaningful.emp.ne.plot <- ggplot(prop.states.meaningful.emp.ne, aes(
         text = element_text(size = 18))
 
 
-girafe(ggobj = prop.states.meaningful.emp.ne.plot, width_svg = 10, height_svg = 10) %>%
+girafe(ggobj = prop.states.meaningful.emp.central.plot, width_svg = 10, height_svg = 10) %>%
   girafe_options(opts_selection(type = "none"),
                  opts_sizing(rescale = FALSE))      
 
@@ -338,72 +350,134 @@ Let's examine the variables to see if there are any significant differences in t
 
 In the demographics section we will examine the relationship between that paths taken by individuals and the following variables;
 
--   Gender
--   grad.year.covid
--   economic.status
--   SpecialEdStatus
--   RaceEthnicity
--   english.learner
+-   Demographics
+    -   Gender
+    -   grad.year.covid
+    -   economic.status
+    -   SpecialEdStatus
+    -   RaceEthnicity
+    -   non.english.home
+    -   englisher.learner
 
-**Summary**
+## **Summary**
 
-*grad.year.covid*
++------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Demographic      | Association Strength   | Highlights                                                                                                                                                                                          |
++==================+:======================:+=====================================================================================================================================================================================================+
+| Gender           | Weak to negligible     | Females attend post-secondary at a much higher rate                                                                                                                                                 |
++------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| grad.year.covid  | Weak                   | Post-COVID grads attend post-secondary at a lower rate.                                                                                                                                             |
++------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| economic.status  | Moderate to negligible | Individuals who qualify for free or reduced lunch attend post-secondary at a lower, and have a lower rate of meaningful employment in Minnesota.                                                    |
++------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| SpecialEdStatus  | Moderate to negligible | Special Ed students attend post-secondary at a SIGNIFICANTLY lower rate, and have a higher rate of not having meaningful employment.                                                                |
+|                  |                        |                                                                                                                                                                                                     |
+|                  |                        | Not having a MN employment record is significantly higher at first.                                                                                                                                 |
++------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| RaceEthnicity    | Negligible             | White and Asian/PI attend post-secondary at a significantly higher rate.                                                                                                                            |
+|                  |                        |                                                                                                                                                                                                     |
+|                  |                        | American Indian and Black graduates have a significantly higher rate of not having a MN employment record or attending post-secondary.                                                              |
+|                  |                        |                                                                                                                                                                                                     |
+|                  |                        | The rate of non-white individuals not having a MN employment record increases significantly over time.                                                                                              |
++------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| non.english.home | Negligible             | Individuals with non-English speakers in their household had lower rate of meaningful employment in the region or in Minnesota, and SIGNIFICANTLY higher rate of not having a MN employment record. |
++------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| english.learner  | Weak to negligible     | English learners had a SIGNIFICANTLY lower rates of attending post-secondary.                                                                                                                       |
+|                  |                        |                                                                                                                                                                                                     |
+|                  |                        | The further from high school graduation saw a significant decrease in the rate of individuals with meaningful employment in the region or Minnesota.                                                |
++------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
--   Post-covid-grads: attended post-secondary at significantly lower rates and had no MN employment record at significantly higher rates.
+<br>
 
-*economic.status*
+## Gender
 
--   Individuals that qualify for free or reduced lunch:
-    -   attend post-secondary at lower rates
-    -   do not have meaningful employment at higher rates
-    -   have no MN employment record at a higher rates - evens out over time
+There is a statistically significant association between whether an individual qualifies for free or reduced lunch and their employment state, but the association starts weak and becomes negligible by five years after graduating high school.
 
-*SpecialEdStatus*
+The most consistent difference is that females attend post-secondary at a significantly higher rate.
 
--   Individuals categorized as needing special education;
-    -   attend post-secondary at significantly lower rates
-    -   do not have meaningful employment at higher rates
-    -   have no MN employment record at higher rates. - evens out over time
+<br>
 
-*RaceEthnicity*
+::: panel-tabset
+### One year after graduating
 
--   Attend post-secondary
-    -   Lower rates: American Indian, Black, Hispanic
--   Have meaningful employment in the region
-    -   Lower rates: All races except white
--   Have meaningful employment in MN
-    -   Lower rates: All races except white
--   Do no have meaningful employment
-    -   Lower rates: Black and American Indian
--   Do not have a MN employment record
-    -   All races except White at first.
+There is a statistically significant, weak association between gender and the employment state.
 
-*english.learner*
+Females;
 
--   Lower rates: attend post-secondary
--   Lower rates: do not have meaningful employment
--   Higher rates: no MN employment record
+-   Have a lower rate of meaningful employment in the region.
+-   Attend post-secondary at a significantly higher rate.
+
+```{r demographics gender one year}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, Gender) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$Gender, 
+         title = "", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+There is a statistically significant, negligible association between gender and the employment state.
+
+Females;
+
+-   Have a lower rate of meaningful employment in the region.
+-   Attend post-secondary at a significantly higher rate.
+
+```{r demographics gender five year}
+data <- meaningful.emp.central %>%
+  select(grad.year.5, Gender) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$Gender, 
+         title = "", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+There is a statistically significant, negligible association between economic status and the employment state.
+
+Barely any differences here.
+
+```{r demographics gender ten year}
+data <- meaningful.emp.central %>%
+  select(grad.year.10, Gender) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$Gender, 
+         title = "", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
 
 <br>
 
 ## Grad.year.covid
 
--   One year after graduating high school
-    -   Post-covid grads were attending post-secondary at a significantly lower rate than individuals who graduated before COVID
+There is a statistically significant, weak association between whether an individual graduated before or after COVID and the employment state. The most striking difference is that post-covid grads were attending post-secondary at a significantly lower rate than individuals who graduated before COVID.
 
-    -   Post-covid grads do not have a MN employment record or attending post-secondary at a significantly higher rate.
+<br>
 
 ::: panel-tabset
 ### One year after graduating
 
 ```{r demographics grad.year.covid one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, grad.year.covid) %>%
   filter(grad.year.1 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$grad.year.covid, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -413,56 +487,76 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$grad.year.covid,
 
 ## economic.status
 
--   One year after graduating high school, individuals that qualify for free or reduced lunch;
-    -   attend post-secondary at a significantly lower rate, and
-    -   do not have meaningful employment, and
-    -   have no MN employment record.
--   5 years after graduating, individuals that qualify for free or reduced lunch;
-    -   attend post-secondary at a significantly lower rate, and
-    -   have no MN employment record.
--   10 years after graduating, individuals that qualify for free or reduced lunch;
-    -   have meaningful employment in the region at a slightly lower rate, and
-    -   have non-meaningful employment at a higher rate.
+There is a statistically significant association between whether an individual qualifies for free or reduced lunch and their employment state, but the association starts at moderate and becomes negligible by ten years after graduating high school.
+
+The most consistent difference through all the years was that individuals who qualify for free and reduced lunch attend post-secondary at a lower rate, and have a lower rate of meaningful employment in Minnesota.
+
+<br>
 
 ::: panel-tabset
 ### One year after graduating
 
+There is a statistically significant, moderate association between economic status and the employment state.
+
+Individuals that qualify for free or reduced lunch;
+
+-   Have a higher rate of meaningful employment in the region.
+-   Have a higher rate of meaningful employment in Minnesota.
+-   Attend post-secondary at a significantly lower rate.
+-   Have a higher rate of not having meaningful employment.
+-   Have a higher rate of having no MN employment record.
+
 ```{r demographics economic.status one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, economic.status) %>%
   filter(grad.year.1 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$economic.status, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
 
 ### Five years after graduating
 
+There is a statistically significant, weak association between economic status and the employment state.
+
+Individuals that qualify for free or reduced lunch;
+
+-   Attend post-secondary at a significantly lower rate.
+-   Have a higher rate of not having meaningful employment.
+-   Have a higher rate of having no MN employment record.
+
 ```{r demographics economic.status five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, economic.status) %>%
   filter(grad.year.5 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$economic.status, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
 
 ### Ten years after graduating
 
+There is a statistically significant, weak association between economic status and the employment state.
+
+Individuals that qualify for free or reduced lunch;
+
+-   Have a lower rate of having meaningful employment in Minnesota.
+-   Have a higher rate of not having meaningful employment.
+
 ```{r demographics economic.status ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, economic.status) %>%
   filter(grad.year.10 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$economic.status, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -472,57 +566,75 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$economic.status,
 
 ## SpecialEdStatus
 
--   One year after graduating high school, individuals that were categorized as needing special education;
-    -   attend post-secondary at a significantly lower rate, and
-    -   do not have meaningful employment at a higher rate, and
-    -   have no MN employment record at a significantly higher rate.
--   5 years after graduating, individuals that were categorized as needing special education
-    -   attend post-secondary at a significantly lower rate, and
-    -   do no have meaningful employment at a higher rate, and
-    -   have no MN employment record at a significantly higher rate.
--   10 years after graduating, individuals that were categorized as needing special education;
-    -   have meaningful employment in the state at a significantly lower rate, and
-    -   do not have meaningful employment at a higher rate.
+There is a statistically significant association between whether an individual is categorized as needing special education and their employment state, but the association starts at moderate and becomes negligible by ten years after graduating high school.
+
+The most consistent difference through all the years was that individuals who are categorized as needing special education attend post-secondary at a SIGFNICANTLY lower rate, and have a higher rate of not having meaningful employment.
+
+Having no MN employment record is significantly higher at first, but evens out by ten years after high school.
 
 ::: panel-tabset
 ### One year after graduating
 
+There is a statistically significant, moderate association between whether an individual was categorized as needing special education and the employment state.
+
+Individuals who were categorized as needing special education;
+
+-   attended post-secondary at a SIGNIFICANTLY lower rate
+-   SIGNFICANTLY higher rate of not having meaningful employment
+-   SIGNFICANTLY higher rate of not having a MN employment record
+
 ```{r demographics SpecialEdStatus one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, SpecialEdStatus) %>%
   filter(grad.year.1 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$SpecialEdStatus, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
 
 ### Five years after graduating
 
+There is a statistically significant, weak association between whether an individual was categorized as needing special education and the employment state.
+
+Individuals who were categorized as needing special education;
+
+-   slightly lower rate of having meaningful employment in Minnesota
+-   attended post-secondary at a SIGNIFICANTLY lower rate
+-   SIGNFICANTLY higher rate of not having meaningful employment
+-   SIGNFICANTLY higher rate of not having a MN employment record
+
 ```{r demographics SpecialEdStatus five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, SpecialEdStatus) %>%
   filter(grad.year.5 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$SpecialEdStatus, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
 
 ### Ten years after graduating
 
+There is a statistically significant, negligible association between whether an individual was categorized as needing special education and the employment state.
+
+Individuals who were categorized as needing special education;
+
+-   SIGNIFICANTLY lower rate of having meaningful employment in Minnesota
+-   SIGNFICANTLY higher rate of not having meaningful employment
+
 ```{r demographics SpecialEdStatus ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, SpecialEdStatus) %>%
   filter(grad.year.10 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$SpecialEdStatus, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -532,60 +644,151 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$SpecialEdStatus,
 
 ## RaceEthnicity
 
--   One year after graduating high school,
-    -   American indian, Black and Hispanic individuals attend post-secondary at a significantly lower rate.
-    -   Black individuals do not have meaningful employment at a significantly higher rate.
-    -   All races except white have a significantly higher rate of not having a MN employment record.
--   5 years after graduating;
-    -   Asian, Black and Hispanic individuals have meaningful employment in the region at a significantly lower rate.
-    -   American Indian and Hispanic individuals have meaningful employment in MN at a lower rate.
-    -   American Indian and Black individuals attend post-secondary at a lower rate.
-    -   American Indian and Black individuals do not have meaningful employment in Minnesota at a higher rate.
-    -   Hispanic, American Indian, and Asian individuals do not have a MN employment record at a higher rate.
--   10 years after graduating;
-    -   All races except white have meaningful employment in the region at a significantly lower rate.
-    -   American Indian individuals have meaningful employment in MN at a significantly lower rate.
-    -   American Indian, Asian and Black individuals do not have meaningful employment in Minnesota at a higher rate.
+There is a statistically significant association between race/ethnicity and their employment state, but the association is negligible.
+
+The most consistent difference through all the years were White and Asian/PI have a higher rate of attending post-secondary, and American Indian and Black individuals had a significantly higher rate of not having meaningful employment nor attending post-secondary.
+
+Non-white individuals had an increasing rate of not having a MN employment record the further out from high school graduation.
 
 ::: panel-tabset
 ### One year after graduating
 
+There is a statistically significant, negligible association between whether race/ethnicity and the employment state.
+
+Individuals who are;
+
+-   Hispanic have a higher rate of meaningful employment in the region.
+-   White or Asian/PI attended post-secondary at a SIGNIFICANTLY higher rate
+-   American Indian, Black or Hispanic had SIGNFICANTLY higher rate of not having meaningful employment
+-   American Indian had a SIGNFICANTLY higher rate of not having a MN employment record
+
 ```{r demographics RaceEthnicity one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, RaceEthnicity) %>%
-  filter(grad.year.1 != "After 2023") %>%
+  filter(grad.year.1 != "After 2023",
+         RaceEthnicity != "Unknown") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$RaceEthnicity, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
 
 ### Five years after graduating
 
+There is a statistically significant, negligible association between whether race/ethnicity and the employment state.
+
+Individuals who are;
+
+-   White or Asian/PI attended post-secondary at a SIGNIFICANTLY higher rate
+-   American Indian, Black or Hispanic had SIGNFICANTLY higher rate of not having meaningful employment
+-   American Indian had a SIGNFICANTLY higher rate of not having a MN employment record
+
 ```{r demographics RaceEthnicity five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, RaceEthnicity) %>%
   filter(grad.year.5 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$RaceEthnicity, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
 
 ### Ten years after graduating
 
+There is a statistically significant, negligible association between whether race/ethnicity and the employment state.
+
+Individuals who are;
+
+-   Asian/PI and black individuals had a lower rate of meaningful employment in the region.
+-   American Indian had a significantly lower rate of meaningful employment in MN.
+-   American Indian and Black had SIGNFICANTLY higher rate of not having meaningful employment
+-   Asian/PI, Black, and Hispanic had a significantly higher rate of having no MN employment record.
+
 ```{r demographics RaceEthnicity ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, RaceEthnicity) %>%
   filter(grad.year.10 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$RaceEthnicity, 
-         title = "Test", 
+         title = "", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## non.english.home
+
+There is a statistically significant association between whether an individual had a non-English speaker in their household and their employment state, but the association is negligible.
+
+The most biggest trend was the individuals that were confirmed to have a non-English speaking individual in their household had lower rates of meaningful employment in the region or in Minnesota and SIGNIFCANTLY higher rate of not having a MN employment record over time.
+
+::: panel-tabset
+### One year after graduating
+
+There is a statistically significant, negligible association between whether ran individual had a non native English speaking person in their household and the employment state.
+
+Individuals who had a non-English speaking person at home;
+
+-   Had a significantly lower rate of attending post-secondary.
+-   Had a significantly higher rate of having no MN employment record.
+
+```{r demographics non.english.home one year}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, non.english.home) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$non.english.home, 
+         title = "", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+There is a statistically significant, negligible association between whether a graduate had a non-English speaking person in their household and the employment state.
+
+Individuals who had a non-English speaking member at home;
+
+-   Had a significantly higher rate of having no MN employment record.
+
+```{r demographics non.english.home five year}
+data <- meaningful.emp.central %>%
+  select(grad.year.5, non.english.home) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$non.english.home, 
+         title = "", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+There is a statistically significant, negligible association between whether a graduate had a non-English speaking person in their household and the employment state.
+
+Individuals who had a non-English speaking member at home;
+
+-   Had a significantly lower rate of meaningful employment in the region
+-   Had a significantly lower rate of meaningful employment in Minnesota.
+-   Had a SIGNIFICANTLY higher rate of having no MN employment record.
+
+```{r demographics non.english.home ten year}
+data <- meaningful.emp.central %>%
+  select(grad.year.10, non.english.home) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$non.english.home, 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -595,217 +798,293 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$RaceEthnicity,
 
 ## english.learner
 
--   One year after graduating high school, individuals that were categorized as needing English learner classes;
-    -   attend post-secondary at a significantly lower rate, and
-    -   do not have meaningful employment at a higher rate, and
-    -   have no MN employment record at a significantly higher rate.
--   5 years after graduating, individuals that were categorized as needing English learner classes;
-    -   attend post-secondary at a significantly lower rate, and
-    -   do no have meaningful employment at a higher rate, and
-    -   have no MN employment record at a significantly higher rate.
--   10 years after graduating, individuals that were categorized as needing English learner classes;
-    -   have meaningful employment in the region at a significantly lower rate, and
-    -   have meaningful employment in the state at a significantly lower rate, and
-    -   had no MN employment record at a significantly higher rate.
+There is a statistically significant association between whether an individual was categorized as an English learner and their employment state, but the association was weak at first and became negligible over time.
+
+Through all the years, graduates categorized as an English learner had SIGNIFICANTLY lower rates of attending post-secondary and had SIGNFICANTLY higher rates of having no MN employment record.
+
+As time away from high school grows, the rate at which these individuals had meaningful employment in the region or in Minnesota became significantly lower.
 
 ::: panel-tabset
 ### One year after graduating
 
+There is a statistically significant, weak association between whether a graduate was categorized as an English learner and the employment state.
+
+Individuals who were classified as an English learner;
+
+-   Had a SIGNIFICANTLY lower rate of attending post-secondary.
+-   Had a significantly higher rate of not having meaningful employment.
+-   Had a SIGNIFICANTLY higher rate of having no MN employment record.
+
 ```{r demographics english.learner one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, english.learner) %>%
   filter(grad.year.1 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$english.learner, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
 
 ### Five years after graduating
 
+There is a statistically significant, negligible association between whether a graduate was categorized as an English learner and the employment state.
+
+Individuals who were classified as an English learner;
+
+-   Had a lower rate of meaningful employment in Minnesota.
+-   Had a SIGNIFICANTLY lower rate of attending post-secondary.
+-   Had a significantly higher rate of not having meaningful employment.
+-   Had a SIGNIFICANTLY higher rate of having no MN employment record.
+
 ```{r demographics english.learner five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, english.learner) %>%
   filter(grad.year.5 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$english.learner, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
 
 ### Ten years after graduating
 
+There is a statistically significant, weak association between whether a graduate was categorized as an English learner and the employment state.
+
+Individuals who were classified as an English learner;
+
+-   Had a lower rate of meaningful employment in the region.
+-   Had a SIGNIFICANTLY lower rate of meaningful employment in Minnesota.
+-   Had a SIGNIFICANTLY higher rate of having no MN employment record.
+
 ```{r demographics english.learner ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, english.learner) %>%
   filter(grad.year.10 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$english.learner, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
 :::
 
 <br>
+
+## ChatGPT
+
+This is the summary provided by ChatGPT when asked to analyze and interpret.
+
+### Gender Trends Over Time
+
++-----------------------------+------------+------------+-------------+------------+------------+-------------+
+| Outcome                     | 1 Year (F) | 5 Year (F) | 10 Year (F) | 1 Year (M) | 5 Year (M) | 10 Year (M) |
++=============================+============+============+=============+============+============+=============+
+| Attending PS                | 55.3%      | 17.8%      | \~0.0%      | 43.7%      | 13.4%      | 0.0%        |
++-----------------------------+------------+------------+-------------+------------+------------+-------------+
+| Meaningful Emp in MN        | 6.8%       | 24.2%      | 28.6%       | 8.2%       | 24.9%      | 31.8%       |
++-----------------------------+------------+------------+-------------+------------+------------+-------------+
+| Meaningful Emp in Region    | 10.9%      | 19.9%      | 21.5%       | 15.3%      | 24.1%      | 24.8%       |
++-----------------------------+------------+------------+-------------+------------+------------+-------------+
+| No MN Emp Record, Not in PS | 7.7%       | 17.1%      | 30.3%       | 11.9%      | 19.1%      | 28.4%       |
++-----------------------------+------------+------------+-------------+------------+------------+-------------+
+| Not Meaningful, Not in PS   | 19.3%      | 20.9%      | 19.6%       | 20.9%      | 18.5%      | 15.1%       |
++-----------------------------+------------+------------+-------------+------------+------------+-------------+
+
+**Trend**: Females start with higher PS enrollment; males steadily overtake in employment. Disconnection grows for both.
+
+------------------------------------------------------------------------
+
+### Economic Status Trends Over Time
+
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Outcome                     | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
++=============================+==========+==========+===========+==========+==========+===========+
+| Attending PS                | 57.4%    | 17.8%    | \~0.0%    | 32.6%    | 11.1%    | \~0.0%    |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Meaningful Emp in MN        | 6.7%     | 26.2%    | 32.6%     | 9.2%     | 21.1%    | 25.0%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Meaningful Emp in Region    | 11.7%    | 21.4%    | 22.8%     | 16.2%    | 23.4%    | 23.8%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| No MN Emp Record, Not in PS | 8.1%     | 17.0%    | 28.7%     | 13.5%    | 20.4%    | 30.7%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Not Meaningful, Not in PS   | 16.1%    | 17.6%    | 15.9%     | 28.5%    | 24.1%    | 20.5%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+
+**Trend**: Low-income students are less likely to pursue PS, and consistently more likely to lack MN employment or be disconnected.
+
+------------------------------------------------------------------------
+
+### Special Education Trends Over Time
+
++-----------------------------+----------------+-------+--------+-------------+-------+-------+
+| Outcome                     | 1 Yr (No SPED) | 5 Yr  | 10 Yr  | 1 Yr (SPED) | 5 Yr  | 10 Yr |
++=============================+================+=======+========+=============+=======+=======+
+| Attending PS                | 54.2%          | 17.0% | \~0.0% | 19.8%       | 6.4%  | 0.0%  |
++-----------------------------+----------------+-------+--------+-------------+-------+-------+
+| Meaningful Emp in MN        | 7.3%           | 25.6% | 31.5%  | 8.6%        | 17.6% | 21.2% |
++-----------------------------+----------------+-------+--------+-------------+-------+-------+
+| Meaningful Emp in Region    | 12.7%          | 21.7% | 23.0%  | 15.9%       | 24.1% | 24.0% |
++-----------------------------+----------------+-------+--------+-------------+-------+-------+
+| No MN Emp Record, Not in PS | 8.1%           | 17.2% | 29.0%  | 21.0%       | 24.5% | 31.5% |
++-----------------------------+----------------+-------+--------+-------------+-------+-------+
+| Not Meaningful, Not in PS   | 17.8%          | 18.5% | 16.5%  | 34.8%       | 27.5% | 23.3% |
++-----------------------------+----------------+-------+--------+-------------+-------+-------+
+
+**Trend**: SPED students consistently show lower engagement in PS and work, and higher disconnection.
+
+------------------------------------------------------------------------
+
+### Race/Ethnicity Snapshot
+
++----------------------+--------------------+---------------+---------------------+-----------------------+
+| Race                 | Attending PS (1yr) | Emp MN (10yr) | No MN Record (10yr) | Not Meaningful (10yr) |
++======================+====================+===============+=====================+=======================+
+| American Indian (AI) | 26.0%              | 21.6%         | 32.1%               | 27.3%                 |
++----------------------+--------------------+---------------+---------------------+-----------------------+
+| Asian/PI             | 52.0%              | 30.2%         | 40.2%               | 15.6%                 |
++----------------------+--------------------+---------------+---------------------+-----------------------+
+| Black                | 38.7%              | 25.3%         | 36.0%               | 25.2%                 |
++----------------------+--------------------+---------------+---------------------+-----------------------+
+| Hispanic             | 31.2%              | 25.1%         | 40.2%               | 17.5%                 |
++----------------------+--------------------+---------------+---------------------+-----------------------+
+| White                | 51.1%              | 30.5%         | 28.8%               | 17.0%                 |
++----------------------+--------------------+---------------+---------------------+-----------------------+
+
+**Trend**: White and Asian/PI grads show strongest MN employment; Black, Hispanic, and AI groups show consistently higher disconnection risk.
+
+### Non-English speakers at home
+
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Outcome                     | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
++=============================+==========+==========+===========+==========+==========+===========+
+| Attending PS                | 50.0%    | 15.7%    | \~0.0%    | 36.4%    | 13.9%    | 0.0%      |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Meaningful Emp in MN        | 7.4%     | 24.7%    | 30.4%     | 10.5%    | 19.4%    | 23.2%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Meaningful Emp in Region    | 13.1%    | 22.2%    | 23.4%     | 14.0%    | 17.0%    | 13.6%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| No MN Emp Record, Not in PS | 9.5%     | 17.7%    | 28.9%     | 18.6%    | 30.4%    | 47.7%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Not Meaningful, Not in PS   | 20.1%    | 19.7%    | 17.4%     | 20.5%    | 19.3%    | 15.5%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+
+**Trend**: Students from non-English-speaking homes have **lower postsecondary enrollment** and are increasingly underrepresented in the MN workforce by year 10, with a high percentage lacking MN employment records.
+
+------------------------------------------------------------------------
+
+### English learners
+
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Outcome                     | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
++=============================+==========+==========+===========+==========+==========+===========+
+| Attending PS                | 51.3%    | 16.1%    | \~0.0%    | 23.6%    | 7.2%     | 0.0%      |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Meaningful Emp in MN        | 7.4%     | 25.0%    | 30.6%     | 9.5%     | 17.9%    | 18.5%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Meaningful Emp in Region    | 12.9%    | 22.1%    | 23.3%     | 15.7%    | 21.5%    | 17.6%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| No MN Emp Record, Not in PS | 8.9%     | 17.4%    | 28.9%     | 22.1%    | 29.1%    | 43.1%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Not Meaningful, Not in PS   | 19.4%    | 19.4%    | 17.2%     | 29.1%    | 24.3%    | 20.8%     |
++-----------------------------+----------+----------+-----------+----------+----------+-----------+
+
+**Trend**: English learners start with significantly lower PS participation and grow increasingly disconnected from MN employment systems over time.
+
+------------------------------------------------------------------------
+
+```{r demogrpahics chatgpt}
+demographics.chatgpt <- meaningful.emp.central %>%
+  select(PersonID, Gender, grad.year.covid, economic.status, SpecialEdStatus, RaceEthnicity, non.english.home, english.learner, grad.year.1, grad.year.5, grad.year.10)
+
+write_csv(demographics.chatgpt, "Data/ChatGPT/demographics-chatgpt.csv")
+```
 
 # High school characteristics
 
 We will take a look at the following variables;
 
 -   Dem_Desc
--   range.school
+-   edr
 -   avg.unemp.rate
 -   avg.wage.pct.state
 
-The analysis highlights the following;
-
-*Dem_Desc*
-
--   Graduates from more rural districts had significantly lower rates of having meaningful employment in the region, but significantly more likely to have meaningful employment in Minnesota.
--   Town/rural mix individuals were significantly more likely to not have a MN employment record.
-
-*range.schools*
-
--   Range graduates were significantly less likely to have meaningful employment in the region and in MN.
--   Range graduates were significantly more likely to not have a MN employment record.
-
-*avg.unemp.rate*
-
--   Eliminate variable
-
-*avg.wages.pct.state*
-
--   Eliminate variable
+## Summary
 
 <br>
 
 ## Dem_Desc
 
--   One year after graduating
-    -   The more urban the district, the higher rate of having meaningful employment in the region.
-    -   Town/rural mix have a slightly higher rate of not having a MN employment record.
--   Five years after graduating
-    -   The more rural the district, the significantly lower rates of having meaningful employment in the region.
-    -   Entirely rural is significantly more likely to have meaningful employment in MN
-    -   Entirely rural signifiacntly less likely to be attending post-secondary
-    -   Town/rural mix more likely to not have a MN employment record
--   Ten years after graduating
-    -   The more rural the district, the significantly lower rates of having meaningful employment in the region.
-    -   Entirely rural significantly more likely to have meaningful employment in MN
-    -   More rural districts are significantly more likely to not have a MN employment record - especially the town/rural mix.
+There is a statistically significant association between an graduate's RUCA category and their employment state, but the association was negligible.
+
+Through all the years, the more rural a graduate was, the higher the rate of having meaningful employment in the region, while urban individuals had a significantly higher rate of meaningful employment in Minnesota.
 
 ::: panel-tabset
 ### One year after graduating
 
+There is a statistically significant, negligible association between a graduate's RUCA category and the employment state.
+
+Graduates from;
+
+-   more rural areas had a higher rate of having meaningful employment in the region.
+-   more urban area had a higher rate of having meaningful employment in MN.
+-   more rural areas had a lower rate of attending post-secondary.
+-   more rural areas had a higher rate of not having a MN employment record.
+
 ```{r hs characteristics Dem_Desc one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, Dem_Desc) %>%
   filter(grad.year.1 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$Dem_Desc, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
 
 ### Five years after graduating
 
+There is a statistically significant, negligible association between a graduate's RUCA category and the employment state.
+
+Graduates from;
+
+-   more rural areas had a higher rate of having meaningful employment in the region.
+-   more urban area had a significantly higher rate of having meaningful employment in MN.
+
 ```{r hs characteristics Dem_Desc five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, Dem_Desc) %>%
   filter(grad.year.5 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$Dem_Desc, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
 
 ### Ten years after graduating
 
+There is a statistically significant, negligible association between a graduate's RUCA category and the employment state.
+
+Graduates from;
+
+-   more rural areas had a significantly higher rate of having meaningful employment in the region.
+-   more urban area had a significantly higher rate of having meaningful employment in MN.
+
 ```{r hs characteristics Dem_Desc ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, Dem_Desc) %>%
   filter(grad.year.10 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$Dem_Desc, 
-         title = "Test", 
-         show.exp = TRUE,
-         show.col.prc = TRUE)
-```
-:::
-
-<br>
-
-## range.school
-
-One year after graduating
-
--   Range schools were significantly more likely to have graduates attend post-secondary.
--   Range schools were a bit less likely to not have a MN employment record.
-
-Five years after graduating
-
--   Range schools were slightly less likely to have meaningful employment in region.
--   Range graduates were slightly less likely to have meaningful employment in MN.
--   Range graduates were slightly more likely to be attending post-secondary.
--   Range graduates were significantly less likely to not have meaningful employment.
--   Range graduates were significantly more likely to not have a MN employment record.
-
-Ten years after graduating
-
--   Range graduates were slightly less likely to have meaningful employment in region.
--   Range graduates were significantly less likely to not have meaninful employment in MN.
--   Range graduates were significantly more likely to not have a MN employment record.
-
-::: panel-tabset
-### One year after graduating
-
-```{r hs characteristics range.school one year}
-data <- meaningful.emp.ne %>%
-  select(grad.year.1, range.school) %>%
-  filter(grad.year.1 != "After 2023") %>%
-  droplevels()
-
-tab_xtab(var.row = data$grad.year.1, var.col = data$range.school, 
-         title = "Test", 
-         show.exp = TRUE,
-         show.col.prc = TRUE)
-```
-
-### Five years after graduating
-
-```{r hs characteristics range.school five year}
-data <- meaningful.emp.ne %>%
-  select(grad.year.5, range.school) %>%
-  filter(grad.year.5 != "After 2023") %>%
-  droplevels()
-
-tab_xtab(var.row = data$grad.year.5, var.col = data$range.school, 
-         title = "Test", 
-         show.exp = TRUE,
-         show.col.prc = TRUE)
-```
-
-### Ten years after graduating
-
-```{r hs characteristics range.school ten year}
-data <- meaningful.emp.ne %>%
-  select(grad.year.10, range.school) %>%
-  filter(grad.year.10 != "After 2023") %>%
-  droplevels()
-
-tab_xtab(var.row = data$grad.year.10, var.col = data$range.school, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -815,18 +1094,24 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$range.school,
 
 ## avg.unemp.rate
 
--   One year after graduating
-    -   The individuals attending post-secondary had slightly higher unemployment rates.
--   Five years after graduating
-    -   Not much
--   Ten years after graduating
-    -   Not much
+There is a statistically significant association between an graduate's RUCA category and their employment state, but the association was negligible.
+
+Through all the years, the more rural a graduate was, the higher the rate of having meaningful employment in the region, while urban individuals had a significantly higher rate of meaningful employment in Minnesota.
 
 ::: panel-tabset
 ### One year after graduating
 
+There is a statistically significant, negligible association between a graduate's RUCA category and the employment state.
+
+Graduates from;
+
+-   more rural areas had a higher rate of having meaningful employment in the region.
+-   more urban area had a higher rate of having meaningful employment in MN.
+-   more rural areas had a lower rate of attending post-secondary.
+-   more rural areas had a higher rate of not having a MN employment record.
+
 ```{r hs characteristics avg.unemp.rate one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, avg.unemp.rate) %>%
   filter(grad.year.1 != "After 2023") %>%
   drop_na() %>%
@@ -852,10 +1137,10 @@ labels <- data %>%
 
 plot <- ggplot(data, aes(grad.year.1, avg.unemp.rate, fill = grad.year.1, group = grad.year.1)) +
   geom_boxplot_interactive() +
-  geom_label(data = labels, aes(x = grad.year.1, y = 25, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
+  geom_label(data = labels, aes(x = grad.year.1, y = 15, label = paste("Min: ", comma(Min, accuracy = .1), "\nQ1: ", comma(Q1, accuracy = .1), "\nMedian: ", comma(Median, accuracy = .1), "\nQ3: ", comma(Q3, accuracy = .1), "\nMax: ", comma(Max, accuracy = ), "\nMean: ", comma(Mean, accuracy = .1))), color = "white") +
   labs(x="", y = "", color="", title = "Boxplots of average unemployment by employment state")+
   scale_y_continuous(labels=scales::comma,
-                     limits = c(0, 30))+
+                     limits = c(0, 20))+
   scale_fill_manual(values = brewer.pal(n = 6, "RdYlBu")) +
   theme_bar+
   theme(legend.position = "none",
@@ -874,12 +1159,16 @@ summary(summary)
 
 TukeyHSD(summary)
 
+hs.characteristics.chatgpt <- meaningful.emp.central %>%
+  select(PersonID, Dem_Desc, edr, avg.unemp.rate, avg.wages.pct.state, grad.year.1, grad.year.5, grad.year.10)
+
+write_csv(hs.characteristics.chatgpt, "Data/ChatGPT/hs-characteristics-chatgpt.csv")
 ```
 
 ### Five years after graduating
 
 ```{r hs characteristics avg.unemp.rate five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, avg.unemp.rate) %>%
   filter(grad.year.5 != "After 2023") %>%
   drop_na() %>%
@@ -932,7 +1221,7 @@ TukeyHSD(summary)
 ### Ten years after graduating
 
 ```{r hs characteristics avg.unemp.rate ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, avg.unemp.rate) %>%
   filter(grad.year.10 != "After 2023") %>%
   drop_na() %>%
@@ -998,7 +1287,7 @@ TukeyHSD(summary)
 ### One year after graduating
 
 ```{r hs characteristics avg.wages.pct.state one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, avg.wages.pct.state) %>%
   filter(grad.year.1 != "After 2023") %>%
   drop_na() %>%
@@ -1051,7 +1340,7 @@ TukeyHSD(summary)
 ### Five years after graduating
 
 ```{r hs characteristics avg.wages.pct.state five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, avg.wages.pct.state) %>%
   filter(grad.year.5 != "After 2023") %>%
   drop_na() %>%
@@ -1104,7 +1393,7 @@ TukeyHSD(summary)
 ### Ten years after graduating
 
 ```{r hs characteristics avg.wages.pct.state ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, avg.wages.pct.state) %>%
   filter(grad.year.10 != "After 2023") %>%
   drop_na() %>%
@@ -1208,13 +1497,13 @@ The analysis provides the following insights;
 ### One year after graduating
 
 ```{r hs accomplishments pseo.participant one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, pseo.participant) %>%
   filter(grad.year.1 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$pseo.participant, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -1222,13 +1511,13 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$pseo.participant,
 ### Five years after graduating
 
 ```{r hs accomplishments pseo.participant five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, pseo.participant) %>%
   filter(grad.year.5 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$pseo.participant, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -1236,13 +1525,13 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$pseo.participant,
 ### Ten years after graduating
 
 ```{r hs accomplishments pseo.participant ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, pseo.participant) %>%
   filter(grad.year.10 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$pseo.participant, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -1267,13 +1556,13 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$pseo.participant,
 ### One year after graduating
 
 ```{r hs accomplishments took.ACT one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, took.ACT) %>%
   filter(grad.year.1 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$took.ACT, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -1281,13 +1570,13 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$took.ACT,
 ### Five years after graduating
 
 ```{r hs accomplishments took.ACT five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, took.ACT) %>%
   filter(grad.year.5 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$took.ACT, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -1295,13 +1584,13 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$took.ACT,
 ### Ten years after graduating
 
 ```{r hs accomplishments took.ACT ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, took.ACT) %>%
   filter(grad.year.10 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$took.ACT, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -1326,7 +1615,7 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$took.ACT,
 ### One year after graduating
 
 ```{r hs accomplishments ACTCompositeScore one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, ACTCompositeScore) %>%
   filter(grad.year.1 != "After 2023") %>%
   drop_na() %>%
@@ -1379,7 +1668,7 @@ TukeyHSD(summary)
 ### Five years after graduating
 
 ```{r hs accomplishments ACTCompositeScore five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, ACTCompositeScore) %>%
   filter(grad.year.5 != "After 2023") %>%
   drop_na() %>%
@@ -1432,7 +1721,7 @@ TukeyHSD(summary)
 ### Ten years after graduating
 
 ```{r hs accomplishments ACTCompositeScore ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, ACTCompositeScore) %>%
   filter(grad.year.10 != "After 2023") %>%
   drop_na() %>%
@@ -1499,7 +1788,7 @@ TukeyHSD(summary)
 ### One year after graduating
 
 ```{r hs accomplishments MCA.R one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, MCA.R) %>%
   filter(grad.year.1 != "After 2023") %>%
   drop_na() %>%
@@ -1552,7 +1841,7 @@ TukeyHSD(summary)
 ### Five years after graduating
 
 ```{r hs accomplishments MCA.R five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, MCA.R) %>%
   filter(grad.year.5 != "After 2023") %>%
   drop_na() %>%
@@ -1605,7 +1894,7 @@ TukeyHSD(summary)
 ### Ten years after graduating
 
 ```{r hs accomplishments MCA.R ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, MCA.R) %>%
   filter(grad.year.10 != "After 2023") %>%
   drop_na() %>%
@@ -1673,7 +1962,7 @@ TukeyHSD(summary)
 ### One year after graduating
 
 ```{r hs accomplishments MCA.S one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, MCA.S) %>%
   filter(grad.year.1 != "After 2023") %>%
   drop_na() %>%
@@ -1726,7 +2015,7 @@ TukeyHSD(summary)
 ### Five years after graduating
 
 ```{r hs accomplishments MCA.S five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, MCA.S) %>%
   filter(grad.year.5 != "After 2023") %>%
   drop_na() %>%
@@ -1779,7 +2068,7 @@ TukeyHSD(summary)
 ### Ten years after graduating
 
 ```{r hs accomplishments MCA.S ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, MCA.S) %>%
   filter(grad.year.10 != "After 2023") %>%
   drop_na() %>%
@@ -1847,7 +2136,7 @@ TukeyHSD(summary)
 ### One year after graduating
 
 ```{r hs accomplishments MCA.M one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, MCA.M) %>%
   filter(grad.year.1 != "After 2023") %>%
   drop_na() %>%
@@ -1900,7 +2189,7 @@ TukeyHSD(summary)
 ### Five years after graduating
 
 ```{r hs accomplishments MCA.M five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, MCA.M) %>%
   filter(grad.year.5 != "After 2023") %>%
   drop_na() %>%
@@ -1953,7 +2242,7 @@ TukeyHSD(summary)
 ### Ten years after graduating
 
 ```{r hs accomplishments MCA.M ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, MCA.M) %>%
   filter(grad.year.10 != "After 2023") %>%
   drop_na() %>%
@@ -2022,13 +2311,13 @@ TukeyHSD(summary)
 ### One year after graduating
 
 ```{r hs accomplishments cte.achievement one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, cte.achievement) %>%
   filter(grad.year.1 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$cte.achievement, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2036,13 +2325,13 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$cte.achievement,
 ### Five years after graduating
 
 ```{r hs accomplishments cte.achievement five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, cte.achievement) %>%
   filter(grad.year.5 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$cte.achievement, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2050,13 +2339,13 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$cte.achievement,
 ### Ten years after graduating
 
 ```{r hs accomplishments cte.achievement ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, cte.achievement) %>%
   filter(grad.year.10 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$cte.achievement, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2078,7 +2367,7 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$cte.achievement,
 ### One year after graduating
 
 ```{r hs accomplishments total.cte.courses.taken one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, total.cte.courses.taken) %>%
   filter(grad.year.1 != "After 2023") %>%
   drop_na() %>%
@@ -2131,7 +2420,7 @@ TukeyHSD(summary)
 ### Five years after graduating
 
 ```{r hs accomplishments total.cte.courses.taken five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, total.cte.courses.taken) %>%
   filter(grad.year.5 != "After 2023") %>%
   drop_na() %>%
@@ -2184,7 +2473,7 @@ TukeyHSD(summary)
 ### Ten years after graduating
 
 ```{r hs accomplishments total.cte.courses.taken ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, total.cte.courses.taken) %>%
   filter(grad.year.10 != "After 2023") %>%
   drop_na() %>%
@@ -2309,13 +2598,13 @@ The analysis provides the following insights;
 ### One year after graduating
 
 ```{r post-secondary attended.ps.within.first.year.hsgrad one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, attended.ps.within.first.year.hsgrad) %>%
   filter(grad.year.1 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$attended.ps.within.first.year.hsgrad, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2323,13 +2612,13 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$attended.ps.within.first.yea
 ### Five years after graduating
 
 ```{r post-secondary attended.ps.within.first.year.hsgrad five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, attended.ps.within.first.year.hsgrad) %>%
   filter(grad.year.5 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$attended.ps.within.first.year.hsgrad, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2337,13 +2626,13 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$attended.ps.within.first.yea
 ### Ten years after graduating
 
 ```{r post-secondary attended.ps.within.first.year.hsgrad ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, attended.ps.within.first.year.hsgrad) %>%
   filter(grad.year.10 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$attended.ps.within.first.year.hsgrad, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2368,13 +2657,13 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$attended.ps.within.first.ye
 ### One year after graduating
 
 ```{r post-secondary attended.ps one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, attended.ps) %>%
   filter(grad.year.1 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$attended.ps, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2382,13 +2671,13 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$attended.ps,
 ### Five years after graduating
 
 ```{r post-secondary attended.ps five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, attended.ps) %>%
   filter(grad.year.5 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$attended.ps, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2396,13 +2685,13 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$attended.ps,
 ### Ten years after graduating
 
 ```{r post-secondary attended.ps ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, attended.ps) %>%
   filter(grad.year.10 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$attended.ps, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2428,14 +2717,14 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$attended.ps,
 ### One year after graduating
 
 ```{r post-secondary ps.grad one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, ps.grad) %>%
   filter(grad.year.1 != "After 2023") %>%
   filter(ps.grad != "Attending ps") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$ps.grad, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2443,14 +2732,14 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$ps.grad,
 ### Five years after graduating
 
 ```{r post-secondary ps.grad five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, ps.grad) %>%
   filter(grad.year.5 != "After 2023") %>%
   filter(ps.grad != "Attending ps") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$ps.grad, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2458,14 +2747,14 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$ps.grad,
 ### Ten years after graduating
 
 ```{r post-secondary ps.grad ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, ps.grad) %>%
   filter(grad.year.10 != "After 2023") %>%
   filter(ps.grad != "Attending ps") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$ps.grad, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2525,7 +2814,7 @@ A quick reminder on what the codes mean;
 ### One year after graduating
 
 ```{r post-secondary ps.grad.InstitutionSector one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, ps.grad.InstitutionSector) %>%
   filter(grad.year.1 != "After 2023") %>%
   filter(ps.grad.InstitutionSector != "Did not grad") %>%
@@ -2533,7 +2822,7 @@ data <- meaningful.emp.ne %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$ps.grad.InstitutionSector, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2541,7 +2830,7 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$ps.grad.InstitutionSector,
 ### Five years after graduating
 
 ```{r post-secondary ps.grad.InstitutionSector five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, ps.grad.InstitutionSector) %>%
   filter(grad.year.5 != "After 2023") %>%
   filter(ps.grad.InstitutionSector != "Did not grad") %>%
@@ -2549,7 +2838,7 @@ data <- meaningful.emp.ne %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$ps.grad.InstitutionSector, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2557,7 +2846,7 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$ps.grad.InstitutionSector,
 ### Ten years after graduating
 
 ```{r post-secondary ps.grad.InstitutionSector ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, ps.grad.InstitutionSector) %>%
   filter(grad.year.10 != "After 2023") %>%
   filter(ps.grad.InstitutionSector != "Did not grad") %>%
@@ -2565,7 +2854,7 @@ data <- meaningful.emp.ne %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$ps.grad.InstitutionSector, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2619,13 +2908,13 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$ps.grad.InstitutionSector,
 ### One year after graduating
 
 ```{r post-secondary highest.cred.level one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, highest.cred.level) %>%
   filter(grad.year.1 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$highest.cred.level, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2633,13 +2922,13 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$highest.cred.level,
 ### Five years after graduating
 
 ```{r post-secondary highest.cred.level five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, highest.cred.level) %>%
   filter(grad.year.5 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$highest.cred.level, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2647,13 +2936,13 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$highest.cred.level,
 ### Ten years after graduating
 
 ```{r post-secondary highest.cred.level ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, highest.cred.level) %>%
   filter(grad.year.10 != "After 2023") %>%
   droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$highest.cred.level, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2712,7 +3001,7 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$highest.cred.level,
 ### One year after graduating
 
 ```{r post-secondary ps.grad.location one year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.1, ps.grad.in.same.edr, ps.grad.in.MN) %>%
   filter(grad.year.1 != "After 2023") %>%
   mutate(ps.grad.location = ifelse(ps.grad.in.same.edr == "In same EDR", "In region",
@@ -2726,7 +3015,7 @@ data <- meaningful.emp.ne %>%
   mutate(ps.grad.location = fct_relevel(ps.grad.location, "In region", "Inside and outside region", "In MN", "Inside and outside MN", "Outside Minnesota"))
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$ps.grad.location, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2734,7 +3023,7 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$ps.grad.location,
 ### Five years after graduating
 
 ```{r post-secondary ps.grad.location five year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.5, ps.grad.in.same.edr, ps.grad.in.MN) %>%
   filter(grad.year.5 != "After 2023") %>%
   mutate(ps.grad.location = ifelse(ps.grad.in.same.edr == "In same EDR", "In region",
@@ -2748,7 +3037,7 @@ data <- meaningful.emp.ne %>%
   mutate(ps.grad.location = fct_relevel(ps.grad.location, "In region", "Inside and outside region", "In MN", "Inside and outside MN", "Outside Minnesota"))
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$ps.grad.location, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2756,7 +3045,7 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$ps.grad.location,
 ### Ten years after graduating
 
 ```{r post-secondary ps.grad.location ten year}
-data <- meaningful.emp.ne %>%
+data <- meaningful.emp.central %>%
   select(grad.year.10, ps.grad.in.same.edr, ps.grad.in.MN) %>%
   filter(grad.year.10 != "After 2023") %>%
   mutate(ps.grad.location = ifelse(ps.grad.in.same.edr == "In same EDR", "In region",
@@ -2770,7 +3059,7 @@ data <- meaningful.emp.ne %>%
   mutate(ps.grad.location = fct_relevel(ps.grad.location, "In region", "Inside and outside region", "In MN", "Inside and outside MN", "Outside Minnesota"))
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$ps.grad.location, 
-         title = "Test", 
+         title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
 ```
@@ -2808,14 +3097,14 @@ Okay, after this analysis, here is what we will move forward with;
     -   ps.grad.location
 
 ```{r create new master after analysis}
-master.after.ct <- meaningful.emp.ne %>%
+master.after.ct <- meaningful.emp.central %>%
   mutate(ps.grad.location = ifelse(ps.grad.in.same.edr == "In same EDR", "In region",
                                    ifelse(ps.grad.in.same.edr == "Outside EDR" & ps.grad.in.MN == "In Minnesota", "In state",
                                           ifelse(ps.grad.in.same.edr == "Inside and outside same EDR" & ps.grad.in.MN == "In Minnesota", "In state",
                                                  ifelse(ps.grad.in.MN == "Outside MN", "Outside Minnesota",
                                                         ifelse(ps.grad.in.same.edr == "Inside and outside same EDR", "Inside and outside region",
                                                         ifelse(ps.grad.in.MN == "Inside and outside MN", "Inside and outside MN", as.character(ps.grad.in.MN)))))))) %>%
-  select(PersonID, grad.year.covid, economic.status, range.school, pseo.participant, SpecialEdStatus, RaceEthnicity, Dem_Desc, took.ACT, cte.achievement, english.learner, ps.grad, ps.grad.InstitutionSector, highest.cred.level, ps.grad.location, ACTCompositeScore, MCA.M, MCA.R, MCA.S, total.cte.courses.taken,grad.year.1, grad.year.5, grad.year.10)
+  select(PersonID, grad.year.covid, economic.status, , pseo.participant, SpecialEdStatus, RaceEthnicity, Dem_Desc, took.ACT, cte.achievement, english.learner, ps.grad, ps.grad.InstitutionSector, highest.cred.level, ps.grad.location, ACTCompositeScore, MCA.M, MCA.R, MCA.S, total.cte.courses.taken,grad.year.1, grad.year.5, grad.year.10)
   
 write_csv(master.after.ct, "Data/SLEDS/Masters/After analysis/Master-after-ct.csv")
 ```
