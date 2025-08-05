@@ -361,31 +361,15 @@ In the demographics section we will examine the relationship between that paths 
 
 ## **Summary**
 
-+------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Demographic      | Association Strength   | Highlights                                                                                                                                                                                          |
-+==================+:======================:+=====================================================================================================================================================================================================+
-| Gender           | Weak to negligible     | Females attend post-secondary at a much higher rate                                                                                                                                                 |
-+------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| grad.year.covid  | Weak                   | Post-COVID grads attend post-secondary at a lower rate.                                                                                                                                             |
-+------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| economic.status  | Moderate to negligible | Individuals who qualify for free or reduced lunch attend post-secondary at a lower, and have a lower rate of meaningful employment in Minnesota.                                                    |
-+------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| SpecialEdStatus  | Moderate to negligible | Special Ed students attend post-secondary at a SIGNIFICANTLY lower rate, and have a higher rate of not having meaningful employment.                                                                |
-|                  |                        |                                                                                                                                                                                                     |
-|                  |                        | Not having a MN employment record is significantly higher at first.                                                                                                                                 |
-+------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| RaceEthnicity    | Negligible             | White and Asian/PI attend post-secondary at a significantly higher rate.                                                                                                                            |
-|                  |                        |                                                                                                                                                                                                     |
-|                  |                        | American Indian and Black graduates have a significantly higher rate of not having a MN employment record or attending post-secondary.                                                              |
-|                  |                        |                                                                                                                                                                                                     |
-|                  |                        | The rate of non-white individuals not having a MN employment record increases significantly over time.                                                                                              |
-+------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| non.english.home | Negligible             | Individuals with non-English speakers in their household had lower rate of meaningful employment in the region or in Minnesota, and SIGNIFICANTLY higher rate of not having a MN employment record. |
-+------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| english.learner  | Weak to negligible     | English learners had a SIGNIFICANTLY lower rates of attending post-secondary.                                                                                                                       |
-|                  |                        |                                                                                                                                                                                                     |
-|                  |                        | The further from high school graduation saw a significant decrease in the rate of individuals with meaningful employment in the region or Minnesota.                                                |
-+------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Demographic | Association Strength | Highlights |
+|---------------|:---------:|--------------------------------------------|
+| Gender | Weak to negligible | Females start with higher PS enrollment; males steadily overtake in employment. Disconnection grows for both. |
+| grad.year.covid | Weak | Post-COVID grads attend post-secondary at a lower rate. |
+| economic.status | Moderate to negligible | Low-income students are less likely to pursue PS, and consistently more likely to lack MN employment or be disconnected. |
+| SpecialEdStatus | Moderate to negligible | SPED students consistently show lower engagement in PS and work, and higher disconnection. |
+| RaceEthnicity | Negligible | White and Asian/PI grads show strongest MN employment; Black, Hispanic, and AI groups show consistently higher disconnection risk. |
+| non.english.home | Negligible | Students from non-English-speaking homes have **lower postsecondary enrollment** and are increasingly underrepresented in the MN workforce by year 10, with a high percentage lacking MN employment records. |
+| english.learner | Weak to negligible | English learners start with significantly lower PS participation and grow increasingly disconnected from MN employment systems over time. |
 
 <br>
 
@@ -881,19 +865,13 @@ This is the summary provided by ChatGPT when asked to analyze and interpret.
 
 ### Gender Trends Over Time
 
-+-----------------------------+------------+------------+-------------+------------+------------+-------------+
-| Outcome                     | 1 Year (F) | 5 Year (F) | 10 Year (F) | 1 Year (M) | 5 Year (M) | 10 Year (M) |
-+=============================+============+============+=============+============+============+=============+
-| Attending PS                | 55.3%      | 17.8%      | \~0.0%      | 43.7%      | 13.4%      | 0.0%        |
-+-----------------------------+------------+------------+-------------+------------+------------+-------------+
-| Meaningful Emp in MN        | 6.8%       | 24.2%      | 28.6%       | 8.2%       | 24.9%      | 31.8%       |
-+-----------------------------+------------+------------+-------------+------------+------------+-------------+
-| Meaningful Emp in Region    | 10.9%      | 19.9%      | 21.5%       | 15.3%      | 24.1%      | 24.8%       |
-+-----------------------------+------------+------------+-------------+------------+------------+-------------+
-| No MN Emp Record, Not in PS | 7.7%       | 17.1%      | 30.3%       | 11.9%      | 19.1%      | 28.4%       |
-+-----------------------------+------------+------------+-------------+------------+------------+-------------+
-| Not Meaningful, Not in PS   | 19.3%      | 20.9%      | 19.6%       | 20.9%      | 18.5%      | 15.1%       |
-+-----------------------------+------------+------------+-------------+------------+------------+-------------+
+| Outcome | 1 Year (F) | 5 Year (F) | 10 Year (F) | 1 Year (M) | 5 Year (M) | 10 Year (M) |
+|-----------|----------|----------|----------|----------|----------|----------|
+| Attending PS | 55.3% | 17.8% | \~0.0% | 43.7% | 13.4% | 0.0% |
+| Meaningful Emp in MN | 6.8% | 24.2% | 28.6% | 8.2% | 24.9% | 31.8% |
+| Meaningful Emp in Region | 10.9% | 19.9% | 21.5% | 15.3% | 24.1% | 24.8% |
+| No MN Emp Record, Not in PS | 7.7% | 17.1% | 30.3% | 11.9% | 19.1% | 28.4% |
+| Not Meaningful, Not in PS | 19.3% | 20.9% | 19.6% | 20.9% | 18.5% | 15.1% |
 
 **Trend**: Females start with higher PS enrollment; males steadily overtake in employment. Disconnection grows for both.
 
@@ -901,19 +879,13 @@ This is the summary provided by ChatGPT when asked to analyze and interpret.
 
 ### Economic Status Trends Over Time
 
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| Outcome                     | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
-+=============================+==========+==========+===========+==========+==========+===========+
-| Attending PS                | 57.4%    | 17.8%    | \~0.0%    | 32.6%    | 11.1%    | \~0.0%    |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| Meaningful Emp in MN        | 6.7%     | 26.2%    | 32.6%     | 9.2%     | 21.1%    | 25.0%     |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| Meaningful Emp in Region    | 11.7%    | 21.4%    | 22.8%     | 16.2%    | 23.4%    | 23.8%     |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| No MN Emp Record, Not in PS | 8.1%     | 17.0%    | 28.7%     | 13.5%    | 20.4%    | 30.7%     |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| Not Meaningful, Not in PS   | 16.1%    | 17.6%    | 15.9%     | 28.5%    | 24.1%    | 20.5%     |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Outcome | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
+|------------|----------|----------|----------|----------|----------|----------|
+| Attending PS | 57.4% | 17.8% | \~0.0% | 32.6% | 11.1% | \~0.0% |
+| Meaningful Emp in MN | 6.7% | 26.2% | 32.6% | 9.2% | 21.1% | 25.0% |
+| Meaningful Emp in Region | 11.7% | 21.4% | 22.8% | 16.2% | 23.4% | 23.8% |
+| No MN Emp Record, Not in PS | 8.1% | 17.0% | 28.7% | 13.5% | 20.4% | 30.7% |
+| Not Meaningful, Not in PS | 16.1% | 17.6% | 15.9% | 28.5% | 24.1% | 20.5% |
 
 **Trend**: Low-income students are less likely to pursue PS, and consistently more likely to lack MN employment or be disconnected.
 
@@ -921,19 +893,13 @@ This is the summary provided by ChatGPT when asked to analyze and interpret.
 
 ### Special Education Trends Over Time
 
-+-----------------------------+----------------+--------+--------+-------------+--------+--------+
-| Outcome                     | 1 Yr (No SPED) | 5 Yr   | 10 Yr  | 1 Yr (SPED) | 5 Yr   | 10 Yr  |
-+=============================+================+========+========+=============+========+========+
-| Attending PS                | 54.2%          | 17.0%  | \~0.0% | 19.8%       | 6.4%   | 0.0%   |
-+-----------------------------+----------------+--------+--------+-------------+--------+--------+
-| Meaningful Emp in MN        | 7.3%           | 25.6%  | 31.5%  | 8.6%        | 17.6%  | 21.2%  |
-+-----------------------------+----------------+--------+--------+-------------+--------+--------+
-| Meaningful Emp in Region    | 12.7%          | 21.7%  | 23.0%  | 15.9%       | 24.1%  | 24.0%  |
-+-----------------------------+----------------+--------+--------+-------------+--------+--------+
-| No MN Emp Record, Not in PS | 8.1%           | 17.2%  | 29.0%  | 21.0%       | 24.5%  | 31.5%  |
-+-----------------------------+----------------+--------+--------+-------------+--------+--------+
-| Not Meaningful, Not in PS   | 17.8%          | 18.5%  | 16.5%  | 34.8%       | 27.5%  | 23.3%  |
-+-----------------------------+----------------+--------+--------+-------------+--------+--------+
+| Outcome | 1 Yr (No SPED) | 5 Yr | 10 Yr | 1 Yr (SPED) | 5 Yr | 10 Yr |
+|-------------|----------|----------|----------|----------|----------|----------|
+| Attending PS | 54.2% | 17.0% | \~0.0% | 19.8% | 6.4% | 0.0% |
+| Meaningful Emp in MN | 7.3% | 25.6% | 31.5% | 8.6% | 17.6% | 21.2% |
+| Meaningful Emp in Region | 12.7% | 21.7% | 23.0% | 15.9% | 24.1% | 24.0% |
+| No MN Emp Record, Not in PS | 8.1% | 17.2% | 29.0% | 21.0% | 24.5% | 31.5% |
+| Not Meaningful, Not in PS | 17.8% | 18.5% | 16.5% | 34.8% | 27.5% | 23.3% |
 
 **Trend**: SPED students consistently show lower engagement in PS and work, and higher disconnection.
 
@@ -941,37 +907,25 @@ This is the summary provided by ChatGPT when asked to analyze and interpret.
 
 ### Race/Ethnicity Snapshot
 
-+----------------------+--------------------+---------------+---------------------+-----------------------+
-| Race                 | Attending PS (1yr) | Emp MN (10yr) | No MN Record (10yr) | Not Meaningful (10yr) |
-+======================+====================+===============+=====================+=======================+
-| American Indian (AI) | 26.0%              | 21.6%         | 32.1%               | 27.3%                 |
-+----------------------+--------------------+---------------+---------------------+-----------------------+
-| Asian/PI             | 52.0%              | 30.2%         | 40.2%               | 15.6%                 |
-+----------------------+--------------------+---------------+---------------------+-----------------------+
-| Black                | 38.7%              | 25.3%         | 36.0%               | 25.2%                 |
-+----------------------+--------------------+---------------+---------------------+-----------------------+
-| Hispanic             | 31.2%              | 25.1%         | 40.2%               | 17.5%                 |
-+----------------------+--------------------+---------------+---------------------+-----------------------+
-| White                | 51.1%              | 30.5%         | 28.8%               | 17.0%                 |
-+----------------------+--------------------+---------------+---------------------+-----------------------+
+| Race | Attending PS (1yr) | Emp MN (10yr) | No MN Record (10yr) | Not Meaningful (10yr) |
+|--------------|--------------|--------------|--------------|--------------|
+| American Indian (AI) | 26.0% | 21.6% | 32.1% | 27.3% |
+| Asian/PI | 52.0% | 30.2% | 40.2% | 15.6% |
+| Black | 38.7% | 25.3% | 36.0% | 25.2% |
+| Hispanic | 31.2% | 25.1% | 40.2% | 17.5% |
+| White | 51.1% | 30.5% | 28.8% | 17.0% |
 
 **Trend**: White and Asian/PI grads show strongest MN employment; Black, Hispanic, and AI groups show consistently higher disconnection risk.
 
 ### Non-English speakers at home
 
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| Outcome                     | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
-+=============================+==========+==========+===========+==========+==========+===========+
-| Attending PS                | 50.0%    | 15.7%    | \~0.0%    | 36.4%    | 13.9%    | 0.0%      |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| Meaningful Emp in MN        | 7.4%     | 24.7%    | 30.4%     | 10.5%    | 19.4%    | 23.2%     |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| Meaningful Emp in Region    | 13.1%    | 22.2%    | 23.4%     | 14.0%    | 17.0%    | 13.6%     |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| No MN Emp Record, Not in PS | 9.5%     | 17.7%    | 28.9%     | 18.6%    | 30.4%    | 47.7%     |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| Not Meaningful, Not in PS   | 20.1%    | 19.7%    | 17.4%     | 20.5%    | 19.3%    | 15.5%     |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Outcome | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
+|------------|----------|----------|----------|----------|----------|----------|
+| Attending PS | 50.0% | 15.7% | \~0.0% | 36.4% | 13.9% | 0.0% |
+| Meaningful Emp in MN | 7.4% | 24.7% | 30.4% | 10.5% | 19.4% | 23.2% |
+| Meaningful Emp in Region | 13.1% | 22.2% | 23.4% | 14.0% | 17.0% | 13.6% |
+| No MN Emp Record, Not in PS | 9.5% | 17.7% | 28.9% | 18.6% | 30.4% | 47.7% |
+| Not Meaningful, Not in PS | 20.1% | 19.7% | 17.4% | 20.5% | 19.3% | 15.5% |
 
 **Trend**: Students from non-English-speaking homes have **lower postsecondary enrollment** and are increasingly underrepresented in the MN workforce by year 10, with a high percentage lacking MN employment records.
 
@@ -979,19 +933,13 @@ This is the summary provided by ChatGPT when asked to analyze and interpret.
 
 ### English learners
 
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| Outcome                     | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
-+=============================+==========+==========+===========+==========+==========+===========+
-| Attending PS                | 51.3%    | 16.1%    | \~0.0%    | 23.6%    | 7.2%     | 0.0%      |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| Meaningful Emp in MN        | 7.4%     | 25.0%    | 30.6%     | 9.5%     | 17.9%    | 18.5%     |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| Meaningful Emp in Region    | 12.9%    | 22.1%    | 23.3%     | 15.7%    | 21.5%    | 17.6%     |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| No MN Emp Record, Not in PS | 8.9%     | 17.4%    | 28.9%     | 22.1%    | 29.1%    | 43.1%     |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
-| Not Meaningful, Not in PS   | 19.4%    | 19.4%    | 17.2%     | 29.1%    | 24.3%    | 20.8%     |
-+-----------------------------+----------+----------+-----------+----------+----------+-----------+
+| Outcome | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
+|------------|----------|----------|----------|----------|----------|----------|
+| Attending PS | 51.3% | 16.1% | \~0.0% | 23.6% | 7.2% | 0.0% |
+| Meaningful Emp in MN | 7.4% | 25.0% | 30.6% | 9.5% | 17.9% | 18.5% |
+| Meaningful Emp in Region | 12.9% | 22.1% | 23.3% | 15.7% | 21.5% | 17.6% |
+| No MN Emp Record, Not in PS | 8.9% | 17.4% | 28.9% | 22.1% | 29.1% | 43.1% |
+| Not Meaningful, Not in PS | 19.4% | 19.4% | 17.2% | 29.1% | 24.3% | 20.8% |
 
 **Trend**: English learners start with significantly lower PS participation and grow increasingly disconnected from MN employment systems over time.
 
@@ -1015,12 +963,12 @@ We will take a look at the following variables;
 
 ## Summary
 
-| Col1 | Col2 | Col3 |
-|------|------|------|
-|      |      |      |
-|      |      |      |
-|      |      |      |
-|      |      |      |
+| High School Characteristics | Association Strength | Highlights |
+|---------------|:-----------:|--------------------------------------------|
+| Dem_Desc | Negligible | Rural graduates had a higher rate of having meaningful employment in the region while urban graduates had a higher rate of meaningful employment in Minnesota. |
+| EDR | Negligible | EDR 5 had a higher rate of meaningful employment in the region and not having a MN employment record. |
+| avg.unemp.rate | Moderate | Higher unemployment was associated with a slight **increase in postsecondary attendance** and a **decrease in meaningful employment**, particularly within Minnesota. While these effects were small, they remained consistent across all three time points. |
+| avg.wages.pct.state | Most important | Individuals from **higher-wage counties** were significantly more likely to have **meaningful employment within Minnesota**, even years after graduation. Conversely, they were less likely to attend post-secondary school immediately after graduation. |
 
 <br>
 
