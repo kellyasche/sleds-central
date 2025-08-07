@@ -156,11 +156,11 @@ Here is a list of all the categorical variables with a description of each.
 <br>
 
 ```{r primary independent variables}
-qual.var.names <-  c("PersonID", "hs.grad.year", "Gender", "grad.year.covid", "LimitedEnglishProficiencyIndicator", "HomelessIndicator", "economic.status", "pseo.participant", "SpecialEdStatus", "non.english.home", "RaceEthnicity", "Dem_Desc", "edr", "took.ACT", "ap.exam", "cte.achievement", "english.learner", "sat.taken", "attended.ps.within.first.year.hsgrad", "attended.ps", "ps.grad", "ps.grad.InstitutionSector", "highest.cred.level")
+qual.var.names <-  c("PersonID", "hs.grad.year", "Gender", "grad.year.covid", "LimitedEnglishProficiencyIndicator", "HomelessIndicator", "economic.status", "pseo.participant", "SpecialEdStatus", "non.english.home", "RaceEthnicity", "Dem_Desc", "edr", "took.ACT", "ap.exam", "cte.achievement", "english.learner", "sat.taken", "attended.ps.within.first.year.hsgrad", "attended.ps", "ps.grad", "ps.grad.InstitutionSector", "highest.cred.level", "ps.grad.location")
 
 quan.var.names <- c("total.cte.courses.taken", "cte.0", "cte.1", "cte.2", "cte.3", "cte.4", "cte.5", "cte.6", "cte.7", "cte.8", "cte.9", "cte.10", "cte.11", "cte.12", "cte.14", "cte.21", "cte.22", "cte.23", "cte.24", "cte.25", "cte.26", "avg.cte.intensity", "MCA.M", "MCA.R", "MCA.S", "avg.unemp.rate", "wages.3year.avg", "avg.wages.pct.state")
 
-independent.var.names <- c("hs.grad.year", "Gender", "LimitedEnglishProficiencyIndicator", "HomelessIndicator", "economic.status", "pseo.participant", "SpecialEdStatus", "non.english.home", "RaceEthnicity", "Dem_Desc", "edr", "took.ACT", "ap.exam", "total.cte.courses.taken", "cte.achievement", "avg.cte.intensity", "MCA.M", "MCA.R", "MCA.S", "sat.taken", "attended.ps", "ps.grad", "highest.cred.level", "avg.unemp.rate", "wages.3year.avg")
+independent.var.names <- c("hs.grad.year", "Gender", "LimitedEnglishProficiencyIndicator", "HomelessIndicator", "economic.status", "pseo.participant", "SpecialEdStatus", "non.english.home", "RaceEthnicity", "Dem_Desc", "edr", "took.ACT", "ap.exam", "total.cte.courses.taken", "cte.achievement", "avg.cte.intensity", "MCA.M", "MCA.R", "MCA.S", "sat.taken", "attended.ps", "ps.grad", "highest.cred.level", "ps.grad.location", "avg.unemp.rate", "wages.3year.avg")
 
 cte.cc.var.names <- c("cte.1", "cte.2", "cte.3", "cte.4", "cte.5", "cte.6", "cte.7", "cte.8", "cte.9", "cte.10", "cte.11", "cte.12", "cte.14", "cte.21", "cte.22", "cte.23", "cte.24", "cte.25")
 
@@ -263,6 +263,13 @@ ind.qual.var <- master.original %>%
         -   Associate degree
         -   Bachelors degree
         -   Higher than bachelors degree.
+    -   ps.grad.location: this is the following;
+        -   ps.grad.edr: graduated from a college in the same EDR as their high school
+        -   ps.grad.region: graduated from a college in the same region as their high school, but not same EDR
+        -   ps.grad.MN: graduated from a college in MN but not same region or EDR
+        -   ps.grad.outside: graduated from a college outside MN, but not in region or EDR or Minnesota
+        -   Did not grad: attended but did not graduate college or attended but did not graduate
+        -   Attending ps: Currently attending post-secondary at grad.year.x
 
 <br>
 
@@ -277,6 +284,7 @@ The tables below shows there are a few to be concerned about.
 -   *sat.taken:* Only 1% (1,440) have taken the SAT
 -   *ps.grad.Institute:*
     -   Categories 3,5,6,7,8,9 have less than 1% of graduates, each.
+-   ps.grad.location: there were a little over a 1,000 that graduated from the same EDR as their high school, so I'm going to combine those with graduated from the same region.
 
 <br>
 
@@ -328,12 +336,17 @@ Due to these low frequencies, I'm going to do the following;
     -   8 - Private not-for-profit less than 2-year
     -   9 - Private for-profit, less-than 2-year
 
+-   ps.grad.location
+
+    -   "PS grad region" = individual graduated from the EDR or region as their high school.
+
 <br>
 
 ```{r updated ind qual var}
 master.ind.qual.var <- ind.qual.var %>%
   select(-PersonID, -LimitedEnglishProficiencyIndicator, -HomelessIndicator, -sat.taken) %>%
-  mutate(ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector %in% c("3", "5", "6", "7", "8", "9"), "11", as.character(ps.grad.InstitutionSector)))
+  mutate(ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector %in% c("3", "5", "6", "7", "8", "9"), "11", as.character(ps.grad.InstitutionSector)),
+         ps.grad.location = ifelse(ps.grad.location %in% c("PS grad region", "PS grad EDR"), "PS grad region", as.character(ps.grad.location)))
 
 ```
 
@@ -687,7 +700,7 @@ Below are the variables that are categorized as "high school accomplishments".
 
 ```{r ps prep, echo=TRUE}
 ps <- master.ind.qual.var %>%
-  select(attended.ps.within.first.year.hsgrad, attended.ps, ps.grad, ps.grad.InstitutionSector, highest.cred.level)
+  select(attended.ps.within.first.year.hsgrad, attended.ps, ps.grad, ps.grad.InstitutionSector, highest.cred.level, ps.grad.location)
 
 write_csv(ps, "Data/ps-data.csv")
 
@@ -708,7 +721,7 @@ There are `r comma(nrow(demographics))` individuals in the dataset.
 
 The eigenvalues measure the amount of variation retained by each principle component. This will help us determine how many principle components to be considered.
 
-The first two dimensions explain 64% of the variation but it takes up to 7 dimensions to surpass 75%.
+The first two dimensions explain 40% of the variation but it takes up to 7 dimensions to surpass 75%.
 
 <br>
 
@@ -724,7 +737,7 @@ eig.val
 
 #### COS^2^
 
-Let's take a look to see which variables are going to be important. From the total cos^2^ we can see that ther are a few that just aren't make the cut (below .2);
+Let's take a look to see which variables are going to be important. From the total cos^2^ we can see that there are a few that just aren't make the cut (below .2);
 
 -   Graduated from any of the following post-secondary institutions;
     -   private not-for-profit, 4-year or above
@@ -849,7 +862,8 @@ The analysis above shows that the following variables would likely provide high 
 master.final.after.mca <- master.original %>%
   select(-LimitedEnglishProficiencyIndicator, -HomelessIndicator, sat.taken) %>%
   mutate(ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector %in% c("2", "3", "5", "6", "7", "8", "9", "10", "11") | is.na(ps.grad.InstitutionSector), "11", ps.grad.InstitutionSector),
-         highest.cred.level = ifelse(highest.cred.level %in% c("Bachelor degree", "Master degree or higher"), "Bachelor degree or higher", as.character(highest.cred.level)))
+         highest.cred.level = ifelse(highest.cred.level %in% c("Bachelor degree", "Master degree or higher"), "Bachelor degree or higher", as.character(highest.cred.level))) %>%
+  select(1:ps.grad.in.MN, ps.grad.location, mn.emp.record.hs.grad.year:ncol(.))
 
 names(master.final.after.mca)
 

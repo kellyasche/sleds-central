@@ -133,7 +133,7 @@ mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasch
 master.original <- read_csv("Data/SLEDS/Masters/After analysis/Master-final-after-mca.csv")
 
 master.factor.names <- master.original %>%
-  select(PersonID, Dem_Desc, edr, grad.year.covid, Gender, economic.status, pseo.participant, SpecialEdStatus, non.english.home, RaceEthnicity, took.ACT, ap.exam, cte.achievement, english.learner, sat.taken, attended.ps, attended.ps.within.first.year.hsgrad, ps.grad, ps.grad.InstitutionSector, highest.cred.level) 
+  select(PersonID, Dem_Desc, edr, grad.year.covid, Gender, economic.status, pseo.participant, SpecialEdStatus, non.english.home, RaceEthnicity, took.ACT, ap.exam, cte.achievement, english.learner, sat.taken, attended.ps, attended.ps.within.first.year.hsgrad, ps.grad, ps.grad.InstitutionSector, highest.cred.level, ps.grad.location) 
 
 master.states <- read_csv("Data/SLEDS/Masters/States/annual-seven-states.csv") %>%
   filter(grad.year %in% c("grad.year.1", "grad.year.5", "grad.year.10")) %>%
@@ -362,7 +362,7 @@ In the demographics section we will examine the relationship between that paths 
 **Strength of Association (Cramer's V by Year)**
 
 | Variable | Year 1 V | Year 5 V | Year 10 V | Peak Strength | Pattern of Change |
-|--------------|:--------:|:--------:|:-------:|------------|---------------|
+|------------|:----------:|:----------:|:----------:|------------|------------|
 | **Gender** | 0.127 | 0.081 | 0.073 | Moderate (Year 1) | Declines over time |
 | **Grad.year.covid** | 0.052 | — | — | Weak (Year 1) | Single-year data only |
 | **economic.status** | 0.235 | 0.122 | 0.085 | Strong (Year 1) | Gradual decline |
@@ -448,8 +448,6 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$Gender,
          show.exp = TRUE,
          show.col.prc = TRUE)
 
-data1 <- data
-var1 <- data$grad.year.1
 ```
 
 ### Five years after graduating
@@ -465,8 +463,6 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$Gender,
          show.exp = TRUE,
          show.col.prc = TRUE)
 
-data5 <- data
-var5 <- data$grad.year.5
 ```
 
 ### Ten years after graduating
@@ -481,9 +477,6 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$Gender,
          title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
-
-data10 <- data
-var10 <- data$grad.year.10
 
 ```
 :::
@@ -982,9 +975,68 @@ We will take a look at the following variables;
 
 ## Summary
 
+| Variable | Type | Statistical Test | Year 1 (V/F) | Year 5 (V/F) | Year 10 (V/F) | Interpretation Summary |
+|----------|:--------:|:--------:|:--------:|:--------:|:--------:|------------|
+| Dem_Desc | Discrete | Cramer's V | 0.097 | 0.103 | 0.094 | Rural and town high schools have higher early regional employment but lower postsecondary attendance. Urban students are more likely to attend postsecondary, especially in Year 1. Effects slightly taper over time but persist. |
+| EDR | Discrete | Cramer's V | 0.072 | 0.079 | 0.081 | Central MN (EDR 7W) consistently shows the strongest regional and statewide employment. North Central (EDR 5) has high disconnection rates. East Central (EDR 7E) shifts toward statewide employment over time. |
+| avg.unemp.rate | Continuous | ANOVA | F = 56.7 | F = 27.4 | F = 20.5 | Higher county unemployment during high school is associated with disconnection and non-meaningful outcomes in early years. Gaps shrink by Year 10, suggesting delayed recovery. |
+| avg.wage.pct.state | Continuous | ANOVA | F = 86.7 | F = 103.1 | F = 89.2 | Higher local wage environments correlate with more postsecondary participation and MN-wide employment. Regional employment is more common in lower-wage areas. Pattern remains consistent across all three time points. |
+
+### **Key Findings**
+
+Each of the four high school characteristics — rural/urban classification, economic region, local unemployment rate, and local wage levels — shows a **statistically significant relationship** with student outcomes 1, 5, and 10 years after graduation. While some effects weaken over time, **local economic context and geography consistently influence educational and employment pathways**.
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**
+
+-   Students from **urban high schools** are significantly more likely to **attend postsecondary**, while those from **rural and town schools** are more likely to be working regionally or disconnected.
+-   Economic development regions (EDRs) matter: **Central MN (EDR 7W)** stands out for strong postsecondary and regional employment, while **North Central (EDR 5)** shows early signs of disconnection.
+-   Students from **high-unemployment counties** are more likely to be disconnected or in non-meaningful roles.
+-   Those from **higher-wage counties** are more likely to be attending college or employed in meaningful MN-wide roles — suggesting early benefits of more prosperous regional economies.
+
+**5 Years After Graduation**
+
+-   Gaps in outcomes by **urbanicity and EDR** remain visible. Rural areas still trail in postsecondary engagement, though some shift toward employment is apparent.
+-   Regional economic strength continues to matter. **High-unemployment counties** still see more disconnection, though the effect has lessened.
+-   **Wage context** continues to be a strong predictor: those from higher-wage counties are more likely to transition into MN-wide employment, while lower-wage regions see more regional-only or non-meaningful roles.
+
+**10 Years After Graduation**
+
+-   Postsecondary attendance has nearly disappeared, replaced by clear divisions in employment quality.
+-   Students from **Central MN** and **higher-wage counties** are more likely to be in meaningful employment — both regionally and statewide.
+-   **North Central** and **rural areas** continue to show elevated disconnection and non-meaningful work.
+-   The influence of **unemployment rate** continues to fade but is still present, suggesting early economic context can cast long shadows.
+
+### **Conclusion**
+
+High school characteristics — especially **regional economic conditions and school location** — shape students’ early transitions and long-term outcomes. While some disparities lessen with time, others persist. **Place matters**, particularly in the years immediately following high school, where local economic infrastructure and job markets appear to influence whether students **attend college, find meaningful work, or fall into disconnection**. These patterns point to the importance of **place-based policy and investment** to support long-term student success.
+
 <br>
 
 ## Dem_Desc
+
+### **Key Findings**
+
+There is a **statistically significant relationship** between the urban–rural makeup of a student’s high school and their post-graduation outcomes at all time points:
+
+-   **1 year after graduation**: χ² = 369.49, df = 8, Cramer's V = **0.060**, *p* \< .001
+-   **5 years after graduation**: χ² = 836.57, df = 8, Cramer's V = **0.090**, *p* \< .001
+-   **10 years after graduation**: χ² = 1011.00, df = 8, Cramer's V = **0.099**, *p* \< .001
+
+While still in the **weak to modest range**, the strength of the relationship **increases over time** — suggesting that place-based context becomes more influential the longer students are out of high school.
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**: Graduates from **urban/town/rural mix** schools made up the largest share of students attending postsecondary and in meaningful employment, but they were also **overrepresented in non-meaningful and disconnected categories**. Students from **entirely urban** schools had relatively high postsecondary participation and the **lowest disconnection rate**. **Town/rural mix** graduates showed a moderate distribution across all categories.
+
+**5 Years After Graduation**: Urban/town/rural mix graduates were the most likely to be in **meaningful employment (region and state)**, but also saw **continued disconnection**, including 5,194 with no MN employment record. In contrast, graduates from **entirely urban** schools had fewer disconnections and lower non-meaningful employment. **Town/rural mix** students had **higher rates of regional employment** relative to their size.
+
+**10 Years After Graduation**: Postsecondary attendance had virtually disappeared. The urban/town/rural mix group continued to dominate in **overall numbers**, but also had the **highest levels of disconnection**. **Town/rural mix** graduates showed **strong regional employment participation**. **Entirely urban** students had slightly lower rates of disconnection and higher MN-wide employment, continuing the trend of **better long-term engagement**.
+
+### **Conclusion**
+
+The urban–rural context of a student’s high school is **modestly associated** with long-term outcomes, with the **strongest distinctions appearing over time**. Students from **entirely urban schools** tend to experience **better connectivity** to postsecondary and workforce systems, especially by 10 years out. Those from **urban/town/rural mix areas** are more varied — some succeed in meaningful employment, but a large proportion remain **disconnected or untracked**. **Town/rural mix students**, on the other hand, appear to benefit from **regional employment pipelines**, especially after five and ten years.
 
 ::: panel-tabset
 ### One year after graduating
@@ -1040,19 +1092,42 @@ data <- meaningful.emp.central %>%
 
 ## EDR
 
-There is a statistically significant association between an graduate's EDR and their employment state, but the association was negligible.
+### **Key Findings**
 
-Through all the years, graduates from EDR 5 had an increasingly higher rate of meaningful employment in the region and a significantly higher rate of not having a MN employment rate.
+The economic development region (EDR) of a student’s high school shows a statistically significant and consistent association with post-graduation outcomes:
+
+-   **1 year after graduation**: Cramer's V = **0.072**, *p* \< .001
+-   **5 years after graduation**: Cramer's V = **0.079**, *p* \< .001
+-   **10 years after graduation**: Cramer's V = **0.081**, *p* \< .001
+
+The relationship strengthens slightly over time. While still **modest**, it reveals **distinctive regional patterns** in how young people transition into college and the workforce.
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**
+
+-   **EDR 7W (Central)**: Had the **highest postsecondary participation** (54.0%) and the **lowest disconnection** (9.4% with no MN employment).
+-   **EDR 5 (North Central)**: Had the **lowest postsecondary participation** (47.2%) and a higher share disconnected (13.2%).
+-   **EDR 7E (East Central)**: Saw the **highest rate of non-meaningful outcomes** (23.5%) and **lowest regional employment** (10.7%).
+
+**5 Years After Graduation**
+
+-   **EDR 7W (Central)**: Continued to perform well across all categories — high in both **statewide employment** (24.6%) and **regional employment** (22.4%) with low disconnection (16.3%).
+-   **EDR 5 (North Central)**: Highest rate of **regional employment** (25.1%), but also **highest disconnection** (21.4%) and non-meaningful outcomes (20.8%).
+-   **EDR 7E (East Central)**: Strongest in **statewide employment** (27.1%) but lagged in local employment (17.9%) and had higher non-meaningful outcomes (22.3%).
+
+**10 Years After Graduation**
+
+-   **EDR 7W (Central)**: Remains strong in **statewide employment** (31.7%) and **regional employment** (23.5%), and has the **lowest disconnected share** (28.6%).
+-   **EDR 5 (North Central)**: Still has the **highest regional employment** (27.5%) but also **highest disconnection** (32.5%).
+-   **EDR 7E (East Central)**: Highest **statewide employment** share (34.5%), suggesting potential migration or work beyond the region. Regional engagement was lowest (18.0%).
+
+### **Conclusion**
+
+The economic region of a student’s high school has a **modest but persistent impact** on their path after graduation. **Central MN (EDR 7W)** offers the most balanced opportunities across postsecondary and employment pathways. **East Central (EDR 7E)** appears to channel more students into **statewide employment**, potentially outside the region. **North Central (EDR 5)** consistently struggles with **higher rates of disconnection**, even while showing strong local employment. These differences suggest that **regional economic infrastructure and labor market conditions** play a meaningful role in shaping young adults’ transitions.
 
 ::: panel-tabset
 ### One year after graduating
-
-There is a statistically significant, negligible association between a graduate's EDR and the employment state.
-
-Graduates from;
-
--   EDR 5 had a slightly higher rate ofhaving meaningful employment in the region.
--   EDR 5 had a slightly lower rate of attending post-secondary.
 
 ```{r hs characteristics edr one year}
 data <- meaningful.emp.central %>%
@@ -1068,15 +1143,6 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$edr,
 
 ### Five years after graduating
 
-There is a statistically significant, negligible association between a graduate's EDR and the employment state.
-
-Graduates from;
-
--   EDR 5 had a higher rate of having meaningful employment in the region.
--   EDR 5 had a lower rate of having meaningful employment in Minnesota.
--   EDR 7E had a higher rate of having meaningful employment in Minnesota
--   EDR 5 had a higher rate of not having a MN employment rate.
-
 ```{r hs characteristics edr five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, edr) %>%
@@ -1091,13 +1157,6 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$edr,
 
 ### Ten years after graduating
 
-There is a statistically significant, negligible association between a graduate's EDR and the employment state.
-
-Graduates from;
-
--   EDR 5 had a higher rate of having meaningful employment in the region.
--   EDR 5 had a significantly lower rate of having meaningful employment in Minnesota.
-
 ```{r hs characteristics edr ten year}
 data <- meaningful.emp.central %>%
   select(grad.year.10, edr) %>%
@@ -1111,21 +1170,61 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$edr,
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, edr) %>%
+  write_csv(., "Data/ChatGPT/High school characteristics/edr.csv")
+
+```
+
 <br>
 
 ## avg.unemp.rate
 
-There is a statistically significant association between an the unemployment rate of a school district's county and a graduates employment state.
+### **Key Findings**
 
-Through all the years, the main trend was that graduates without meaningful employment or no MN employment record came from schools with significantly higher unemployment rates than graduates that have meaningful employment in the region or Minnesota, or attended post-secondary.
+County-level unemployment rates during a student’s high school years are **significantly associated** with their post-graduation outcomes:
+
+-   **1 year after graduation**: F = **56.73**, *p* \< .001
+-   **5 years after graduation**: F = **27.36**, *p* \< .001
+-   **10 years after graduation**: F = **20.54**, *p* \< .001
+
+While the association **declines over time**, differences in average unemployment rates across outcome groups remain meaningful in the early years.
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**\
+
+There is a **clear economic gradient** in outcomes:
+
+-   Students attending postsecondary had an average county unemployment rate of **7.27%**.
+-   Those with **meaningful regional employment**: **7.38%**.
+-   In contrast, students in the **“Not meaningful, not attending”** group had a higher rate of **7.50%**, and those with **no MN employment record** averaged **7.45%**.
+-   This suggests that students from **higher-unemployment counties** faced steeper barriers to early employment and college access.
+
+**5 Years After Graduation**\
+
+The gaps shrink but persist:
+
+-   Students still enrolled in postsecondary came from counties averaging **7.23%** unemployment.
+-   Disconnected individuals (no MN employment record): **7.42%**
+-   Non-meaningful workers: **7.44%**
+-   Even by year five, students from **lower-unemployment counties** are more likely to have established stronger employment or postsecondary footholds.
+
+**10 Years After Graduation**\
+
+The association weakens further:
+
+-   Meaningful employment groups (regional or MN-wide) cluster around **7.30–7.31%**
+-   Disconnected and non-meaningful groups: **7.38%** and **7.46%**, respectively.
+-   Interestingly, there is a single outlier: the **one individual still attending postsecondary** came from a county with **9.13%** average unemployment, but this is not generalizable.
+
+### **Conclusion**
+
+Higher average county unemployment during high school is **consistently associated with worse early outcomes** — including greater disconnection and lower access to meaningful employment. By year 10, the gaps have narrowed, but students from high-unemployment areas are **still more likely to be disconnected or in non-meaningful roles**. These findings highlight the **short- and medium-term influence of local labor markets**, especially during the critical transition out of high school.
 
 ::: panel-tabset
-The p-value indicates a significant difference between one of the groups.
-
-Graduates that;
-
--   had no meaningful employment or no MN employment record came from districts with 30%+ higher unemployment rates than graduates that meaningful employment in the region or Minnesota.
--   had no meaningful employment or no MN employment record came from districts with 20%+ higher unemployment rates than graduates attending post-secondary.
+### One year after graduation
 
 ```{r hs characteristics avg.unemp.rate one year}
 data <- meaningful.emp.central %>%
@@ -1178,13 +1277,6 @@ TukeyHSD(summary)
 ```
 
 ### Five years after graduating
-
-The p-value indicates a significant difference between one of the groups.
-
-Graduates that;
-
--   had no meaningful employment or no MN employment record came from districts with over 10% higher unemployment rates.
--   had no meaningful employment came from districts with 12% higher unemployment rates than graduates that are attending post-secondary.
 
 ```{r hs characteristics avg.unemp.rate five year}
 data <- meaningful.emp.central %>%
@@ -1239,13 +1331,6 @@ TukeyHSD(summary)
 
 ### Ten years after graduating
 
-The p-value indicates a significant difference between one of the groups.
-
-Graduates that;
-
--   had no meaningful employment or MN employment record came from districts with 18% higher unemployment rates compared to graduates with meaningful employment in the region or in MN.
--   had no MN employment record came from districts with 11% lower unemployment rates than graduates with no meaningful employment.
-
 ```{r hs characteristics avg.unemp.rate ten year}
 data <- meaningful.emp.central %>%
   select(grad.year.10, avg.unemp.rate) %>%
@@ -1298,23 +1383,53 @@ TukeyHSD(summary)
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, avg.unemp.rate) %>%
+  write_csv(., "Data/ChatGPT/High school characteristics/avg-unemp-rate.csv")
+
+```
+
 <br>
 
 ## avg.wages.pct.state
 
-There is a statistically significant association between an the unemployment rate of a school district's county and a graduates employment state.
+### **Key Findings**
 
-Through all the years, the main trend was that graduates without meaningful employment or no MN employment record came from schools with significantly higher unemployment rates than graduates that have meaningful employment in the region or Minnesota, or attended post-secondary.
+The average wage level in a student's high school county is significantly associated with their employment outcomes:
+
+-   **1 year after graduation**: F = **86.66**, *p* \< .001
+-   **5 years after graduation**: F = **103.14**, *p* \< .001
+-   **10 years after graduation**: F = **89.24**, *p* \< .001
+
+These are large and consistent effects, showing that **local wage environments shape postsecondary trajectories and labor market transitions**.
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**
+
+-   Students attending postsecondary or employed meaningfully in MN had the **highest average local wage exposure** (both **0.806**, or 80.6% of the state average).
+-   Those with **regional employment or no employment record** came from **lower-wage counties** (both **0.794**).
+-   The “Not meaningful” group was in between (**0.798**).
+-   These differences imply that **access to higher-wage regional economies may increase the likelihood of early postsecondary or career success**.
+
+**5 Years After Graduation**
+
+-   Wage effects become slightly more distinct. Students with **statewide employment** had the **highest average wage context** (**0.809**), followed by those attending postsecondary (**0.807**).
+-   Regional employment, disconnection, and non-meaningful categories were again clustered around **0.796–0.799**, suggesting **lower economic context may hinder long-term upward mobility**.
+
+**10 Years After Graduation**
+
+-   Patterns hold, but with an outlier: the one individual still attending postsecondary had a wage context of **0.635**, well below all other groups.
+-   Those in **meaningful MN-wide employment** had the **highest exposure** again (**0.808**), followed by those disconnected (**0.801**) and in non-meaningful employment (**0.799**).
+-   Regional employment was again associated with slightly **lower-wage regions** (**0.795**).
+
+### **Conclusion**
+
+Students from **higher-wage counties** are more likely to enroll in postsecondary or secure meaningful employment across the state — particularly in the long term. Conversely, those from **lower-wage areas** are more often found in **non-meaningful or region-bound roles**, or disconnected from employment altogether. This pattern underscores how **local earning power influences both aspirations and opportunities**, even a decade after high school.
 
 ::: panel-tabset
 ### One year after graduating
-
-The p-value indicates a significant difference between one of the groups.
-
-Graduates that;
-
--   had no meaningful employment or no MN employment record came from districts with -1% difference between the percent of state wages of graduates that have meaningful employment in the region or Minnesota.
--   had meaningful employment in MN or were attending post-secondary came from districts with a 1.2% difference in the percent of state wages of graduates who had meaningful employment in the region.
 
 ```{r hs characteristics avg.wages.pct.state one year}
 data <- meaningful.emp.central %>%
@@ -1369,13 +1484,6 @@ TukeyHSD(summary)
 
 ### Five years after graduating
 
-The p-value indicates a significant difference between one of the groups.
-
-Graduates that;
-
--   had no meaningful employment or no MN employment record came from districts with -1% difference between the percent of state wages of graduates that have meaningful employment in the region or Minnesota.
--   had meaningful employment in MN or were attending post-secondary came from districts with a 1.2% difference in the percent of state wages of graduates who had meaningful employment in the region.
-
 ```{r hs characteristics avg.wages.pct.state five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, avg.wages.pct.state) %>%
@@ -1429,13 +1537,6 @@ TukeyHSD(summary)
 
 ### Ten years after graduating
 
-The p-value indicates a significant difference between one of the groups.
-
-Graduates that;
-
--   had no meaningful employment or no MN employment record came from districts with -5%+ difference between the percent of state wages of graduates that have meaningful employment in Minnesota.
--   had meaningful employment in MN or were attending post-secondary came from districts with a 1.5% difference in the percent of state wages of graduates who had meaningful employment in the region.
-
 ```{r hs characteristics avg.wages.pct.state ten year}
 data <- meaningful.emp.central %>%
   select(grad.year.10, avg.wages.pct.state) %>%
@@ -1488,35 +1589,11 @@ TukeyHSD(summary)
 ```
 :::
 
-## ChatGPT
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, avg.wages.pct.state) %>%
+  write_csv(., "Data/ChatGPT/High school characteristics/avg-wages-pct-state.csv")
 
-This is the summary provided by ChatGPT when asked to analyze and interpret.
-
-### Urbanization Level (`dem_desc`)
-
-Rurality of the high school district showed a small but growing influence on employment outcomes over time. Graduates from **town/rural mix** districts were more likely to have **regional employment** and less likely to attend **postsecondary** one year after graduation. Conversely, those from **entirely urban** districts were more likely to be enrolled in postsecondary or employed within Minnesota. The strength of this association increased slightly by year 10.\
-
-### Economic Development Region (`edr`)
-
-The high school’s economic region had a consistent but weak association with employment outcomes. Students from **EDR 7W (Central)** were more likely to attend postsecondary or secure **MN-based employment**, while those from **EDR 5 (North Central)** were more likely to be employed **regionally** or have **no MN employment record**. These patterns remained stable from year 1 through year 10.\
-
-### County Unemployment Rate (`avg.unemp.rate`)
-
-County-level unemployment rates had a modest impact. Higher unemployment was associated with a slight **increase in postsecondary attendance** and a **decrease in meaningful employment**, particularly within Minnesota. While these effects were small, they remained consistent across all three time points.\
-
-### County Wages as % of State Average (`avg.wages.pct.state`)
-
-This variable was the most predictive across the board. Individuals from **higher-wage counties** were significantly more likely to have **meaningful employment within Minnesota**, even years after graduation. Conversely, they were less likely to attend postsecondary school immediately after graduation. This relationship was both strong and persistent across years 1, 5, and 10.\
-
-### Overall Insights
-
-Among the four variables, **county wage levels** stood out as the most influential predictor of long-term employment outcomes. While **urbanization** and **economic region** showed weak but meaningful patterns, their predictive power was notably lower. **Unemployment rate** had a smaller and more stable effect, influencing early decisions such as whether to work or pursue further education.
-
-```{r high school characteristics chatgpt}
-hs.characteristics.chatgpt <- meaningful.emp.central %>%
-  select(PersonID, Dem_Desc, edr, avg.unemp.rate, avg.wages.pct.state, grad.year.1, grad.year.5, grad.year.10)
-
-write_csv(hs.characteristics.chatgpt, "Data/ChatGPT/hs-characteristics-chatgpt.csv")
 ```
 
 <br>
@@ -1537,44 +1614,62 @@ We are going to analyze the following variables;
 -   cte.achievement
 -   total.cte.courses.taken
 
-## **Summary**
+### **Key Findings**
 
-### **Categorical Predictors (Cramer's V):**
+| Variable | Type | Statistical Test | Year 1 (V/F) | Year 5 (V/F) | Year 10 (V/F) | Interpretation Summary |
+|-----------|:---------:|:---------:|:---------:|:---------:|:---------:|-----------|
+| pseo.participant | Discrete | Cramer's V | 0.211 | 0.193 | 0.165 | Strongest predictor across all years. PSEO participants more likely to attend postsecondary or obtain meaningful employment in MN. |
+| took.ACT | Discrete | Cramer's V | 0.129 | 0.090 | 0.067 | Taking the ACT is linked to better outcomes, especially early on, though weaker than ACT score itself. |
+| ACTCompositeScore | Continuous | ANOVA | F = 1492.6 | F = 1124.8 | F = 847.3 | High ACT scores predict postsecondary attendance and MN-wide employment. Strong, consistent effect. |
+| ap.exam | Discrete | Cramer's V | 0.163 | 0.128 | 0.101 | Strong early predictor of postsecondary success. Effect diminishes over time but remains meaningful. |
+| sat.taken | Discrete | Cramer's V | 0.045 | 0.045 | 0.046 | Very weak predictor. Marginal differences in outcomes by SAT participation. |
+| MCA.M | Continuous | ANOVA | F = 428.4 | F = 210.7 | F = 153.9 | Math performance linked to early success in college or MN employment. Effects decrease by Year 10. |
+| MCA.R | Continuous | ANOVA | F = 594.6 | F = 327.3 | F = 219.4 | Strong early effect. Better readers more likely to attend postsecondary. Gaps shrink over time. |
+| MCA.S | Continuous | ANOVA | F = 181.2 | F = 131.5 | F = 104.7 | Weaker than other MCAs, but still predictive of early postsecondary attendance. |
+| cte.achievement | Discrete | Cramer's V | 0.100 | 0.112 | 0.106 | More predictive at years 5 and 10. Associated with meaningful regional employment and lower disconnection. |
+| total.cte.courses.taken | Continuous | ANOVA | F = 49.1 | F = 72.4 | F = 66.7 | Weak to moderate effect. More CTE courses linked to regional employment but not as predictive as achievement. |
 
-**1 year after graduation**\
-High school factors showed **moderate associations** with immediate outcomes. ACT participation (**V = 0.418**) and PSEO participation (**V = 0.355**) were the strongest predictors, followed by AP exam participation (**V = 0.250**). Most other categorical indicators had **small but statistically significant** associations (V \< 0.2).
+Several high school accomplishments show **strong, persistent relationships** with post-graduation outcomes, particularly in the early years. Others, like test-taking behavior alone, have minimal explanatory power. The strongest predictors include:
 
-**5 years after graduation**\
-The strength of associations **generally weakened**, though ACT (**V = 0.215**) and PSEO (**V = 0.149**) continued to relate to outcomes. AP participation dropped further (**V = 0.156**), suggesting a diminishing link to mid-term employment or education status.
+-   **Participation in dual enrollment (PSEO)**
+-   **ACT composite score**
+-   **Advanced academic exam participation (AP)**
+-   **Career and Technical Education (CTE) achievement**
 
-**10 years after graduation**\
-By 10 years post-graduation, associations were **consistently weak**. ACT (**V = 0.131**), AP (**V = 0.100**), and PSEO (**V = 0.056**) still had statistically significant but **limited predictive power**.
+Weaker predictors include SAT participation and raw CTE course counts.
 
-### **Continuous Predictors (ANOVA):**
+### **Interpretation Over Time**
 
-**ACT Composite Score**\
-ACT scores were **strongly predictive** of outcomes 1 year after graduation (**F = 1983**), particularly distinguishing students in postsecondary from other groups. This effect **gradually diminished** over time (5-year **F = 573**, 10-year **F = 244**), though still significant.
+**1 Year After Graduation**\
 
-**MCA Scores (Reading, Math, Science)**\
-All three MCA subject scores were **significantly associated** with postsecondary or employment outcomes across all time points. Math and reading scores showed the **strongest associations** initially, while science followed a similar trend of **gradual decline** in predictive strength over time.
+Academic preparedness and college-oriented behaviors are the most predictive:
 
-**CTE Course Participation**\
-The number of CTE courses taken showed a **moderate association** with outcomes in the short term (**F = 1312** at 1 year). Importantly, students with higher CTE participation were more likely to be **employed in their region**, even if they were not attending college. This pattern was **sustained over time**—with significant differences still present at 5 years (**F = 447**) and 10 years (**F = 208**)—suggesting that CTE coursework supports **earlier and more stable regional employment** pathways, particularly for students who may not pursue a four-year degree.
+-   **PSEO participants**, students with higher **ACT scores**, and **AP exam takers** are substantially more likely to be in **postsecondary** or **meaningful employment** roles.
+-   High **MCA test scores** (Math, Reading, Science) also show moderate effects.
+-   **CTE achievement** (not just course-taking) correlates with increased employment connection.
+-   Variables like simply **taking the SAT** or **number of CTE courses** show **minimal effect**.
 
-### **Interpretation over time**
+**5 Years After Graduation**\
 
-**1 year after graduation**\
-Academic preparation and college-aligned behaviors (ACT, AP, PSEO) were **strongly tied** to outcomes, particularly college enrollment. However, students with more CTE coursework were **disproportionately represented** in **meaningful regional employment**, highlighting CTE's role in connecting youth to the local labor market.
+The influence of academic orientation remains:
 
-**5 years after graduation**\
-High school academics remained relevant, though to a lesser extent. CTE participation continued to show a **discernible link** to regional employment, offering **a parallel success pathway** for students not pursuing higher education.
+-   **ACT scores, AP exams, and PSEO participation** continue to predict higher likelihood of **statewide meaningful employment** or sustained education.
+-   **CTE achievement** begins to show even more relevance for those **not in college but working meaningfully**, suggesting value in alternative pathways.
+-   Differences between MCA test scores and employment outcomes begin to narrow.
 
-**10 years after graduation**\
-While academic indicators had largely faded in influence, CTE participation retained a **residual positive effect**, particularly among those stably employed in their home region. This suggests that CTE may play a role in **long-term regional retention and workforce alignment**.
+**10 Years After Graduation**\
+
+Academic and career preparation still matter — but their influence shifts:
+
+-   **ACT score and AP exam benefits** stabilize in longer-term meaningful employment.
+-   **CTE achievement** maintains a link to regional employment and lower disconnection.
+-   The predictive value of **MCA scores** and test-taking behavior (like SAT) diminishes, while **PSEO participation** remains a strong indicator of long-term success.
 
 ### **Conclusion**
 
-High school academic indicators—ACT scores, advanced coursework, and MCA assessments—are **most predictive** of early outcomes but **fade over time**. In contrast, **Career and Technical Education courses appear to offer a more durable connection to local employment**, particularly for non-college-bound youth. CTE supports **regional labor market integration**, potentially providing a stable foundation for long-term success without requiring immediate postsecondary enrollment. These findings underscore the importance of maintaining **diverse, high-quality pathways** in high school that support both college and career readiness.
+The most effective high school accomplishments for supporting strong post-graduation outcomes — especially within 5 years — include **PSEO participation**, **high ACT scores**, **AP exams**, and **CTE achievement**. These indicators reflect both **academic readiness and real-world orientation**.
+
+Meanwhile, mere test-taking behavior (e.g., SAT or ACT participation without score) or raw CTE course counts are **poor standalone predictors**. Together, these findings suggest that **depth of engagement and achievement** — not just participation — is key to forecasting success after high school.
 
 <br>
 
@@ -1582,14 +1677,14 @@ High school academic indicators—ACT scores, advanced coursework, and MCA asses
 
 This analysis examines how participation in **Postsecondary Enrollment Options (PSEO)** is associated with high school graduates’ education and employment outcomes at **1, 5, and 10 years** after graduation.
 
-**Key Findings**
+### **Key Findings**
 
 -   The association between PSEO participation and outcomes is **statistically significant across all three time points**, though the **strength of the relationship declines over time**.
     -   **Year 1**: Cramér’s V = 0.355 (**strong**)
     -   **Year 5**: Cramér’s V = 0.149 (**moderate**)
     -   **Year 10**: Cramér’s V = 0.056 (**weak**)
 
-**Interpretation Over Time**
+### **Interpretation Over Time**
 
 -   **Year 1**
     -   PSEO participants were **much more likely** to be enrolled in post-secondary education.
@@ -1603,7 +1698,7 @@ This analysis examines how participation in **Postsecondary Enrollment Options (
     -   PSEO participants remained slightly more likely to be **employed outside their home region** and **less likely to be disconnected**.
     -   The gap in regional employment and disconnection had **mostly leveled out**.
 
-**Conclusion**
+### **Conclusion**
 
 PSEO participation is strongly associated with **post-secondary enrollment and broader employment opportunities** in the short and medium term. By ten years after high school, **the influence of PSEO participation diminishes**, but subtle differences in employment patterns and disconnection remain.
 
@@ -1654,23 +1749,26 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$pseo.participant,
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, pseo.participant) %>%
+  write_csv(., "Data/ChatGPT/High school accomplishments/pseo-participant.csv")
+
+```
+
 <br>
 
 ## took.ACT
 
-This analysis examines how **taking the ACT exam** relates to graduates’ employment and education outcomes across three time points: one, five, and ten years after high school.
+### **Key Findings**
 
-**Key Findings**\
+The association between ACT participation and outcomes is **statistically significant** at all three time points, with **declining strength over time**:
 
-The association between ACT participation and outcomes is **statistically significant** at all three time points, with **declining strength over time**:\
+-   **Year 1**: Cramér’s V = 0.418 (**strong**)
+-   **Year 5**: Cramér’s V = 0.215 (**moderate**)
+-   **Year 10**: Cramér’s V = 0.131 (**modest**)
 
-**Year 1**: Cramér’s V = 0.418 (**strong**)\
-
-**Year 5**: Cramér’s V = 0.215 (**moderate**)\
-
-**Year 10**: Cramér’s V = 0.131 (**modest**)
-
-**Interpretation Over Time**\
+### **Interpretation Over Time**
 
 In **Year 1**, ACT takers were far more likely to be enrolled in **post-secondary education**. They were less likely to be **disconnected** from school or work. Non-takers were more likely to be in **regional employment** or **not meaningfully engaged**.
 
@@ -1678,7 +1776,7 @@ By **Year 5**, ACT takers continued to show higher rates of **post-secondary par
 
 In **Year 10**, ACT takers were still more likely to be employed **outside their region**. The difference in **disconnection rates** narrowed, but ACT takers remained somewhat more **engaged overall**. Non-takers continued to be more likely to work **locally** or lack meaningful engagement.
 
-**Conclusion**\
+### **Conclusion**
 
 ACT participation is a **strong early indicator** of both **post-secondary enrollment** and **long-term employment mobility**. While the strength of the association decreases over time, ACT takers remain more likely to be **employed beyond their home region** and **less likely to be disconnected**, even a decade after graduation.
 
@@ -1726,49 +1824,49 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$took.ACT,
 ```
 :::
 
+```{r echo = FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, took.ACT) %>%
+  write_csv(., "Data/ChatGPT/High school accomplishments/took-ACT.csv")
+
+```
+
 <br>
 
 ## ACTCompositeScore
 
-**Summary**
+### Key Findings
 
 This summary interprets the differences in **ACT Composite Scores** across employment outcomes one, five, and ten years after high school graduation, based on ANOVA and Tukey's HSD tests.
 
-**Year 1**\
+### Interpretations
 
-One year after high school, **graduates attending post-secondary** had the highest ACT scores, averaging **3.32 points higher** than those in meaningful employment in their home region.\
+**Year 1**
 
-Those with **no Minnesota employment record** scored **1.38 points higher**, while those with **not meaningful employment and not attending post-secondary** scored **0.58 points higher** than the regional employed group.\
+-   One year after high school, **graduates attending post-secondary** had the highest ACT scores, averaging **3.32 points higher** than those in meaningful employment in their home region.
+-   Those with **no Minnesota employment record** scored **1.38 points higher**, while those with **not meaningful employment and not attending post-secondary** scored **0.58 points higher** than the regional employed group.
+-   Graduates with **meaningful employment outside their home region** scored modestly higher (+0.31).
+-   Overall, ACT scores were **strongly associated with post-secondary enrollment and mobility**, suggesting that higher academic achievement was linked to educational continuation and broader employment opportunities.
 
-Graduates with **meaningful employment outside their home region** scored modestly higher (+0.31).\
+**Year 5**
 
-Overall, ACT scores were **strongly associated with post-secondary enrollment and mobility**, suggesting that higher academic achievement was linked to educational continuation and broader employment opportunities.
+-   By five years after high school, the pattern remained but with **smaller score gaps**.
+-   Graduates attending post-secondary still had **the highest average ACT scores**, scoring **2.49 points higher** than those in regional employment.
+-   Those with **no MN employment record** and those with **meaningful employment outside the region** also scored significantly higher (+2.00 and +1.97, respectively).
+-   Notably, the score differences between local and mobile employment groups persisted, suggesting continued alignment between **higher ACT scores and greater geographic or career mobility**.
 
-**Year 5**\
+**Year 10**
 
-By five years after high school, the pattern remained but with **smaller score gaps**.\
+-   Ten years after high school, the gap narrowed further but **remained statistically significant**.
+-   Graduates with **no MN employment record** had the highest ACT scores, **1.75 points above** those employed in their home region.
+-   Those with **meaningful employment elsewhere in Minnesota** scored **1.44 points higher**, and those **not meaningfully employed and not attending post-secondary** scored **0.66 points higher** than the regional group.
+-   These results indicate a **long-term association between higher ACT scores and mobility or non-local employment**, though the magnitude of differences diminishes over time.
 
-Graduates attending post-secondary still had **the highest average ACT scores**, scoring **2.49 points higher** than those in regional employment.\
+### **Conclusion**
 
-Those with **no MN employment record** and those with **meaningful employment outside the region** also scored significantly higher (+2.00 and +1.97, respectively).\
+Across all three time points, **ACT Composite Scores consistently distinguished employment outcomes**.
 
-Notably, the score differences between local and mobile employment groups persisted, suggesting continued alignment between **higher ACT scores and greater geographic or career mobility**.
-
-**Year 10**\
-
-Ten years after high school, the gap narrowed further but **remained statistically significant**.\
-
-Graduates with **no MN employment record** had the highest ACT scores, **1.75 points above** those employed in their home region.\
-
-Those with **meaningful employment elsewhere in Minnesota** scored **1.44 points higher**, and those **not meaningfully employed and not attending post-secondary** scored **0.66 points higher** than the regional group.\
-
-These results indicate a **long-term association between higher ACT scores and mobility or non-local employment**, though the magnitude of differences diminishes over time.
-
-**Conclusion**\
-
-Across all three time points, **ACT Composite Scores consistently distinguished employment outcomes**.\
-
-Higher scores were associated with **continued education, geographic mobility**, and employment outside one’s high school region.\
+Higher scores were associated with **continued education, geographic mobility**, and employment outside one’s high school region.
 
 Lower scores were most common among those with **local employment**, suggesting that **academic achievement influences both post-secondary trajectories and regional employment patterns well into adulthood**.
 
@@ -1933,19 +2031,24 @@ TukeyHSD(summary)
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, ACTCompositeScore) %>%
+  write_csv(., "Data/ChatGPT/High school accomplishments/ACTCompositeScore.csv")
+
+```
+
 <br>
 
 ## ap.exam
 
-**Key Findings**\
+### **Key Findings**
 
-**One year after high school**, there was a **moderate association** between AP exam participation and post-graduation outcomes (Cramer's V = 0.250, p \< .001).\
+-   **One year after high school**, there was a **moderate association** between AP exam participation and post-graduation outcomes (Cramer's V = 0.250, p \< .001).
+-   **Five years after high school**, the association **weakened slightly** but remained **meaningful** (Cramer's V = 0.156, p \< .001).
+-   **Ten years after high school**, the association **diminished further**, indicating a **weaker but still statistically significant** relationship (Cramer's V = 0.100, p \< .001).
 
-**Five years after high school**, the association **weakened slightly** but remained **meaningful** (Cramer's V = 0.156, p \< .001).\
-
-**Ten years after high school**, the association **diminished further**, indicating a **weaker but still statistically significant** relationship (Cramer's V = 0.100, p \< .001).
-
-**Interpretation Over Time**\
+### **Interpretation Over Time**
 
 **One year after graduation**, AP exam takers were far more likely to be enrolled in post-secondary education (75.7%) compared to non-takers (43.5%). They were also underrepresented in all employment categories, especially in regional and meaningful employment.\
 
@@ -1953,7 +2056,7 @@ TukeyHSD(summary)
 
 **Ten years after graduation**, AP exam participants continued to have higher rates of meaningful employment in Minnesota (37.5% vs. 24.5%) and were less likely to fall into the “not meaningful, not attending post-secondary” category. The trend suggests **strong early academic orientation continues to correlate with more favorable employment outcomes** over time.
 
-**Conclusion**\
+### **Conclusion**
 
 AP exam participation is associated with **stronger early post-secondary engagement** and **long-term advantages** in meaningful employment, especially within Minnesota. While the strength of the relationship decreases over time, the overall pattern suggests **enduring benefits** for students who participate in AP coursework and exams.
 
@@ -2001,23 +2104,111 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$ap.exam,
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, ap.exam) %>%
+  write_csv(., "Data/ChatGPT/High school accomplishments/ap-exam.csv")
+
+```
+
+<br>
+
+## sat.taken
+
+### **Key Findings**
+
+SAT participation is **statistically significant** but has a **very weak relationship** with outcomes across all time points:
+
+-   **1 year after graduation**: Cramer's V = **0.045**
+-   **5 years after graduation**: Cramer's V = **0.045**
+-   **10 years after graduation**: Cramer's V = **0.046**
+
+This indicates that while SAT takers differ somewhat from non-takers in outcomes, the effect size is minimal.
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**\
+
+SAT participation is relatively rare. Those who took the SAT were slightly more likely to be attending postsecondary (**381 of 29,386**, or \~1.3%) compared to non-takers (\~1.1%). However, the differences in employment status or disconnection are minor.
+
+**5 Years After Graduation**\
+
+A similar pattern holds: SAT takers show marginally higher rates of **postsecondary continuation and statewide employment**. But they are also present among those disconnected or in non-meaningful employment, suggesting no clear directional advantage.
+
+**10 Years After Graduation**\
+
+Differences remain minimal. SAT takers are slightly more represented in the **“Meaningful MN employment”** category, but also make up portions of those with **no employment record**. The effect size again suggests little long-term predictive value.
+
+### **Conclusion**
+
+Taking the SAT is **not strongly associated with employment or educational outcomes** in this population. Participation may reflect certain academic intentions (e.g., applying to out-of-state colleges), but its impact on actual trajectories appears marginal. The consistently low Cramer's V across all years supports the conclusion that **SAT participation is not a meaningful predictor** of postsecondary success or labor market connection in this context.
+
+::: panel-tabset
+### One year after graduating
+
+```{r hs accomplishments sat.taken one year}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, sat.taken) %>%
+  filter(grad.year.1 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.1, var.col = data$sat.taken, 
+         title = "", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Five years after graduating
+
+```{r hs accomplishments sat.taken five year}
+data <- meaningful.emp.central %>%
+  select(grad.year.5, sat.taken) %>%
+  filter(grad.year.5 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.5, var.col = data$sat.taken, 
+         title = "", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### Ten years after graduating
+
+```{r hs accomplishments sat.taken ten year}
+data <- meaningful.emp.central %>%
+  select(grad.year.10, sat.taken) %>%
+  filter(grad.year.10 != "After 2023") %>%
+  droplevels()
+
+tab_xtab(var.row = data$grad.year.10, var.col = data$sat.taken, 
+         title = "", 
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, sat.taken) %>%
+  write_csv(., "Data/ChatGPT/High school accomplishments/sat-taken.csv")
+
+```
+
 <br>
 
 ## MCA.R
 
-**Key Findings**\
+### **Key Findings**
 
 There were statistically significant differences in MCA Reading scores across employment states in all three years after graduation:
 
-**Year 1:** F(4, 119,756) = 3471, p \< .001\
-
-**Year 5:** F(4, 84,266) = 426.6, p \< .001\
-
-**Year 10:** F(3, 47,064) = 750.3, p \< .001
+-   **Year 1:** F(4, 119,756) = 3471, p \< .001
+-   **Year 5:** F(4, 84,266) = 426.6, p \< .001
+-   **Year 10:** F(3, 47,064) = 750.3, p \< .001
 
 **In all three years, students attending post-secondary had the highest average MCA Reading scores.** Those with no Minnesota employment record or who were not meaningfully employed consistently had the lowest scores. Graduates with meaningful employment in their home region generally had **lower scores** than those employed meaningfully outside their region (elsewhere in Minnesota).
 
-**Interpretation Over Time**\
+### **Interpretation Over Time**
 
 **One Year After Graduation:** Students attending post-secondary scored **0.33 points higher** than those with meaningful employment in their home region. Those with no MN employment record scored **0.32 points lower**, while the not-meaningfully-employed group scored **0.25 points lower** than the home-region group.
 
@@ -2025,7 +2216,8 @@ There were statistically significant differences in MCA Reading scores across em
 
 **Ten Years After Graduation:** The trend intensified. Those employed meaningfully outside their region scored **0.37 points higher** than the in-region group, and those with no MN employment record scored similarly (**0.37 points higher**). However, the difference between the in-region and not-meaningfully-employed group was **not significant**, suggesting this group's reading achievement had converged over time.
 
-**Conclusion**\
+### **Conclusion**
+
 Across all three post-graduation points, MCA Reading scores were **strongly associated** with future employment states. The most consistent pattern was that **graduates who pursued post-secondary education or secured employment beyond their home region had higher reading scores**, suggesting both academic preparation and geographic mobility play important roles in post-school success. Conversely, **graduates disconnected from education or stable employment tended to have lower scores**, though these differences became less pronounced by year ten.
 
 ::: panel-tabset
@@ -2189,27 +2381,34 @@ TukeyHSD(summary)
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, MCA.R) %>%
+  write_csv(., "Data/ChatGPT/High school accomplishments/MCA-R.csv")
+
+```
+
 <br>
 
 ## MCA.S
 
-**Key Findings**\
+### **Key Findings**
 
-**Year 1**: ANOVA results revealed significant differences in MCA Science scores across employment outcomes (*F* = 2233, *p* \< .001). Graduates attending post-secondary scored **0.45 points higher** on average than those with meaningful employment in their high school region. Those with no MN employment record and not attending post-secondary scored **0.32 points lower** than the regional employment group, and those not meaningfully employed or attending post-secondary scored **0.25 points lower**.\
+**Year 1**: ANOVA results revealed significant differences in MCA Science scores across employment outcomes (*F* = 2233, *p* \< .001). Graduates attending post-secondary scored **0.45 points higher** on average than those with meaningful employment in their high school region. Those with no MN employment record and not attending post-secondary scored **0.32 points lower** than the regional employment group, and those not meaningfully employed or attending post-secondary scored **0.25 points lower**.
 
-**Year 5**: Differences remained statistically significant (*F* = 498.4, *p* \< .001). Post-secondary attendees scored **0.39 points higher** than those employed in the region. Those with no MN employment record scored **0.17 points higher**, while those not meaningfully employed or in post-secondary were **not significantly different** from the regional employment group.\
+**Year 5**: Differences remained statistically significant (*F* = 498.4, *p* \< .001). Post-secondary attendees scored **0.39 points higher** than those employed in the region. Those with no MN employment record scored **0.17 points higher**, while those not meaningfully employed or in post-secondary were **not significantly different** from the regional employment group.
 
 **Year 10**: Differences continued to be significant (*F* = 168.6, *p* \< .001). Those meaningfully employed elsewhere in Minnesota scored **0.23 points higher**, and those with no MN employment record scored **0.18 points higher** than the regional employment group. Those not meaningfully employed nor attending post-secondary were **not significantly different** from the regional group.
 
-**Interpretation Over Time**\
+### **Interpretation Over Time**
 
-**One year after high school**, higher MCA Science scores were **strongly associated** with attending post-secondary and **moderately associated** with meaningful employment in other parts of Minnesota.\
+**One year after high school**, higher MCA Science scores were **strongly associated** with attending post-secondary and **moderately associated** with meaningful employment in other parts of Minnesota.
 
-**Five years after high school**, this pattern **persisted**, though differences between most groups **narrowed**. Post-secondary students and those with no MN employment record continued to score higher, but the gaps were **less pronounced**.\
+**Five years after high school**, this pattern **persisted**, though differences between most groups **narrowed**. Post-secondary students and those with no MN employment record continued to score higher, but the gaps were **less pronounced**.
 
 **Ten years after high school**, academic achievement as measured by MCA Science remained **predictive**, but differences across employment groups **weakened slightly**, particularly for those not meaningfully employed.
 
-**Conclusion**\
+### **Conclusion**
 
 Science achievement in high school, as measured by the MCA, is **consistently associated** with more favorable postsecondary and employment outcomes. While the strength of these associations **diminishes over time**, they remain **statistically and practically significant** well into the first decade after graduation.
 
@@ -2321,21 +2520,26 @@ TukeyHSD(summary)
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, MCA.S) %>%
+  write_csv(., "Data/ChatGPT/High school accomplishments/MCA-S.csv")
+
+```
+
 <br>
 
 ## MCA.M
 
-**Key Findings**\
+### **Key Findings**
 
-Statistically significant differences were found in MCA Math scores across post-graduation employment groups in all three years:\
+Statistically significant differences were found in MCA Math scores across post-graduation employment groups in all three years:
 
-**1 year after high school**: F(4, 119,783) = 5009, p \< .001\
+-   **1 year after high school**: F(4, 119,783) = 5009, p \< .001
+-   **5 years after high school**: F(4, 89,361) = 1027, p \< .001
+-   **10 years after high school**: F(3, 49,527) = 244.9, p \< .001
 
-**5 years after high school**: F(4, 89,361) = 1027, p \< .001\
-
-**10 years after high school**: F(3, 49,527) = 244.9, p \< .001
-
-**Interpretation Over Time**\
+### **Interpretation Over Time**
 
 **1 Year After Graduation** Graduates attending post-secondary education had the **highest MCA Math scores**, averaging 0.64 points higher than those with meaningful employment in the region. Those not meaningfully employed or without a Minnesota employment record scored significantly **lower**, with differences ranging from -0.13 to -0.19 points. The smallest gap was between those employed in Minnesota outside the region and those employed in the region (+0.04), though still statistically significant.
 
@@ -2345,7 +2549,9 @@ Differences persisted, though gaps **narrowed slightly**. Postsecondary attendee
 **10 Years After Graduation**\
 The trend largely held. Postsecondary attendees were no longer a distinct group in the model, but those employed in Minnesota outside their region still scored **higher** (+0.29) than regional workers. Those not meaningfully employed showed **no statistically significant difference** from regional workers (-0.01, p = 0.91), and those with no MN record scored **modestly higher** (+0.22).
 
-**Conclusion** MCA Math scores were **strongly associated** with post-graduation outcomes early on, especially for those pursuing higher education. Over time, score differences **remained**, especially between regional employment and out-of-region employment, but **gaps narrowed**, particularly among those not attending post-secondary or not meaningfully employed.
+### **Conclusion**
+
+MCA Math scores were **strongly associated** with post-graduation outcomes early on, especially for those pursuing higher education. Over time, score differences **remained**, especially between regional employment and out-of-region employment, but **gaps narrowed**, particularly among those not attending post-secondary or not meaningfully employed.
 
 ::: panel-tabset
 ### One year after graduating
@@ -2508,9 +2714,18 @@ TukeyHSD(summary)
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, MCA.M) %>%
+  write_csv(., "Data/ChatGPT/High school accomplishments/MCA-M.csv")
+
+```
+
 <br>
 
 ## cte.achievement
+
+### Key findings
 
 This section summarizes the association between **Career and Technical Education (CTE) achievement** and **employment or education outcomes** at one, five, and ten years after high school. While all three chi-square tests were statistically significant, the **Cramér’s V values** suggest a consistently **very weak relationship**:
 
@@ -2518,7 +2733,7 @@ This section summarizes the association between **Career and Technical Education
 -   **Year 5:** Cramér’s V = 0.069
 -   **Year 10:** Cramér’s V = 0.054
 
-**Key trends over time:**
+### **Interpretations over time:**
 
 **Year 1:**
 
@@ -2538,7 +2753,8 @@ This section summarizes the association between **Career and Technical Education
 -   **Meaningful MN employment** was the most common outcome regardless of CTE status (\~30%).
 -   **Non-CTE students** were slightly more likely to have **no MN employment record**, suggesting possible migration or untracked employment.
 
-**Conclusion:**\
+### **Conclusion:**
+
 CTE achievement is **modestly associated** with earlier post-graduation outcomes, especially around **regional employment and post-secondary enrollment**. However, by ten years out, differences by CTE status largely **diminish**, indicating that **CTE pathways may shape short-term trajectories**, but **long-term outcomes converge** across student groups.
 
 ::: panel-tabset
@@ -2585,29 +2801,35 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$cte.achievement,
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, cte.achievement) %>%
+  write_csv(., "Data/ChatGPT/High school accomplishments/cte-achievement.csv")
+
+```
+
 <br>
 
 ## total.cte.courses.taken
 
-**Key Findings**\
+### **Key Findings**
 
-There was a **statistically significant relationship** between the number of CTE courses taken in high school and employment outcomes in all three years analyzed.\
+There was a **statistically significant relationship** between the number of CTE courses taken in high school and employment outcomes in all three years analyzed.
 
-Year 1: F(4, 124040) = 1312, p \< .001\
+-   Year 1: F(4, 124040) = 1312, p \< .001
+-   Year 5: F(4, 91140) = 446.8, p \< .001
+-   Year 10: F(3, 49670) = 208.5, p \< .001
 
-Year 5: F(4, 91140) = 446.8, p \< .001\
+### **Interpretation Over Time**
 
-Year 10: F(3, 49670) = 208.5, p \< .001
+**1 year after graduation:** Students with meaningful employment in the region took slightly more CTE courses on average than most other groups, especially compared to those attending post-secondary institutions. The largest differences appeared between those attending post-secondary (fewer CTE courses) and those with meaningful employment in the region.
 
-**Interpretation Over Time**
-
-**1 year after graduation:** Students with meaningful employment in the region took slightly more CTE courses on average than most other groups, especially compared to those attending post-secondary institutions. The largest differences appeared between those attending post-secondary (fewer CTE courses) and those with meaningful employment in the region.\
-
-**5 years after graduation:** The trend persisted—graduates with meaningful employment in the region had taken more CTE courses than those in other outcome groups, particularly those attending post-secondary. Notably, students not meaningfully employed or not in education had intermediate CTE course averages.\
+**5 years after graduation:** The trend persisted—graduates with meaningful employment in the region had taken more CTE courses than those in other outcome groups, particularly those attending post-secondary. Notably, students not meaningfully employed or not in education had intermediate CTE course averages.
 
 **10 years after graduation:** The differences diminished slightly but remained statistically significant. Graduates with meaningful employment in the region continued to show higher average CTE course completion than those not in the workforce or in meaningful employment. However, differences between the non-engaged groups (not employed, not in school) were narrower.
 
-**Conclusion**\
+### **Conclusion**
+
 Graduates with **meaningful employment in their home region** consistently took **more CTE courses** than their peers, especially compared to those who pursued post-secondary education. This pattern supports the notion that CTE coursework is more strongly associated with **early and regional employment outcomes**, while those pursuing college took fewer CTE courses overall. The strength of the association appears to **weaken modestly over time**.
 
 ::: panel-tabset
@@ -2771,6 +2993,13 @@ TukeyHSD(summary)
 ```
 :::
 
+```{r echo = FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, total.cte.courses.taken) %>%
+  write_csv(., "Data/ChatGPT/High school accomplishments/total-cte-courses-taken.csv")
+
+```
+
 <br>
 
 # Post-secondary
@@ -2784,62 +3013,94 @@ We will analyze the following variables;
 -   highest.cred.level
 -   ps.grad.location
 
-The analysis provides the following insights;
+### **Key Findings**
 
--   Meaningful employment in the region, long-term
-    -   More likely:
-        -   Attended or graduated
-        -   Graduated from a public, 2-year
-        -   Less than associated degree or an associate degree
-        -   Graduated in region
-    -   Less likely:
-        -   Did not attend or graduated
-        -   Graduated from any 4-year or any for-profit
-        -   Bachelors degree or higher & No college
-        -   Outside region, worse if outside Minnesota
--   Meaningful employment in MN, long-term
-    -   More likely:
-        -   Attended or graduated.
-        -   Graduated from any 4-year or any for-profit
-        -   Bachelor degree or higher
-        -   Graduated in Minnesota
-    -   Less likely
-        -   Did not attend or graduate
-        -   Graduated from a public 2-year
-        -   No college or some college, associate degree, less than associate degree
--   Not meaningful
-    -   More likely:
-        -   Did not attend or graduate
-        -   Graduated from a for-profit
-    -   Less likely:
-        -   Graduated from post-secondary
-        -   ASsociate or higher
--   No MN employment record
-    -   More likely:
-        -   Did not attend or graduate
-        -   Graduated from a for-profit, or public 4-year
-        -   Master degree or higher
-        -   Outside Minnesota
-    -   Less likely:
-        -   Graduated
-        -   Graduated from a 2-year
-        -   Associate degree, less than associate degree
-        -   In region
+The strongest and most consistent predictors of **meaningful regional employment** and labor market engagement overall are:
+
+-   **Whether an individual graduated** from a postsecondary institution
+-   **Where** they graduated (especially regionally)
+-   **What type of institution** they graduated from
+-   **What level of credential** they earned
+
+All variables in this section showed at least moderate associations with employment outcomes **within the first year** after high school, though the strength of these relationships generally **declined over time**.
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**\
+
+Postsecondary **participation dominates** the employment landscape this early:
+
+-   Individuals still attending college make up the majority in nearly every group, especially for those who would go on to earn **bachelor’s or higher degrees**, or graduate from **public 4-year institutions**.
+-   **Graduates from 2-year institutions** and those with **associate degrees** were **more likely to already be in meaningful regional employment** than their peers.
+-   Individuals who **never attended** or had **not yet graduated** were disproportionately in **non-meaningful employment or disconnected** from the labor market (e.g., over 40% not meaningfully employed or with no MN record).
+
+**5 Years After Graduation**\
+
+Graduation status and credential type take center stage:
+
+-   Those with **associate degrees** or graduates from **2-year institutions** had the **highest rates of meaningful regional employment**, often around **30–33%**.
+-   In contrast, individuals with **bachelor’s degrees or higher**, or who graduated from **4-year institutions**, were more likely to be in **meaningful employment outside their high school region**, signaling greater **geographic mobility** or **broader employment markets**.
+-   The **location** of graduation mattered significantly: those who **graduated from a college in their high school region** had **twice the rate** of meaningful regional employment compared to graduates from MN colleges outside the region.
+
+**10 Years After Graduation**\
+
+Although patterns narrowed, **educational attainment and geography still mattered**:
+
+-   Individuals with **postsecondary degrees** remained far more engaged in the workforce, especially in **meaningful employment**.
+-   Those who **graduated locally** still had the **highest rates of meaningful employment in the region**, often exceeding **35%**.
+-   People who **never attended or didn’t complete college** were consistently more disconnected, with **\~30–35%** showing **no MN employment record** a full decade later.
+
+### **Conclusion**
+
+The postsecondary journey plays a **central role in shaping long-term employment outcomes**. Specifically:
+
+-   **Completion matters**: individuals who earn degrees—especially associate or higher—are much more likely to be employed meaningfully and remain engaged in the MN workforce.
+-   **Location matters**: graduating from a postsecondary institution **in the same region** as high school strongly predicts **regional employment**, suggesting local educational pipelines support local labor market retention.
+-   **Mobility varies by institution type**: graduates of **4-year and out-of-region institutions** are more likely to find employment elsewhere in MN, while **2-year grads** tend to stay local.
+-   **Disconnection is concentrated** among those who did **not graduate** from college or **never attended**, who are persistently overrepresented among the not meaningfully employed and those with **no MN employment record**.
 
 <br>
 
 ## attended.ps.within.first.year.hsgrad
 
--   One year after graduating;
-    -   Individuals that did not attend college, or attended not immediately after graduating college were significantly more likely to have meaningful employment in the region.
-    -   These individuals were significantly more likely to not have meaningful employment.
-    -   Significantly more likely to not have a MN employment record.
--   Five years after graduating;
-    -   Significantly more likely to not have meaningful employment
-    -   Individuals who did not attend post-secondary were significantly more likely to not have a MN employment record
--   Ten years after graduating;
-    -   individuals that never attended post-secondary were significantly less likely to have meaningful employment in the region.
-    -   Individuals that did not attend post-secondary were significantly more likely to not have a MN employment record.
+### **Key Findings**
+
+Attending postsecondary immediately after high school is **strongly associated** with future outcomes, especially early on:
+
+-   **1 year after graduation**: Cramer's V = **0.548** → Very strong relationship
+-   **5 years after graduation**: Cramer's V = **0.229** → Moderate relationship
+-   **10 years after graduation**: Cramer's V = **0.088** → Weak but still statistically meaningful
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**
+
+This is the **strongest relationship observed** among any postsecondary variables.
+
+-   Nearly all individuals attending postsecondary at year 1 had enrolled immediately after high school.
+
+-   Those who did **not** attend immediately were much more likely to be **disconnected or in non-meaningful employment**.
+
+-   This sharp contrast highlights the early importance of immediate postsecondary transition.
+
+**5 Years After Graduation**
+
+The relationship weakens but remains meaningful.
+
+-   Those who attended college immediately are still **more likely to be in meaningful employment (especially MN-wide)** or **still pursuing postsecondary education**.
+-   Those who delayed or never attended show higher rates of **disconnection and non-meaningful employment**.
+
+**10 Years After Graduation**
+
+The gap narrows significantly but still favors early enrollees.
+
+-   Individuals who attended right away are **more concentrated in meaningful employment**, especially statewide.
+-   Those who never attended are overrepresented in **disconnected and non-meaningful employment categories**.
+-   The fading strength suggests that other life experiences may catch up or intervene over time.
+
+### **Conclusion**
+
+Attending college within the first year after high school is one of the **strongest predictors of positive post-graduation outcomes**, especially in the short term. While the effect diminishes over time, early college enrollment remains a **powerful signal of future labor market success and educational persistence**. This reinforces the importance of **early access, readiness, and support for postsecondary transitions**.
 
 ::: panel-tabset
 ### One year after graduating
@@ -2885,20 +3146,81 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$attended.ps.within.first.ye
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, attended.ps.within.first.year.hsgrad) %>%
+  write_csv(., "Data/ChatGPT/Post-secondary/attended-ps-within-first-year-hsgrad.csv")
+
+```
+
 <br>
 
 ## attended.ps
 
--   One year after graduating; individuals that did not attend post-secondary were;
-    -   more likely to have meaningful employment in the region.
-    -   Significantly more likely to not have meaningful employment
-    -   Significantly more likely to not have a MN employment record
--   Five years after graduating; individuals that did not attend post-secondary were;
-    -   More likely to not have meaningful employment
-    -   Significantly more likely to not have a MN employment record
--   Ten years after graduating; individuals that did not attend post-secondary were;
-    -   Less likely to have meaningful employment in region or Minnesota
-    -   Significantly more likely to not have a MN employment record.
+### **Key Findings**
+
+Attending postsecondary is **strongly associated** with better employment and educational outcomes, particularly in terms of **meaningful employment in the region**:
+
+-   **1 year after graduation**: Cramer's V = **0.655** → Very strong association
+-   **5 years after graduation**: Cramer's V = **0.321** → Moderate association
+-   **10 years after graduation**: Cramer's V = **0.114** → Weaker but still relevant
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**\
+
+Among those who attended college:
+
+-   **11.4%** were in **meaningful regional employment**
+-   **63.4%** were **attending postsecondary**
+-   Only **6.9%** were **disconnected** (no MN record or not meaningful)
+
+Among non-attendees:
+
+-   Only **5.2%** were in **meaningful regional employment**
+-   **0%** were attending postsecondary
+-   Over **40%** were **disconnected**
+-   This sharp contrast shows that **early college attendance is closely tied to both educational persistence and labor market connection**.
+
+**5 Years After Graduation**\
+
+Among college attendees:
+
+-   **18.1%** were in **meaningful regional employment**
+-   **16.6%** were **still in postsecondary**
+-   About **31%** were **disconnected**
+
+Among non-attendees:
+
+-   Only **11.6%** had **meaningful regional employment**
+-   Less than **2%** were still in postsecondary
+-   Nearly **50%** were **disconnected**
+-   The gap in **regional employment** remains substantial — nearly **7 percentage points** higher among college attendees.
+
+**10 Years After Graduation**\
+
+Among those who attended college:
+
+-   **24.1%** had **meaningful employment in the region**
+-   Nearly **33%** had **meaningful employment elsewhere in MN**
+-   Just **26.4%** were **disconnected**
+
+Among those who never attended:
+
+-   Only **14.1%** had **meaningful regional employment**
+-   Over **41%** were **disconnected**
+
+The **10-point advantage in regional employment** persists even a decade later.
+
+### **Conclusion**
+
+Postsecondary attendance is a **critical predictor of meaningful employment in the region** across all time points. Those who attend are:
+
+-   **More likely** to connect with their regional labor market
+-   **Less likely** to be disconnected
+-   Still showing benefits even a decade later
+
+This underscores the regional workforce value of expanding and supporting **postsecondary access** for high school graduates.
 
 ::: panel-tabset
 ### One year after graduating
@@ -2944,21 +3266,63 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$attended.ps,
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, attended.ps) %>%
+  write_csv(., "Data/ChatGPT/Post-secondary/attended-ps.csv")
+
+
+```
+
 <br>
 
 ## ps.grad
 
--   One year after graduating; individuals that graduated from post-secondary were;
-    -   less likely to have meaningful employment in the region.
-    -   Significantly more likely to attend post-secondary
-    -   Significantly less likely to not have meaningful employment
-    -   Significantly more likely to not have a MN employment record
--   Five years after graduating; individuals that did not graduate from post-secondary were;
-    -   More likely to have meaningful employment in Minnesota
-    -   Significantly less likely to not have meaningful employment
-    -   Significantly less likely to not have a MN employment record
--   Ten years after graduating; individuals that did not attend post-secondary were;
-    -   Slightly more likely to have meaningful employment in the region or in Minnesota
+### **Key Findings**
+
+Graduating from a postsecondary institution is **strongly associated** with better post-graduation outcomes, particularly **regional and statewide employment**:
+
+-   **1 year after graduation**: Cramer's V = **0.393** → Strong relationship
+-   **5 years after graduation**: Cramer's V = **0.252** → Moderate relationship
+-   **10 years after graduation**: Cramer's V = **0.099** → Weak but still notable
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**\
+
+Among those who had already graduated college (Y):
+
+-   Only **7.6%** had meaningful employment in the region
+-   But **78.9%** were still attending postsecondary — unsurprising this early
+-   Those who had not graduated (No) were **over 3x more likely** to be disconnected (e.g., **18.3%** had no MN employment record vs. only **2.8%** among graduates)
+
+Graduates were **more anchored in education or employment**, with much lower rates of disconnection.
+
+**5 Years After Graduation**\
+
+Postsecondary graduates had:
+
+-   **19.4%** in **meaningful regional employment** (vs. 24.4% of non-graduates — a reversal)
+-   **27.0%** in **meaningful MN employment** (vs. 20.7% of non-graduates)
+-   Much lower disconnection: **11.5%** had no MN employment record (vs. 23.7% of non-graduates)
+
+Graduates were **less regionally concentrated** but had **higher statewide engagement** and were **less disconnected**.
+
+**10 Years After Graduation**\
+
+At this point:
+
+-   **22.4%** of graduates had meaningful employment in the region (vs. 23.7% of non-graduates)
+-   But **36.5%** had meaningful employment statewide (vs. 24.5% for non-graduates)
+-   Fewer were disconnected: **26.9%** of graduates had no MN record, vs. **31.5%** of non-graduates
+
+Again, postsecondary graduation seems to **shift outcomes from regional to statewide success** — and is associated with **lower long-term disconnection**.
+
+### **Conclusion**
+
+Graduating from a postsecondary institution is consistently linked to **lower disconnection** and **higher rates of meaningful employment statewide**, though not always regionally. In fact, non-graduates slightly exceed graduates in regional employment at years 5 and 10 — suggesting that **graduates may be more mobile or drawn to employment outside their home region**.\
+
+Still, graduation remains a **strong signal of economic integration**, especially **statewide**.
 
 ::: panel-tabset
 ### One year after graduating
@@ -3007,55 +3371,59 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$ps.grad,
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, ps.grad) %>%
+  write_csv(., "Data/ChatGPT/Post-secondary/ps-grad.csv")
+
+```
+
 <br>
 
 ## ps.grad.InstitutionSector
 
-A quick reminder on what the codes mean;
+### **Key Findings**
 
--   1 - Public, 4-year or above
--   2 - Private not-for-profit, 4-year or above
--   4 - Public, 2-year
--   10 - went to multiple sectors
--   11 - Includes all of the following
-    -   3 - Private for-profit, 4-year or above
-    -   6 - Private for-profit, 2-year
-    -   9 - Private for-profit, less-than-2-year
+The type of postsecondary institution is **strongly related to early outcomes** and **moderately predictive by year 5**, but only **weakly associated** by year 10:
 
-<!-- -->
+-   **1 year after graduation**: Cramer's V = **0.356** → Strong
+-   **5 years after graduation**: Cramer's V = **0.211** → Moderate
+-   **10 years after graduation**: Cramer's V = **0.093** → Weak
 
--   One year after graduating;
-    -   Have meaningful employment in region
-        -   Less likely: 1, 2
-        -   More likely: 4
-    -   Meaningful emp in MN
-        -   Less likely: 2
-    -   No MN employment record
-        -   More likely: 11 (low numbers though)
--   Five years after graduating;
-    -   Have meaningful employment in region
-        -   Less likely: 1, 2
-        -   More likely: 4
-    -   Meaningful emp in MN
-        -   Less likely: 4
-        -   More likely: 1, 11, 2
-    -   Not meaningful
-        -   Less likely: 10
-    -   No MN employment record
-        -   Less likely: 10
-        -   More likely: 11, 2
--   Ten years after graduating;
-    -   Have meaningful employment in region
-        -   Less likely: 1, 2, 11,
-        -   More likely: 4
-    -   Meaningful emp in MN
-        -   Less likely: 4, 11
-        -   More likely: 1, 2
-    -   Not meaningful
-        -   More likely: 11 (low numbers)
-    -   No MN employment record
-        -   Less likely:
-        -   More likely: 11
+### **Interpretation Over Time**
+
+**1 Year After Graduation**\
+
+Outcomes are dominated by whether the person is still in school:
+
+-   Among those who eventually graduated from **public 4-year institutions**, **90%** were still attending school.
+-   Among **public 2-year** and **other institutions**, around **65–77%** were still enrolled.
+-   In contrast, those who **did not graduate** or **never attended** were far more likely to fall into **non-meaningful** or **no MN record** categories.
+-   **Meaningful regional employment** was most common (15.7%) among public 2-year graduates — but generally low across all sectors due to ongoing schooling.
+
+**5 Years After Graduation**\
+
+Institutional differences become more apparent:
+
+-   Those who graduated from **public 2-year institutions** had the **highest rate of meaningful regional employment** at **33.4%**, followed by other institutions (15.4%) and public 4-years (13.9%).
+-   Graduates from **public 4-year institutions** were more likely to be in **meaningful employment in MN more broadly** (**26.4%**).
+-   Non-completers (did not grad, never attended) had **much higher rates of disconnection**, with **28.8%** of "never attended" having no MN employment record.
+
+**10 Years After Graduation**\
+
+Differences persist but narrow:
+
+-   Meaningful regional employment was **highest for public 2-year completers** (33.2%), followed by other institutions (19.1%) and public 4-year grads (18.5%).
+-   Public 4-year grads were **most likely to have meaningful MN employment overall** (39%).
+-   Disconnection remained highest among those who **never attended college** (**34.3%** had no MN employment record).
+
+### **Conclusion**
+
+Graduates of **public 2-year institutions** consistently show the **highest levels of meaningful regional employment** — especially by 5 and 10 years after high school. In contrast, **public 4-year graduates** are more likely to be employed **elsewhere in the state**, suggesting greater mobility or different job placement patterns.\
+
+Those who never attended or did not complete postsecondary are **far more likely to be disconnected** from the labor market at all time points.\
+
+The data supports the view that **2-year institutions play a unique role in anchoring talent locally**, while 4-year institutions may prepare students for **broader, statewide opportunities**.
 
 ::: panel-tabset
 ### One year after graduating
@@ -3107,49 +3475,58 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$ps.grad.InstitutionSector,
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, ps.grad.InstitutionSector) %>%
+  write_csv(., "Data/ChatGPT/Post-secondary/ps-grad-InstitutionSector.csv")
+
+```
+
 <br>
 
 ## highest.cred.level
 
--   One year after graduating;
-    -   Have meaningful employment in region
-        -   Less likely: Bachelor degree or higher
-        -   More likely: No college, Associate degree
-    -   Meaningful emp in MN
-        -   Less likely: Bachelor or higher
-        -   More likely: No college
-    -   Not meaningful
-        -   Less likely: Less than associate degree or higher
-        -   More likely: No college
-    -   No MN employment record
-        -   Less likely: Some college or higher
-        -   More likely: No college
--   Five years after graduating;
-    -   Have meaningful employment in region
-        -   Less likely: Bachelor degree or higher
-        -   More likely: Less than associate degree to associate degree
-    -   Meaningful emp in MN
-        -   Less likely: Bachelor degree
-        -   More likely: Master degree or higher
-    -   Not meaningful
-        -   Less likely: Master degree or higher
-        -   More likely: No college or some college
-    -   No MN employment record
-        -   Less likely: Associate degree or higher
-        -   More likely: No college
--   Ten years after graduating;
-    -   Have meaningful employment in region
-        -   Less likely: Master degree, No college
-        -   More likely: Associate degree, Less than associate degree
-    -   Meaningful emp in MN
-        -   Less likely: No college, some college, Associate degree, Less than associate degree
-        -   More likely: Bachelor degree or higher
-    -   Not meaningful
-        -   Less likely: Associate degree or higher
-        -   More likely: Some college
-    -   No MN employment record
-        -   Less likely: Less than Associate degree
-        -   More likely:
+### **Key Findings**
+
+Educational attainment is a **strong early predictor** of labor market and education outcomes. The strength of this association diminishes over time, but notable patterns persist.
+
+-   **1 year after graduation**: Cramer's V = **0.357** → Strong relationship
+-   **5 years after graduation**: Cramer's V = **0.214** → Moderate
+-   **10 years after graduation**: Cramer's V = **0.093** → Weak but present
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**\
+
+Most individuals are still attending postsecondary:
+
+-   **Attending ps** rates were highest among those pursuing a **bachelor’s or higher (87%)**, followed by **associate degrees (67%)**.
+-   For those who had **not attended college**, **46%** were already in the **not meaningful** category, and **28%** had **no MN employment record**.
+-   Among associate degree seekers, **14.5%** had already achieved **meaningful regional employment**, a higher share than most other groups at this stage.
+
+**5 Years After Graduation**\
+
+Clear employment patterns emerge:
+
+-   Those with **associate degrees** had the **highest proportion** in **meaningful regional employment** (**29.5%**).
+-   **Bachelor’s+ degree holders** were more likely to be employed **somewhere in MN** (**27.4%** in meaningful MN employment).
+-   Individuals with **no college** or **less than an associate degree** were **far more likely** to be disconnected, with **\~28–29%** having no MN employment record.
+
+**10 Years After Graduation**\
+
+Gaps narrow, but degree level still matters:
+
+-   **Meaningful regional employment** was highest among **associate degree earners (30.7%)** and **those with less than an associate (31.7%)**.
+-   Those with a **bachelor’s or higher** were more often employed **elsewhere in MN** (**39%**), rather than regionally (**18.3%**).
+-   Individuals with **no college** had a disconnection rate of **34.3%**, nearly **10 percentage points higher** than those with degrees.
+
+### **Conclusion**
+
+Educational attainment — especially an **associate degree** — is consistently associated with **stronger regional labor market outcomes**, particularly by 5 and 10 years.\
+
+Individuals with **bachelor’s degrees or higher** are more likely to be employed **outside their home region**, reflecting broader career mobility.\
+
+Those with **no college experience** remain at high risk of labor market **disconnection**, reinforcing the value of postsecondary pathways for regional and statewide workforce integration.
 
 ::: panel-tabset
 ### One year after graduating
@@ -3195,71 +3572,63 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$highest.cred.level,
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, highest.cred.level) %>%
+  write_csv(., "Data/ChatGPT/Post-secondary/highest-cred-level.csv")
+
+```
+
 <br>
 
 ## ps.grad.location
 
--   One year after graduating;
+### **Key Findings**
 
-    -   Have meaningful employment in region
-        -   Less likely: In MN, Inside and outside MN, Outside MN
-        -   More likely: In region
-    -   Meaningful emp in MN
-        -   Less likely: Outside Minnesota
-        -   More likely:
-    -   Not meaningful
-        -   Less likely: Inside and outside region, Inside and outside Minnesota
-        -   More likely: Outside Minnesota
-    -   No MN employment record
-        -   Less likely: Inside and outside region
-        -   More likely: Inside and outside Minnesota, outside Minnesota
+Where an individual graduates from college has a **moderate relationship** with their employment outcomes shortly after high school, which **persists but weakens** over time:
 
--   Five years after graduating;
+-   **1 year after graduation**: Cramer's V = **0.159**
+-   **5 years after graduation**: Cramer's V = **0.186**
+-   **10 years after graduation**: Cramer's V = **0.147**
 
-    -   Have meaningful employment in region
-        -   Less likely: In MN, Inside and outside MN, Outside MN
-        -   More likely: In region
-    -   Meaningful emp in MN
-        -   Less likely: In region, inside and outside region, inside and outside MN, outside MN
-        -   More likely: In Minnesota
-    -   Not meaningful
-        -   Less likely: Inside and outside region, Inside and outside Minnesota
-        -   More likely:
-    -   No MN employment record
-        -   Less likely: Inside and outside region, Inside and outside MN
-        -   More likely: outside Minnesota
+### **Interpretation Over Time**
 
--   Ten years after graduating;
+**1 Year After Graduation**
 
-    -   Have meaningful employment in region
-        -   Less likely: In MN, Inside and outside MN, Outside Minnesota
-        -   More likely: In region
-    -   Meaningful emp in MN
-        -   Less likely: In region
-        -   More likely: In Minnesota, Inside and outside Minnesota
-    -   Not meaningful
-        -   Less likely: Inside and outside region, Inside and outside Minnesota, outside Minnesota
-        -   More likely:
-    -   No MN employment record
-        -   Less likely: In region
-        -   More likely: Inside and outside Minnesota, Outside minnesota
+-   Graduates from institutions in the **same region as their high school** had the **highest rate** of **meaningful regional employment (48.7%)**.
+-   Those graduating from MN institutions **outside their region** were more likely to have **meaningful MN employment (30.5%)**, but not regionally anchored.
+-   Non-completers had high rates of disconnection: **24.3%** had no MN employment record, and **44.4%** were not meaningfully employed nor in school.
+
+**5 Years After Graduation**
+
+-   The regional advantage **intensifies**: those who graduated in the same region had **47.8%** in meaningful regional employment — over **twice as high** as MN grads outside the region (19.6%).
+-   Graduates from outside MN were far more likely to be working in MN (26.2%) than regionally (11.9%), suggesting possible **return migration** without regional anchoring.
+-   Again, non-completers had high disconnection: **25%** had no MN employment record.
+
+**10 Years After Graduation**
+
+-   Regional graduates continue to show the **strongest ties to regional employment (37.5%)**.
+-   Those who graduated from MN colleges outside their region have **higher statewide employment (43%)** but relatively lower regional outcomes (17.8%).
+-   Out-of-state grads and non-completers are more often **disconnected**, with **48%** and **31.5%**, respectively, having no MN employment record.
+
+### **Conclusion**
+
+Graduating from a **college in the same region as one’s high school** is consistently associated with **greater regional employment integration**, especially in the first five years after high school.\
+
+Those who graduate from **MN institutions outside their region** or from **out-of-state** are more likely to be employed in Minnesota broadly, but **less likely to be regionally anchored**.\
+
+Meanwhile, those who do not complete college show **higher rates of disconnection**, reinforcing the importance of both **completion** and **local institutional pathways** for regional workforce development.
 
 ::: panel-tabset
 ### One year after graduating
 
 ```{r post-secondary ps.grad.location one year}
 data <- meaningful.emp.central %>%
-  select(grad.year.1, ps.grad.in.same.edr, ps.grad.in.MN) %>%
-  filter(grad.year.1 != "After 2023") %>%
-  mutate(ps.grad.location = ifelse(ps.grad.in.same.edr == "In same EDR", "In region",
-                                   ifelse(ps.grad.in.same.edr == "Outside EDR" & ps.grad.in.MN == "In Minnesota", "In state",
-                                          ifelse(ps.grad.in.same.edr == "Inside and outside same EDR" & ps.grad.in.MN == "In Minnesota", "In state",
-                                                 ifelse(ps.grad.in.MN == "Outside MN", "Outside Minnesota",
-                                                        ifelse(ps.grad.in.same.edr == "Inside and outside same EDR", "Inside and outside region",
-                                                        ifelse(ps.grad.in.MN == "Inside and outside MN", "Inside and outside MN", as.character(ps.grad.in.MN)))))))) %>%
-  droplevels() %>%
-  filter(!ps.grad.location %in% c("Did not grad", "Never attended ps")) %>%
-  mutate(ps.grad.location = fct_relevel(ps.grad.location, "In region", "Inside and outside region", "In MN", "Inside and outside MN", "Outside Minnesota"))
+  select(grad.year.1, ps.grad.location) %>%
+  filter(grad.year.1 != "After 2023",
+         grad.year.1 != "Attending ps",
+         ps.grad.location != "Attending ps") %>%
+  droplevels()
 
 tab_xtab(var.row = data$grad.year.1, var.col = data$ps.grad.location, 
          title = "", 
@@ -3271,17 +3640,11 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$ps.grad.location,
 
 ```{r post-secondary ps.grad.location five year}
 data <- meaningful.emp.central %>%
-  select(grad.year.5, ps.grad.in.same.edr, ps.grad.in.MN) %>%
-  filter(grad.year.5 != "After 2023") %>%
-  mutate(ps.grad.location = ifelse(ps.grad.in.same.edr == "In same EDR", "In region",
-                                   ifelse(ps.grad.in.same.edr == "Outside EDR" & ps.grad.in.MN == "In Minnesota", "In state",
-                                          ifelse(ps.grad.in.same.edr == "Inside and outside same EDR" & ps.grad.in.MN == "In Minnesota", "In state",
-                                                 ifelse(ps.grad.in.MN == "Outside MN", "Outside Minnesota",
-                                                        ifelse(ps.grad.in.same.edr == "Inside and outside same EDR", "Inside and outside region",
-                                                        ifelse(ps.grad.in.MN == "Inside and outside MN", "Inside and outside MN", as.character(ps.grad.in.MN)))))))) %>%
-  droplevels() %>%
-  filter(!ps.grad.location %in% c("Did not grad", "Never attended ps")) %>%
-  mutate(ps.grad.location = fct_relevel(ps.grad.location, "In region", "Inside and outside region", "In MN", "Inside and outside MN", "Outside Minnesota"))
+  select(grad.year.5, ps.grad.location) %>%
+  filter(grad.year.5 != "After 2023",
+         grad.year.5 != "Attending ps",
+         ps.grad.location != "Attending ps") %>%
+  droplevels()
 
 tab_xtab(var.row = data$grad.year.5, var.col = data$ps.grad.location, 
          title = "", 
@@ -3293,17 +3656,11 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$ps.grad.location,
 
 ```{r post-secondary ps.grad.location ten year}
 data <- meaningful.emp.central %>%
-  select(grad.year.10, ps.grad.in.same.edr, ps.grad.in.MN) %>%
-  filter(grad.year.10 != "After 2023") %>%
-  mutate(ps.grad.location = ifelse(ps.grad.in.same.edr == "In same EDR", "In region",
-                                   ifelse(ps.grad.in.same.edr == "Outside EDR" & ps.grad.in.MN == "In Minnesota", "In state",
-                                          ifelse(ps.grad.in.same.edr == "Inside and outside same EDR" & ps.grad.in.MN == "In Minnesota", "In state",
-                                                 ifelse(ps.grad.in.MN == "Outside MN", "Outside Minnesota",
-                                                        ifelse(ps.grad.in.same.edr == "Inside and outside same EDR", "Inside and outside region",
-                                                        ifelse(ps.grad.in.MN == "Inside and outside MN", "Inside and outside MN", as.character(ps.grad.in.MN)))))))) %>%
-  droplevels() %>%
-  filter(!ps.grad.location %in% c("Did not grad", "Never attended ps")) %>%
-  mutate(ps.grad.location = fct_relevel(ps.grad.location, "In region", "Inside and outside region", "In MN", "Inside and outside MN", "Outside Minnesota"))
+  select(grad.year.10, ps.grad.location) %>%
+  filter(grad.year.10 != "After 2023",
+         grad.year.10 != "Attending ps",
+         ps.grad.location != "Attending ps") %>%
+  droplevels()
 
 tab_xtab(var.row = data$grad.year.10, var.col = data$ps.grad.location, 
          title = "", 
@@ -3312,46 +3669,62 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$ps.grad.location,
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, ps.grad.location) %>%
+  write_csv(., "Data/ChatGPT/Post-secondary/ps-grad-location.csv")
+
+```
+
 <br>
 
-# Variables to keep
+# Total Summary
 
-Okay, after this analysis, here is what we will move forward with;
+## **1. Strong Predictors of Regional Employment and Disconnection**
 
--   Demographics
-    -   Gender
-    -   grad.year.covid
-    -   economic.status
-    -   SpecialEdStatus
-    -   RaceEthnicity
-    -   english.learner
--   High school characteristics
-    -   Dem_Desc
--   High school accomplishments
-    -   pseo.participant
-    -   took.ACT
-    -   ap.exam
-    -   ACTCompositeScore
-    -   MCA.M
-    -   MCA.R
-    -   MCA.S
-    -   cte.achievement
-    -   n.cte.courses.taken
--   Post-secondary
-    -   ps.grad
-    -   ps.grad.InstitutionSector
-    -   highest.cred.level
-    -   ps.grad.location
+These variables **consistently show strong or moderate Cramer's V values** and **clear differences in meaningful employment in the region**, making them strong candidates for inclusion in modeling.
+
+| Variable | Type | Key Insights |
+|----------------|----------------|----------------------------------------|
+| ps.grad.location | Postsecondary | Strongest predictor of regional employment. Local grads more likely to stay. |
+| ps.grad | Postsecondary | Graduation itself reduces disconnection and improves employment outcomes. |
+| highest.cred.level | Postsecondary | Clear stepwise value: higher credential = better outcomes. |
+| ps.grad.InstitutionSector | Postsecondary | 2-year grads more likely to stay regional; 4-year grads more mobile. |
+| economic.status | Demographic | Low-income students consistently more disconnected, especially early. |
+| RaceEthnicity | Demographic | Persistent racial gaps. Black, AI, Hispanic students more likely disconnected. |
+| Dem_Desc | High School Characteristic | Rural grads more regionally tied; metro students more mobile/disconnected. |
+| ACTCompositeScore | Accomplishment (cont.) | Higher scores = more statewide mobility, but not always regional. |
+| pseo.participant | Accomplishment | Linked to early employment or enrollment; reduces disconnection. |
+
+### **2. Moderate Predictors — Some Association, Less Consistency**
+
+These variables show **moderate associations** with outcomes. Their predictive value may depend on how they interact with other variables and could be useful in modeling, especially when looking for cumulative effects.
+
+| Variable | Type | Key Insights |
+|----------------|----------------|----------------------------------------|
+| SpecialEdStatus | Demographic | Somewhat lower employment, higher disconnection. |
+| Grad.year.covid | Demographic | Post-COVID grads slightly more disconnected early on. |
+| cte.achievement | Accomplishment | Boosts regional employment, especially early. |
+| total.cte.courses.taken | Accomplishment (cont.) | More courses = slight boost in employment, especially regionally. |
+| avg.unemp.rate | HS Characteristic (cont.) | Higher unemployment → more disconnection. Small effect. |
+| avg.wage.pct.state | HS Characteristic (cont.) | Higher wage counties → less disconnection. Small but consistent. |
+| MCA Math & Reading | Accomplishment (cont.) | Slight association with higher employment, mostly MN-wide. |
+
+### **3. Weak or Inconsistent Predictors — Candidates for Dropping**
+
+These variables showed **very weak associations** (low Cramer's V, minimal group differences) and could be considered for **dropping from modeling**, unless interaction effects suggest otherwise.
+
+| Variable | Type | Notes |
+|----------------|----------------|----------------------------------------|
+| english.learner | Demographic | Minimal differences, especially when controlling for other variables. |
+| non.english.home | Demographic | Weak signal, may overlap with other demographics. |
+| sat.taken | Accomplishment | Tiny population, not informative. |
+| took.ACT | Accomplishment | Near-universal participation, little discriminatory value. |
+| ap.exam | Accomplishment | Modest effect, likely overlapping with other academic indicators. |
 
 ```{r create new master after analysis}
 master.after.ct <- meaningful.emp.central %>%
-  mutate(ps.grad.location = ifelse(ps.grad.in.same.edr == "In same EDR", "In region",
-                                   ifelse(ps.grad.in.same.edr == "Outside EDR" & ps.grad.in.MN == "In Minnesota", "In state",
-                                          ifelse(ps.grad.in.same.edr == "Inside and outside same EDR" & ps.grad.in.MN == "In Minnesota", "In state",
-                                                 ifelse(ps.grad.in.MN == "Outside MN", "Outside Minnesota",
-                                                        ifelse(ps.grad.in.same.edr == "Inside and outside same EDR", "Inside and outside region",
-                                                        ifelse(ps.grad.in.MN == "Inside and outside MN", "Inside and outside MN", as.character(ps.grad.in.MN)))))))) %>%
-  select(PersonID, grad.year.covid, economic.status, , pseo.participant, SpecialEdStatus, RaceEthnicity, Dem_Desc, took.ACT, cte.achievement, english.learner, ps.grad, ps.grad.InstitutionSector, highest.cred.level, ps.grad.location, ACTCompositeScore, MCA.M, MCA.R, MCA.S, total.cte.courses.taken,grad.year.1, grad.year.5, grad.year.10)
+  select(-english.learner, -non.english.home, -sat.taken, -took.ACT, -ap.exam)
   
 write_csv(master.after.ct, "Data/SLEDS/Masters/After analysis/Master-after-ct.csv")
 ```
