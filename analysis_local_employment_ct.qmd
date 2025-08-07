@@ -357,37 +357,85 @@ In the demographics section we will examine the relationship between that paths 
     -   non.english.home
     -   englisher.learner
 
-## **Summary**
+## Summary of all variables
 
-| Demographic | Association Strength | Highlights |
-|-----------|:---------:|--------------------------------------------------|
-| Gender | Weak to negligible | Females start with higher PS enrollment; males steadily overtake in employment. Disconnection grows for both. |
-| grad.year.covid | Weak | Post-COVID grads attend post-secondary at a lower rate. |
-| economic.status | Moderate to negligible | Low-income students are less likely to pursue PS, and consistently more likely to lack MN employment or be disconnected. |
-| SpecialEdStatus | Moderate to negligible | SPED students consistently show lower engagement in PS and work, and higher disconnection. |
-| RaceEthnicity | Negligible | White and Asian/PI grads show strongest MN employment; Black, Hispanic, and AI groups show consistently higher disconnection risk. |
-| non.english.home | Negligible | Students from non-English-speaking homes have **lower postsecondary enrollment** and are increasingly underrepresented in the MN workforce by year 10, with a high percentage lacking MN employment records. |
-| english.learner | Weak to negligible | English learners start with significantly lower PS participation and grow increasingly disconnected from MN employment systems over time. |
+**Strength of Association (Cramer's V by Year)**
+
+| Variable | Year 1 V | Year 5 V | Year 10 V | Peak Strength | Pattern of Change |
+|--------------|:--------:|:--------:|:-------:|------------|---------------|
+| **Gender** | 0.127 | 0.081 | 0.073 | Moderate (Year 1) | Declines over time |
+| **Grad.year.covid** | 0.052 | — | — | Weak (Year 1) | Single-year data only |
+| **economic.status** | 0.235 | 0.122 | 0.085 | Strong (Year 1) | Gradual decline |
+| **SpecialEdStatus** | 0.248 | 0.145 | 0.084 | Strong (Year 1) | Declines but still meaningful |
+| **RaceEthnicity** | 0.059 | 0.041 | 0.038 | Weak (Year 1) | Small but persistent |
+| **non.english.home** | 0.101 | 0.073 | 0.066 | Weak–Moderate | Modest decline |
+| **english.learner** | 0.139 | 0.084 | 0.068 | Moderate (Year 1) | Persistent, narrowing gap |
+
+**Key Patterns & Comparative Insights**
+
+**1. Strongest Predictors of Outcome Differences**
+
+-   **SpecialEdStatus** and **economic.status** had the **largest effect sizes**, especially one year after graduation. Both were associated with **lower postsecondary participation** and **greater disconnection from meaningful work**, with disparities that persisted across a decade.
+-   These two variables reflect **structural barriers** — economic and learning support — that strongly shape early and long-term outcomes.
+
+**2. Language-Related Variables**
+
+-   Both **english.learner** and **non.english.home** showed **moderate effects early on**.
+-   Students with these language indicators were **less likely to attend postsecondary** and **more likely to appear in disconnected categories**.
+-   While **gaps narrowed over time**, persistent differences suggest long-term barriers related to language acquisition and access.
+
+**3. Gender**
+
+-   Gender had a **moderate short-term effect** that decreased over time.
+-   Males were **more likely to take local employment**, while females were **more likely to attend postsecondary**.
+-   The gap gradually narrowed but **did not fully disappear** even after 10 years.
+
+**4. RaceEthnicity**
+
+-   Despite its importance, race/ethnicity had **weaker statistical associations** than other factors.
+-   However, group-level disparities — especially for **AI, Black, and Hispanic** graduates — were **consistent**.
+-   **Asian/PI** students showed unique patterns of **early postsecondary participation** and **underrepresentation in local employment**, possibly due to out-of-state or non-traditional career paths.
+
+**5. COVID-era Graduation**
+
+-   Graduation year relative to COVID had a **statistically significant but weak** effect.
+-   Post-COVID grads were **less likely to attend PS** and **more likely to work locally**, likely due to **pandemic-era constraints**.
+
+**Conclusion**
+
+Among all the demographic variables, **economic disadvantage and special education status** emerged as the **most powerful and persistent predictors** of postsecondary and employment outcomes. **Language and gender** also played meaningful roles, particularly in the short term, while **race/ethnicity** and **COVID-era graduation** had weaker but still important associations.
+
+These findings suggest that interventions aiming to improve post-high school pathways should prioritize support for **low-income students**, **students receiving special education**, and **multilingual or English learner populations**, especially in the critical first years after graduation.
 
 <br>
 
 ## Gender
 
-There is a statistically significant association between whether an individual qualifies for free or reduced lunch and their employment state, but the association starts weak and becomes negligible by five years after graduating high school.
+### **Key Findings**
 
-The most consistent difference is that females attend post-secondary at a significantly higher rate.
+-   There is a statistically significant relationship between gender and post-graduation outcomes in all three timeframes:
+    -   **1 year after graduation**: χ² = 2083.575, df = 4, Cramer's V = **0.127**, *p* \< .001
+    -   **5 years after graduation**: χ² = 612.448, df = 4, Cramer's V = **0.081**, *p* \< .001
+    -   **10 years after graduation**: χ² = 278.976, df = 4, Cramer's V = **0.073**, *p* \< .001
+
+The strength of association is **moderate in the first year** and diminishes over time to a **weak but still significant** relationship by year ten.
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**: Females are more likely to be **attending postsecondary education** (55.3% vs. 43.7%), while males are more likely to be employed — especially **within their high school region** (15.3% vs. 10.9%). Males also have higher rates of **no MN employment record** (11.9% vs. 7.7%). These early differences reflect a pattern in which **males enter the local workforce more often**, while **females pursue longer-term educational pathways**.
+
+**5 Years After Graduation**: Postsecondary enrollment declines across the board, but differences remain. Males continue to have higher rates of **regional employment** and are slightly more likely to be employed meaningfully somewhere in MN. The gender gap in disconnected outcomes narrows, suggesting some convergence over time.
+
+**10 Years After Graduation**: Differences persist but are smaller. Males still maintain an edge in meaningful employment — both **in-region and statewide** — while females are slightly more likely to appear in the **"no MN record"** group, possibly due to moving out of state or untracked employment.
+
+### **Conclusion**
+
+Gender-based differences are **most pronounced in the first year**, with males more likely to take **local employment routes** and females more likely to pursue postsecondary education. Over time, the differences **narrow but remain**, especially in terms of where employment is located and whether individuals are tracked in the MN employment system.
 
 <br>
 
 ::: panel-tabset
 ### One year after graduating
-
-There is a statistically significant, weak association between gender and the employment state.
-
-Females;
-
--   Have a lower rate of meaningful employment in the region.
--   Attend post-secondary at a significantly higher rate.
 
 ```{r demographics gender one year}
 data <- meaningful.emp.central %>%
@@ -399,16 +447,12 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$Gender,
          title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
+
+data1 <- data
+var1 <- data$grad.year.1
 ```
 
 ### Five years after graduating
-
-There is a statistically significant, negligible association between gender and the employment state.
-
-Females;
-
--   Have a lower rate of meaningful employment in the region.
--   Attend post-secondary at a significantly higher rate.
 
 ```{r demographics gender five year}
 data <- meaningful.emp.central %>%
@@ -420,13 +464,12 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$Gender,
          title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
+
+data5 <- data
+var5 <- data$grad.year.5
 ```
 
 ### Ten years after graduating
-
-There is a statistically significant, negligible association between economic status and the employment state.
-
-Barely any differences here.
 
 ```{r demographics gender ten year}
 data <- meaningful.emp.central %>%
@@ -438,14 +481,32 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$Gender,
          title = "", 
          show.exp = TRUE,
          show.col.prc = TRUE)
+
+data10 <- data
+var10 <- data$grad.year.10
+
 ```
 :::
+
+```{r echo = FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, Gender) %>%
+  write_csv(., "Data/ChatGPT/Demographics/Gender.csv")
+```
 
 <br>
 
 ## Grad.year.covid
 
-There is a statistically significant, weak association between whether an individual graduated before or after COVID and the employment state. The most striking difference is that post-covid grads were attending post-secondary at a significantly lower rate than individuals who graduated before COVID.
+### **Key Findings**
+
+There is a statistically significant relationship between graduation timing and outcomes **one year after high school** (χ² = 349.128, df = 4, *p* \< .001). The strength of association is **weak**, with a Cramer's V of **0.052**.
+
+### **Interpretation (1 Year After Graduation)**
+
+Graduates who finished high school **after the onset of COVID-19 (2020 or later)** were **less likely to be attending postsecondary education** (45.5% vs. 50.5%) and **more likely to be employed**, particularly in-region (15.0% vs. 12.6%) or statewide (9.2% vs. 7.1%). They also had slightly higher rates of being untracked or disconnected (10.6% with no MN record vs. 9.6%).
+
+This pattern suggests that **COVID-era graduates may have faced barriers to postsecondary access** or opted more often for immediate employment, perhaps due to economic pressures, remote learning challenges, or changes in job availability during the pandemic.
 
 <br>
 
@@ -465,13 +526,37 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$grad.year.covid,
 ```
 :::
 
+```{r echo = FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, grad.year.covid) %>%
+  write_csv(., "Data/ChatGPT/Demographics/grad-year-covid.csv")
+```
+
 <br>
 
 ## economic.status
 
-There is a statistically significant association between whether an individual qualifies for free or reduced lunch and their employment state, but the association starts at moderate and becomes negligible by ten years after graduating high school.
+### **Key Findings**
 
-The most consistent difference through all the years was that individuals who qualify for free and reduced lunch attend post-secondary at a lower rate, and have a lower rate of meaningful employment in Minnesota.
+There is a statistically significant relationship between economic status and post-graduation outcomes:
+
+-   **1 year after graduation**: χ² = 7116.172, df = 4, Cramer's V = **0.235**, *p* \< .001
+-   **5 years after graduation**: χ² = 1409.165, df = 4, Cramer's V = **0.122**, *p* \< .001
+-   **10 years after graduation**: χ² = 373.783, df = 4, Cramer's V = **0.085**, *p* \< .001
+
+The strength of association is **moderate to strong in the first year** and gradually weakens over time, though differences persist.
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**: Students not eligible for free/reduced lunch were **far more likely to attend postsecondary education** (57.4% vs. 32.6%). Students from low-income backgrounds were more likely to be employed **locally in their high school region** (16.2% vs. 11.7%) and more likely to be disconnected — either in non-meaningful roles (28.5%) or lacking MN employment records (13.5%).
+
+**5 Years After Graduation**: Gaps narrow slightly but remain. Higher-income students continue to show **higher rates of meaningful MN employment**, while low-income students maintain **elevated disconnection** and are more concentrated in **regional jobs**, likely reflecting limited mobility or economic necessity.
+
+**10 Years After Graduation**: Regional employment rates are similar, but higher-income students are still more likely to have **meaningful jobs elsewhere in MN** and **less likely to be disconnected**. The long-term trend suggests that **early disparities in education and employment compound over time**, even as the gap narrows.
+
+### **Conclusion**
+
+Economic status is a **powerful predictor** of early postsecondary and employment outcomes. Students from low-income backgrounds are more likely to take **local jobs out of necessity**, less likely to pursue postsecondary education, and more vulnerable to **long-term disconnection from the workforce**. While disparities decrease by year ten, they remain meaningful.
 
 <br>
 
@@ -544,15 +629,38 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$economic.status,
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, economic.status) %>%
+  write_csv(., "Data/ChatGPT/Demographics/economic-status.csv")
+
+```
+
 <br>
 
 ## SpecialEdStatus
 
-There is a statistically significant association between whether an individual is categorized as needing special education and their employment state, but the association starts at moderate and becomes negligible by ten years after graduating high school.
+### **Key Findings**
 
-The most consistent difference through all the years was that individuals who are categorized as needing special education attend post-secondary at a SIGFNICANTLY lower rate, and have a higher rate of not having meaningful employment.
+There is a statistically significant relationship between SpecialEdStatus and post-graduation outcomes across all three years:
 
-Having no MN employment record is significantly higher at first, but evens out by ten years after high school.
+-   1 **year after graduation**: χ² = 3177.82, df = 4, Cramer's V = **0.248**, *p* \< .001
+-   **5 years after graduation**: χ² = 1091.37, df = 4, Cramer's V = **0.145**, *p* \< .001
+-   **10 years after graduation**: χ² = 366.90, df = 4, Cramer's V = **0.084**, *p* \< .001
+
+The strength of association is **strongest one year after graduation** and diminishes over time, though remains statistically significant even ten years later.
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**: Students who received special education services in high school were substantially less likely to be **attending postsecondary education** (only 1,375 compared to 24,769 peers without special ed status) and more likely to be in **non-meaningful or untracked employment categories**, including **“no MN employment record”** and **“not meaningful”** employment. While some were employed locally (838 in-region), the disparities suggest substantial barriers to immediate postsecondary success.
+
+**5 Years After Graduation**: The gap narrows but persists. Special education students still trail their peers in **postsecondary enrollment** and are **less likely to hold meaningful employment in MN** (1,068 vs. 11,204) or **in their local region** (1,529 vs. 9,866). They are overrepresented in **non-meaningful** and **no-record** categories, though many do gain some form of employment by this point.
+
+**10 Years After Graduation**: By year ten, special education students continue to be **underrepresented in meaningful MN employment** (1,373 vs. 14,267) and **more likely to have no MN employment record** or to be in a non-meaningful status. Postsecondary participation is negligible for both groups at this point. The long-term pattern reflects **lasting disparities in workforce outcomes**, though gaps are smaller than in earlier years.
+
+### **Conclusion**
+
+Special education status is **strongly associated with post-graduation outcomes**, especially in the first year. Students with special education histories are consistently **less likely to attend post secondary education** and more likely to experience **disconnection from the workforce** over time. While some individuals do gain meaningful regional or statewide employment, the **long-term opportunity gap remains**, pointing to the need for sustained support well beyond high school.
 
 ::: panel-tabset
 ### One year after graduating
@@ -622,27 +730,41 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$SpecialEdStatus,
 ```
 :::
 
+```{r echo = FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, SpecialEdStatus) %>%
+  write_csv(., "Data/ChatGPT/Demographics/economic-status.csv")
+
+```
+
 <br>
 
 ## RaceEthnicity
 
-There is a statistically significant association between race/ethnicity and their employment state, but the association is negligible.
+### **Key Findings**
 
-The most consistent difference through all the years were White and Asian/PI have a higher rate of attending post-secondary, and American Indian and Black individuals had a significantly higher rate of not having meaningful employment nor attending post-secondary.
+There is a statistically significant relationship between race/ethnicity and post-graduation outcomes at all time points:
 
-Non-white individuals had an increasing rate of not having a MN employment record the further out from high school graduation.
+-   **1 year after graduation**: χ² = 719.74, df = 16, Cramer's V = **0.059**, *p* \< .001
+-   **5 years after graduation**: χ² = 352.07, df = 16, Cramer's V = **0.041**, *p* \< .001
+-   **10 years after graduation**: χ² = 301.57, df = 16, Cramer's V = **0.038**, *p* \< .001
+
+The association is **statistically significant but weak** at each time point and **decreases slightly over time**.
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**: White graduates were the most likely to be **attending postsecondary education** (24,849), while other groups — especially American Indian (AI) and Hispanic students — were more likely to be in **non-meaningful employment** or have **no MN employment record**. White students also had the highest counts in **regional meaningful employment** (5,742), while the counts for all other groups were much lower.
+
+**5 Years After Graduation**: The overall pattern persists. White graduates had higher levels of **meaningful MN employment** and **regional employment**, while American Indian, Black, and Hispanic graduates were more concentrated in **non-meaningful** or **disconnected categories**. Postsecondary enrollment declined across all groups, but disparities in employment outcomes remained.
+
+**10 Years After Graduation**: Postsecondary attendance was nearly zero across the board. White graduates continued to lead in **meaningful MN and regional employment**, while American Indian, Black, and Hispanic graduates had **higher rates of disconnection** (no MN record or not meaningful employment). The differences were smaller than in earlier years but still evident.
+
+### **Conclusion**
+
+Racial and ethnic differences in post-graduation outcomes are **present across all time points**, though the **overall effect size is weak**. White graduates are consistently more likely to be enrolled in postsecondary education and employed meaningfully in both **statewide and local contexts**, while graduates identifying as American Indian, Black, or Hispanic are **overrepresented in disconnected and non-meaningful employment categories**. These patterns **persist over time**, albeit with **diminishing strength**, highlighting enduring disparities in opportunity and access.
 
 ::: panel-tabset
 ### One year after graduating
-
-There is a statistically significant, negligible association between whether race/ethnicity and the employment state.
-
-Individuals who are;
-
--   Hispanic have a higher rate of meaningful employment in the region.
--   White or Asian/PI attended post-secondary at a SIGNIFICANTLY higher rate
--   American Indian, Black or Hispanic had SIGNFICANTLY higher rate of not having meaningful employment
--   American Indian had a SIGNFICANTLY higher rate of not having a MN employment record
 
 ```{r demographics RaceEthnicity one year}
 data <- meaningful.emp.central %>%
@@ -659,14 +781,6 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$RaceEthnicity,
 
 ### Five years after graduating
 
-There is a statistically significant, negligible association between whether race/ethnicity and the employment state.
-
-Individuals who are;
-
--   White or Asian/PI attended post-secondary at a SIGNIFICANTLY higher rate
--   American Indian, Black or Hispanic had SIGNFICANTLY higher rate of not having meaningful employment
--   American Indian had a SIGNFICANTLY higher rate of not having a MN employment record
-
 ```{r demographics RaceEthnicity five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, RaceEthnicity) %>%
@@ -681,15 +795,6 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$RaceEthnicity,
 
 ### Ten years after graduating
 
-There is a statistically significant, negligible association between whether race/ethnicity and the employment state.
-
-Individuals who are;
-
--   Asian/PI and black individuals had a lower rate of meaningful employment in the region.
--   American Indian had a significantly lower rate of meaningful employment in MN.
--   American Indian and Black had SIGNFICANTLY higher rate of not having meaningful employment
--   Asian/PI, Black, and Hispanic had a significantly higher rate of having no MN employment record.
-
 ```{r demographics RaceEthnicity ten year}
 data <- meaningful.emp.central %>%
   select(grad.year.10, RaceEthnicity) %>%
@@ -703,23 +808,41 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$RaceEthnicity,
 ```
 :::
 
+```{r echo=FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, RaceEthnicity) %>%
+  write_csv(., "Data/ChatGPT/Demographics/RaceEthnicity.csv")
+
+```
+
 <br>
 
 ## non.english.home
 
-There is a statistically significant association between whether an individual had a non-English speaker in their household and their employment state, but the association is negligible.
+### **Key Findings**
 
-The most biggest trend was the individuals that were confirmed to have a non-English speaking individual in their household had lower rates of meaningful employment in the region or in Minnesota and SIGNIFCANTLY higher rate of not having a MN employment record over time.
+There is a statistically significant relationship between having a non-English speaker at home and post-graduation outcomes:
+
+-   **1 year after graduation**: χ² = 529.90, df = 4, Cramer's V = **0.101**, *p* \< .001
+-   **5 years after graduation**: χ² = 275.73, df = 4, Cramer's V = **0.073**, *p* \< .001
+-   **10 years after graduation**: χ² = 228.43, df = 4, Cramer's V = **0.066**, *p* \< .001
+
+The association is **consistently weak but statistically meaningful**, with the strongest divergence seen one year after graduation.
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**: Students from households where a non-English language is spoken were significantly **less likely to be attending postsecondary education** (472 vs. 25,672) and **more likely to be in disconnected categories**, such as **no MN employment record** or **non-meaningful employment**. They were also underrepresented in **meaningful employment**, both locally and statewide.
+
+**5 Years After Graduation**: The gap remains but narrows. Most graduates, regardless of home language, have transitioned out of postsecondary education. However, students from non-English-speaking households continue to have **lower representation in meaningful MN and regional employment** and are **slightly more likely to be disconnected**.
+
+**10 Years After Graduation**: Postsecondary enrollment disappears entirely for this group, and differences in employment outcomes persist. Those from English-speaking households are still more likely to be in **meaningful MN employment** and **less likely to be in disconnected categories**.
+
+### **Conclusion**
+
+Having a non-English speaker in the home is **associated with lower postsecondary participation and increased early disconnection** from employment. While the differences shrink over time, disparities persist — particularly in access to **meaningful employment opportunities**, both regionally and statewide. These findings point to **language and cultural barriers** that may limit immediate access to education and career pathways following high school.
 
 ::: panel-tabset
 ### One year after graduating
-
-There is a statistically significant, negligible association between whether ran individual had a non native English speaking person in their household and the employment state.
-
-Individuals who had a non-English speaking person at home;
-
--   Had a significantly lower rate of attending post-secondary.
--   Had a significantly higher rate of having no MN employment record.
 
 ```{r demographics non.english.home one year}
 data <- meaningful.emp.central %>%
@@ -735,12 +858,6 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$non.english.home,
 
 ### Five years after graduating
 
-There is a statistically significant, negligible association between whether a graduate had a non-English speaking person in their household and the employment state.
-
-Individuals who had a non-English speaking member at home;
-
--   Had a significantly higher rate of having no MN employment record.
-
 ```{r demographics non.english.home five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, non.english.home) %>%
@@ -755,14 +872,6 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$non.english.home,
 
 ### Ten years after graduating
 
-There is a statistically significant, negligible association between whether a graduate had a non-English speaking person in their household and the employment state.
-
-Individuals who had a non-English speaking member at home;
-
--   Had a significantly lower rate of meaningful employment in the region
--   Had a significantly lower rate of meaningful employment in Minnesota.
--   Had a SIGNIFICANTLY higher rate of having no MN employment record.
-
 ```{r demographics non.english.home ten year}
 data <- meaningful.emp.central %>%
   select(grad.year.10, non.english.home) %>%
@@ -776,26 +885,41 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$non.english.home,
 ```
 :::
 
+```{r echo = FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, non.english.home) %>%
+  write_csv(., "Data/ChatGPT/Demographics/non-english-home.csv")
+
+```
+
 <br>
 
 ## english.learner
 
-There is a statistically significant association between whether an individual was categorized as an English learner and their employment state, but the association was weak at first and became negligible over time.
+### **Key Findings**
 
-Through all the years, graduates categorized as an English learner had SIGNIFICANTLY lower rates of attending post-secondary and had SIGNFICANTLY higher rates of having no MN employment record.
+There is a statistically significant relationship between being an English Learner in high school and post-graduation outcomes:
 
-As time away from high school grows, the rate at which these individuals had meaningful employment in the region or in Minnesota became significantly lower.
+-   **1 year after graduation**: χ² = 1006.49, df = 4, Cramer's V = **0.139**, *p* \< .001
+-   **5 years after graduation**: χ² = 362.71, df = 4, Cramer's V = **0.084**, *p* \< .001
+-   **10 years after graduation**: χ² = 237.28, df = 4, Cramer's V = **0.068**, *p* \< .001
+
+The strength of association is **moderate one year after graduation** and becomes **weaker but still statistically meaningful** over time.
+
+### **Interpretation Over Time**
+
+**1 Year After Graduation**: Students identified as English Learners were **significantly less likely to be attending postsecondary education** (407 vs. 25,737) and **more likely to be in disconnected or non-meaningful employment states**. Only 317 total English Learners were employed meaningfully either in the region or in MN. Over 1,000 were either disconnected or untracked in employment records.
+
+**5 Years After Graduation**: Many English Learners begin to transition into employment, but gaps persist. Only 285 had meaningful employment in MN and 342 in the region — far fewer than their non-EL peers. They remain **underrepresented in meaningful outcomes** and **overrepresented in disconnection**, suggesting ongoing barriers to long-term opportunity.
+
+**10 Years After Graduation**: Disparities shrink but do not disappear. Just over 600 English Learners were meaningfully employed, while more than 1,100 were still in non-meaningful or untracked categories. Postsecondary enrollment had disappeared entirely. In contrast, non-EL students showed **higher levels of workforce engagement**, especially in MN-wide employment.
+
+### **Conclusion**
+
+English Learner status is a **meaningful predictor of post-graduation outcomes**, especially in the short term. These students face **substantial early disadvantages** in both education and employment, with limited access to **meaningful opportunities** in the region or state. Although some gaps close over time, English Learners remain **more disconnected from the workforce** than their peers a full decade after graduation — signaling a persistent equity concern.
 
 ::: panel-tabset
 ### One year after graduating
-
-There is a statistically significant, weak association between whether a graduate was categorized as an English learner and the employment state.
-
-Individuals who were classified as an English learner;
-
--   Had a SIGNIFICANTLY lower rate of attending post-secondary.
--   Had a significantly higher rate of not having meaningful employment.
--   Had a SIGNIFICANTLY higher rate of having no MN employment record.
 
 ```{r demographics english.learner one year}
 data <- meaningful.emp.central %>%
@@ -811,15 +935,6 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$english.learner,
 
 ### Five years after graduating
 
-There is a statistically significant, negligible association between whether a graduate was categorized as an English learner and the employment state.
-
-Individuals who were classified as an English learner;
-
--   Had a lower rate of meaningful employment in Minnesota.
--   Had a SIGNIFICANTLY lower rate of attending post-secondary.
--   Had a significantly higher rate of not having meaningful employment.
--   Had a SIGNIFICANTLY higher rate of having no MN employment record.
-
 ```{r demographics english.learner five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, english.learner) %>%
@@ -834,14 +949,6 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$english.learner,
 
 ### Ten years after graduating
 
-There is a statistically significant, weak association between whether a graduate was categorized as an English learner and the employment state.
-
-Individuals who were classified as an English learner;
-
--   Had a lower rate of meaningful employment in the region.
--   Had a SIGNIFICANTLY lower rate of meaningful employment in Minnesota.
--   Had a SIGNIFICANTLY higher rate of having no MN employment record.
-
 ```{r demographics english.learner ten year}
 data <- meaningful.emp.central %>%
   select(grad.year.10, english.learner) %>%
@@ -855,100 +962,14 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$english.learner,
 ```
 :::
 
-<br>
+```{r echo = FALSE}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, english.learner) %>%
+  write_csv(., "Data/ChatGPT/Demographics/english-learner.csv")
 
-## ChatGPT
-
-This is the summary provided by ChatGPT when asked to analyze and interpret.
-
-### Gender Trends Over Time
-
-| Outcome | 1 Year (F) | 5 Year (F) | 10 Year (F) | 1 Year (M) | 5 Year (M) | 10 Year (M) |
-|-----------|----------|----------|----------|----------|----------|----------|
-| Attending PS | 55.3% | 17.8% | \~0.0% | 43.7% | 13.4% | 0.0% |
-| Meaningful Emp in MN | 6.8% | 24.2% | 28.6% | 8.2% | 24.9% | 31.8% |
-| Meaningful Emp in Region | 10.9% | 19.9% | 21.5% | 15.3% | 24.1% | 24.8% |
-| No MN Emp Record, Not in PS | 7.7% | 17.1% | 30.3% | 11.9% | 19.1% | 28.4% |
-| Not Meaningful, Not in PS | 19.3% | 20.9% | 19.6% | 20.9% | 18.5% | 15.1% |
-
-**Trend**: Females start with higher PS enrollment; males steadily overtake in employment. Disconnection grows for both.
-
-------------------------------------------------------------------------
-
-### Economic Status Trends Over Time
-
-| Outcome | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
-|------------|----------|----------|----------|----------|----------|----------|
-| Attending PS | 57.4% | 17.8% | \~0.0% | 32.6% | 11.1% | \~0.0% |
-| Meaningful Emp in MN | 6.7% | 26.2% | 32.6% | 9.2% | 21.1% | 25.0% |
-| Meaningful Emp in Region | 11.7% | 21.4% | 22.8% | 16.2% | 23.4% | 23.8% |
-| No MN Emp Record, Not in PS | 8.1% | 17.0% | 28.7% | 13.5% | 20.4% | 30.7% |
-| Not Meaningful, Not in PS | 16.1% | 17.6% | 15.9% | 28.5% | 24.1% | 20.5% |
-
-**Trend**: Low-income students are less likely to pursue PS, and consistently more likely to lack MN employment or be disconnected.
-
-------------------------------------------------------------------------
-
-### Special Education Trends Over Time
-
-| Outcome | 1 Yr (No SPED) | 5 Yr | 10 Yr | 1 Yr (SPED) | 5 Yr | 10 Yr |
-|-------------|----------|----------|----------|----------|----------|----------|
-| Attending PS | 54.2% | 17.0% | \~0.0% | 19.8% | 6.4% | 0.0% |
-| Meaningful Emp in MN | 7.3% | 25.6% | 31.5% | 8.6% | 17.6% | 21.2% |
-| Meaningful Emp in Region | 12.7% | 21.7% | 23.0% | 15.9% | 24.1% | 24.0% |
-| No MN Emp Record, Not in PS | 8.1% | 17.2% | 29.0% | 21.0% | 24.5% | 31.5% |
-| Not Meaningful, Not in PS | 17.8% | 18.5% | 16.5% | 34.8% | 27.5% | 23.3% |
-
-**Trend**: SPED students consistently show lower engagement in PS and work, and higher disconnection.
-
-------------------------------------------------------------------------
-
-### Race/Ethnicity Snapshot
-
-| Race | Attending PS (1yr) | Emp MN (10yr) | No MN Record (10yr) | Not Meaningful (10yr) |
-|--------------|--------------|--------------|--------------|--------------|
-| American Indian (AI) | 26.0% | 21.6% | 32.1% | 27.3% |
-| Asian/PI | 52.0% | 30.2% | 40.2% | 15.6% |
-| Black | 38.7% | 25.3% | 36.0% | 25.2% |
-| Hispanic | 31.2% | 25.1% | 40.2% | 17.5% |
-| White | 51.1% | 30.5% | 28.8% | 17.0% |
-
-**Trend**: White and Asian/PI grads show strongest MN employment; Black, Hispanic, and AI groups show consistently higher disconnection risk.
-
-### Non-English speakers at home
-
-| Outcome | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
-|------------|----------|----------|----------|----------|----------|----------|
-| Attending PS | 50.0% | 15.7% | \~0.0% | 36.4% | 13.9% | 0.0% |
-| Meaningful Emp in MN | 7.4% | 24.7% | 30.4% | 10.5% | 19.4% | 23.2% |
-| Meaningful Emp in Region | 13.1% | 22.2% | 23.4% | 14.0% | 17.0% | 13.6% |
-| No MN Emp Record, Not in PS | 9.5% | 17.7% | 28.9% | 18.6% | 30.4% | 47.7% |
-| Not Meaningful, Not in PS | 20.1% | 19.7% | 17.4% | 20.5% | 19.3% | 15.5% |
-
-**Trend**: Students from non-English-speaking homes have **lower postsecondary enrollment** and are increasingly underrepresented in the MN workforce by year 10, with a high percentage lacking MN employment records.
-
-------------------------------------------------------------------------
-
-### English learners
-
-| Outcome | 1 Yr (0) | 5 Yr (0) | 10 Yr (0) | 1 Yr (1) | 5 Yr (1) | 10 Yr (1) |
-|------------|----------|----------|----------|----------|----------|----------|
-| Attending PS | 51.3% | 16.1% | \~0.0% | 23.6% | 7.2% | 0.0% |
-| Meaningful Emp in MN | 7.4% | 25.0% | 30.6% | 9.5% | 17.9% | 18.5% |
-| Meaningful Emp in Region | 12.9% | 22.1% | 23.3% | 15.7% | 21.5% | 17.6% |
-| No MN Emp Record, Not in PS | 8.9% | 17.4% | 28.9% | 22.1% | 29.1% | 43.1% |
-| Not Meaningful, Not in PS | 19.4% | 19.4% | 17.2% | 29.1% | 24.3% | 20.8% |
-
-**Trend**: English learners start with significantly lower PS participation and grow increasingly disconnected from MN employment systems over time.
-
-------------------------------------------------------------------------
-
-```{r demogrpahics chatgpt}
-demographics.chatgpt <- meaningful.emp.central %>%
-  select(PersonID, Gender, grad.year.covid, economic.status, SpecialEdStatus, RaceEthnicity, non.english.home, english.learner, grad.year.1, grad.year.5, grad.year.10)
-
-write_csv(demographics.chatgpt, "Data/ChatGPT/demographics-chatgpt.csv")
 ```
+
+<br>
 
 # High school characteristics
 
@@ -961,32 +982,12 @@ We will take a look at the following variables;
 
 ## Summary
 
-| High School Characteristics | Association Strength | Highlights |
-|-----------|:---------:|--------------------------------------------------|
-| Dem_Desc | Negligible | Rural graduates had a higher rate of having meaningful employment in the region while urban graduates had a higher rate of meaningful employment in Minnesota. |
-| EDR | Negligible | EDR 5 had a higher rate of meaningful employment in the region and not having a MN employment record. |
-| avg.unemp.rate | Moderate | Higher unemployment was associated with a slight **increase in postsecondary attendance** and a **decrease in meaningful employment**, particularly within Minnesota. While these effects were small, they remained consistent across all three time points. |
-| avg.wages.pct.state | Most important | Individuals from **higher-wage counties** were significantly more likely to have **meaningful employment within Minnesota**, even years after graduation. Conversely, they were less likely to attend post-secondary school immediately after graduation. |
-
 <br>
 
 ## Dem_Desc
 
-There is a statistically significant association between an graduate's RUCA category and their employment state, but the association was negligible.
-
-Through all the years, the more rural a graduate was, the higher the rate of having meaningful employment in the region, while urban individuals had a significantly higher rate of meaningful employment in Minnesota.
-
 ::: panel-tabset
 ### One year after graduating
-
-There is a statistically significant, negligible association between a graduate's RUCA category and the employment state.
-
-Graduates from;
-
--   more rural areas had a higher rate of having meaningful employment in the region.
--   more urban area had a higher rate of having meaningful employment in MN.
--   more rural areas had a lower rate of attending post-secondary.
--   more rural areas had a higher rate of not having a MN employment record.
 
 ```{r hs characteristics Dem_Desc one year}
 data <- meaningful.emp.central %>%
@@ -1002,13 +1003,6 @@ tab_xtab(var.row = data$grad.year.1, var.col = data$Dem_Desc,
 
 ### Five years after graduating
 
-There is a statistically significant, negligible association between a graduate's RUCA category and the employment state.
-
-Graduates from;
-
--   more rural areas had a higher rate of having meaningful employment in the region.
--   more urban area had a significantly higher rate of having meaningful employment in MN.
-
 ```{r hs characteristics Dem_Desc five year}
 data <- meaningful.emp.central %>%
   select(grad.year.5, Dem_Desc) %>%
@@ -1023,13 +1017,6 @@ tab_xtab(var.row = data$grad.year.5, var.col = data$Dem_Desc,
 
 ### Ten years after graduating
 
-There is a statistically significant, negligible association between a graduate's RUCA category and the employment state.
-
-Graduates from;
-
--   more rural areas had a significantly higher rate of having meaningful employment in the region.
--   more urban area had a significantly higher rate of having meaningful employment in MN.
-
 ```{r hs characteristics Dem_Desc ten year}
 data <- meaningful.emp.central %>%
   select(grad.year.10, Dem_Desc) %>%
@@ -1042,6 +1029,12 @@ tab_xtab(var.row = data$grad.year.10, var.col = data$Dem_Desc,
          show.col.prc = TRUE)
 ```
 :::
+
+```{r}
+data <- meaningful.emp.central %>%
+  select(grad.year.1, grad.year.5, grad.year.10, Dem_Desc) %>%
+  write_csv(., "Data/ChatGPT/High school characteristics/Dem-Desc.csv")
+```
 
 <br>
 
@@ -2344,8 +2337,7 @@ Statistically significant differences were found in MCA Math scores across post-
 
 **Interpretation Over Time**\
 
-**1 Year After Graduation**
-Graduates attending post-secondary education had the **highest MCA Math scores**, averaging 0.64 points higher than those with meaningful employment in the region. Those not meaningfully employed or without a Minnesota employment record scored significantly **lower**, with differences ranging from -0.13 to -0.19 points. The smallest gap was between those employed in Minnesota outside the region and those employed in the region (+0.04), though still statistically significant.
+**1 Year After Graduation** Graduates attending post-secondary education had the **highest MCA Math scores**, averaging 0.64 points higher than those with meaningful employment in the region. Those not meaningfully employed or without a Minnesota employment record scored significantly **lower**, with differences ranging from -0.13 to -0.19 points. The smallest gap was between those employed in Minnesota outside the region and those employed in the region (+0.04), though still statistically significant.
 
 **5 Years After Graduation**\
 Differences persisted, though gaps **narrowed slightly**. Postsecondary attendees remained the highest scorers (+0.60 vs. regional employment), while those not meaningfully employed scored lower (-0.05 to -0.17). Interestingly, those with no MN employment record scored **slightly higher** than those employed in-region (+0.10), a reversal from year one.
@@ -2353,8 +2345,7 @@ Differences persisted, though gaps **narrowed slightly**. Postsecondary attendee
 **10 Years After Graduation**\
 The trend largely held. Postsecondary attendees were no longer a distinct group in the model, but those employed in Minnesota outside their region still scored **higher** (+0.29) than regional workers. Those not meaningfully employed showed **no statistically significant difference** from regional workers (-0.01, p = 0.91), and those with no MN record scored **modestly higher** (+0.22).
 
-**Conclusion**
-MCA Math scores were **strongly associated** with post-graduation outcomes early on, especially for those pursuing higher education. Over time, score differences **remained**, especially between regional employment and out-of-region employment, but **gaps narrowed**, particularly among those not attending post-secondary or not meaningfully employed.
+**Conclusion** MCA Math scores were **strongly associated** with post-graduation outcomes early on, especially for those pursuing higher education. Over time, score differences **remained**, especially between regional employment and out-of-region employment, but **gaps narrowed**, particularly among those not attending post-secondary or not meaningfully employed.
 
 ::: panel-tabset
 ### One year after graduating
