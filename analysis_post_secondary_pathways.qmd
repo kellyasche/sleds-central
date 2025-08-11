@@ -1,0 +1,373 @@
+---
+title: "Post-secondary pathways"
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(fastDummies)
+library(car)
+library(glmnet)
+library(glmnetUtils)
+library(pscl)
+library(sjPlot)
+library(ggforce)
+```
+
+```{r themes and shapefiles, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+```
+
+```{r master}
+master.original <- read_csv("Data/SLEDS/Masters/After analysis/Master-after-ct.csv")
+
+kable(names(master.original))
+
+kable(head(master.original))
+```
+
+# Dependent Variable
+
+The cross-tab and ANOVA analysis exploring relationships between demographic, high school, and post-secondary variables with employment outcomes highlighted the importance of post-secondary variables in an individuals journey to meaningful employment inside and outside the region. Due to this, it makes sense to explore if some of the other variables play a role in post-secondary outcomes - whether an individual attends, graduates, the type of institution they attend and the location.
+
+We will explore this here. We will explore this in three sections;
+
+[**Tier 1: Core Postsecondary Access and Attainment**]{.underline}
+
+These outcomes are most foundational and closely tied to employment.
+
+1\. `attended.ps.within.first.year.hsgrad`
+
+**Question:** Who transitions directly to postsecondary? **Why it matters:** Strongly linked to long-term success and minimizes "disconnection."
+
+2\. `attended.ps` (ever attended postsecondary)
+
+**Question:** Who attends postsecondary at all? **Why it matters:** Broader view than immediate enrollment.
+
+3\. `ps.grad` (graduated from postsecondary)
+
+**Question:** Who completes a credential? **Why it matters:** Credential completion is often the real driver of employment outcomes.
+
+[**🔹 Tier 2: Type of Postsecondary Experience**]{.underline}
+
+These outcomes differentiate the **nature** of the experience, which may shape career pathways and economic outcomes.
+
+4\. `ps.grad.InstitutionSector`
+
+**Question:** Who graduates from 2-year vs. 4-year, public vs. private schools? **Why it matters:** This affects cost, prestige, job access, and transfer opportunities.
+
+5\. `highest.cred.level`
+
+**Question:** Who earns certificates, associate degrees, bachelor’s degrees? **Why it matters:** Different credentials yield different labor market returns.
+
+[**Tier 3: Location of Postsecondary Experience**]{.underline}
+
+These outcomes reveal **mobility**, local engagement, or place-based equity patterns.
+
+6\. `ps.grad.location`
+
+**Question:** Who stays in the region for school? **Why it matters:** Tied to affordability and regional workforce planning.
+
+Each dependent variable has the following categories;
+
+```{r dependent variable categories}
+data <- master.original %>%
+  select(attended.ps.within.first.year.hsgrad, attended.ps, ps.grad, ps.grad.InstitutionSector, highest.cred.level, ps.grad.location) %>%
+  mutate(across(c("attended.ps.within.first.year.hsgrad":"ps.grad.location"), factor))
+```
+
+**attended.ps.within.first.yer.hsgrad**
+
+```{r echo = FALSE}
+levels(data$attended.ps.within.first.year.hsgrad)
+
+```
+
+**attended.ps**
+
+```{r echo = FALSE}
+levels(data$attended.ps)
+```
+
+**ps.grad**
+
+```{r echo = FALSE}
+levels(data$ps.grad)
+```
+
+**ps.grad.InstitutionSector**
+
+```{r echo = FALSE}
+levels(data$ps.grad.InstitutionSector)
+```
+
+**highest.cred.level**
+
+```{r echo = FALSE}
+levels(data$highest.cred.level)
+```
+
+**ps.grad.location**
+
+```{r echo = FALSE}
+levels(data$ps.grad.location)
+```
+
+<br>
+
+# Predictors
+
+For all of these, we will use the predictors that were in Tier 1 and Tier 2 of the previous cross-tab analysis.
+
+-   Demographics
+    -   economic.status
+    -   RaceEthnicity
+    -   SpecialEdStatus
+-   High school characteristics
+    -   Dem_Desc
+    -   avg.unemp.rate
+    -   avg.wage.pct.state
+-   High school accomplishments
+    -   ACTCompositeScore
+    -   pseo.participant
+    -   cte.achievement
+    -   total.cte.courses.taken
+    -   MCA.M
+    -   MCA.R
+    -   MCA.S
+
+# attended.ps.within.first.year.hsgrad
+
+## Demographics
+
+Here are the variables we will be exploring;
+
+-   economic.status
+-   RaceEthnicity
+-   SpecialEdStatus
+
+### **Interpretation**
+
+Individual demographic characteristics showed meaningful differences in the likelihood of attending postsecondary within one year of high school graduation, with **special education status** and **economic status** having the strongest associations. Students who had received special education services and those who were economically disadvantaged were much less likely to make the immediate transition to postsecondary, highlighting potential barriers related to academic support needs and financial resources.
+
+Race/ethnicity was also significantly related to postsecondary attendance, though the differences were smaller in magnitude. Asian/PI and White students had the highest immediate attendance rates, while American Indian students had the lowest. These patterns suggest disparities that may stem from a combination of historical, structural, and resource-related factors influencing access to and navigation of postsecondary pathways.
+
+Taken together, the demographic findings indicate that **academic support needs, economic resources, and systemic equity issues** all play roles in shaping postsecondary access. Addressing these factors—through targeted supports, financial assistance, and culturally responsive programming—could help close gaps in immediate postsecondary enrollment.
+
+::: panel-tabset
+### economic.status
+
+-   **Association:** Statistically significant relationship between economic status and attending postsecondary within one year of high school graduation (χ²=6969.50, df=2, p\<0.001, Cramer's V=0.225 — moderate association).
+
+Students who were **not economically disadvantaged** had the highest attendance rate (70%). Those who were **economically disadvantaged** attended at much lower rates (46.7%), while students with **unknown economic status** showed a similar attendance rate to the disadvantaged group (47%).
+
+```{r}
+tab_xtab(var.row = master.original$attended.ps.within.first.year.hsgrad,
+         var.col = master.original$economic.status,
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### RaceEthnicity
+
+-   **Association:** Statistically significant relationship between race/ethnicity and attending postsecondary within one year of high school graduation (χ²=3523.25, df=10, p\<0.001, Cramer's V=0.113 — small to moderate association).
+
+Attendance rates within one year were highest for Asian/PI students (64.7%) and White students (65.3%), followed by Black students (54.5%) and Hispanic students (45.2%). American Indian students had the lowest rate (36.9%). Students with unknown race/ethnicity had a midrange rate (57.3%).
+
+```{r}
+tab_xtab(var.row = master.original$attended.ps.within.first.year.hsgrad,
+         var.col = master.original$RaceEthnicity,
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### SpecialEdStatus
+
+-   **Association:** Statistically significant relationship between special education status and attending postsecondary within one year of high school graduation (χ²=10976.54, df=2, p\<0.001, Cramer's V=0.282 — moderate association).
+
+Students who had never received special education services attended postsecondary within one year at a much higher rate (67.9%) than those who had received special education services (29.5%).
+
+```{r}
+tab_xtab(var.row = master.original$attended.ps.within.first.year.hsgrad,
+         var.col = master.original$SpecialEdStatus,
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+:::
+
+<br>
+
+## High School Characteristics
+
+Here are the variables we will be exploring;
+
+-   Dem_Desc
+-   avg.unemp.rate
+-   avg.wage.pct.state
+
+### **Interpretation**
+
+High school context appears to play a meaningful, though varied, role in whether students attend postsecondary within one year of graduation. Community economic conditions—both **unemployment rate** and **wage levels relative to the state average**—were more strongly linked to postsecondary attendance than RUCA classification (urban–rural mix). Students from economically stronger areas (lower unemployment, higher wages) were more likely to transition quickly to postsecondary and to complete within the first year.
+
+In contrast, the urban–rural mix of a high school’s location showed only a weak relationship with postsecondary attendance. While entirely urban schools had the highest immediate attendance rates and town/rural mix schools the lowest, the gap was relatively small compared to the economic variables.
+
+These results suggest that **economic opportunity in the community where a student attends high school may be a more important driver of immediate postsecondary enrollment and completion than rurality alone**. However, the weaker relationship with RUCA also indicates that place still matters, but its effects may operate indirectly—perhaps through economic conditions or access to postsecondary institutions—rather than through rurality itself.
+
+::: panel-tabset
+### Dem_Desc
+
+-   **Association:** Statistically significant relationship between RUCA classification (urban–rural mix) and attending postsecondary within one year of high school graduation (χ²=335.16, df=4, p\<0.001, Cramer's V=0.035 — very weak association).
+
+Attendance rates were highest among students from **entirely urban** areas (65.7%), slightly lower for those from **urban/town/rural mix** areas (63.1%), and lowest for those from **town/rural mix** areas (58.7%).
+
+```{r}
+tab_xtab(var.row = master.original$attended.ps.within.first.year.hsgrad,
+         var.col = master.original$Dem_Desc,
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### avg.unemp.rate
+
+-   **Association:** Average county unemployment rate was significantly related to whether a student attended postsecondary within one year of high school graduation (F(2,136860)=575.6, p\<0.001).
+
+Students who **did not attend postsecondary** within one year were from areas with the lowest average unemployment rates. Those who attended but **did not complete** within one year came from areas with unemployment rates that were 0.80 percentage points higher, while those who **did attend and complete** were from areas with rates only 0.07 points higher. The largest gap was between students who attended and completed versus those who attended but did not complete, with the latter living in areas with substantially higher unemployment rates.
+
+```{r}
+summary <- aov(avg.unemp.rate ~ attended.ps.within.first.year.hsgrad, data = master.original)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### avg.wage.pct.state
+
+-   **Association:** The average wages of a student’s high school community (as a percent of Minnesota’s average wages) were significantly related to whether they attended postsecondary within one year of high school graduation (F(2,137619)=324.7, p\<0.001).
+
+Students who **did not attend postsecondary** within one year came from areas with slightly lower relative wages compared to those who did attend. The largest difference was between students who attended and versus those who attended but not within one year. Those who attended within one year had high schools located in communities averaging about 1.03 percentage points higher relative wages.
+
+```{r}
+summary <- aov(avg.wages.pct.state ~ attended.ps.within.first.year.hsgrad, data = master.original)
+
+summary(summary)
+
+TukeyHSD(summary)
+```
+:::
+
+<br>
+
+## High School Accomplishments
