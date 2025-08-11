@@ -249,6 +249,18 @@ For all of these, we will use the predictors that were in Tier 1 and Tier 2 of t
 
 # attended.ps.within.first.year.hsgrad
 
+## Interpretation of findings
+
+Immediate postsecondary enrollment within one year of high school graduation is shaped by a combination of **individual**, **school-level**, and **academic preparation** factors.
+
+From a **demographic perspective**, the strongest influences were special education status and economic status. Students who had received special education services and those who were economically disadvantaged were substantially less likely to attend immediately, suggesting barriers related to academic support needs and financial resources. Race/ethnicity also played a role, with Asian/PI and White students having the highest rates and American Indian students the lowest, reflecting broader systemic disparities.
+
+**High school characteristics** added another layer of influence. Economic conditions in the community—particularly lower unemployment rates and higher wages relative to the state average—were more strongly associated with immediate enrollment than rurality alone. While urban students had slightly higher attendance rates than their rural counterparts, community economic health appeared to be the more critical driver, potentially reflecting both the local opportunity structure and the resources available to schools and families.
+
+**High school accomplishments** showed the most direct and consistent relationship with postsecondary entry. Strong academic performance (ACT and MCA scores) and early college exposure through PSEO were powerful predictors of immediate enrollment, with PSEO standing out as the single strongest individual factor. In contrast, greater engagement in Career and Technical Education was linked to lower immediate enrollment, likely reflecting alternative workforce-oriented pathways.
+
+Taken together, these findings suggest that **academic readiness, early exposure to college, and favorable economic contexts all facilitate rapid postsecondary transition**, while financial, academic support, and systemic equity barriers can slow or divert that path. At the same time, CTE participation highlights that not all students aim for immediate college enrollment—emphasizing the importance of supporting multiple, equally viable pathways into adulthood.
+
 ## Demographics
 
 Here are the variables we will be exploring;
@@ -371,3 +383,126 @@ TukeyHSD(summary)
 <br>
 
 ## High School Accomplishments
+
+Here are the variables we will explore.
+
+-   ACTCompositeScore
+
+-   pseo.participant
+
+-   cte.achievement
+
+-   total.cte.courses.taken
+
+-   MCA.M
+
+-   MCA.R
+
+-   MCA.S
+
+**Interpretation**\
+
+High school accomplishment measures reveal two distinct patterns in immediate postsecondary enrollment. First, indicators of **college readiness and academic achievement**—such as higher ACT scores, stronger MCA performance in math, reading, and science, and participation in PSEO—are strongly linked to higher rates of attending and completing postsecondary within one year. The particularly strong relationship with PSEO suggests that early exposure to college coursework not only signals readiness but may also build momentum toward rapid postsecondary transition.
+
+Second, **greater involvement in Career and Technical Education (CTE)**—both in terms of number of courses taken and concentrator/completer status—was associated with lower immediate postsecondary attendance. This may reflect intentional pathway choices, where students prepare for direct workforce entry rather than college, or differences in academic preparation and postsecondary aspirations.
+
+Overall, these findings indicate that **college-oriented academic preparation supports immediate postsecondary entry**, while **career-oriented pathways may divert graduates toward alternative post–high school options**. This divergence highlights the importance of aligning supports with students’ chosen pathways—ensuring that those pursuing workforce entry have strong employment prospects, while those aiming for college receive the preparation and early exposure that promotes successful transition.
+
+::: panel-tabset
+### ACTCompositeScore
+
+-   **Association:** ACT Composite Score was significantly related to whether a student attended postsecondary within one year of high school graduation (F(2,86268)=2827.0, p\<0.001).
+
+Students who **attended and completed** within one year had the highest average ACT scores, scoring about 3.03 points higher than those who did not attend postsecondary, and 1.85 points higher than those who attended but did not complete. Students who attended but did not complete scored about 1.18 points higher than those who did not attend at all.
+
+```{r}
+summary <- aov(ACTCompositeScore ~ attended.ps.within.first.year.hsgrad, data = master.original)
+
+summary(summary)
+
+TukeyHSD(summary)
+```
+
+### pseo.participant
+
+-   **Association:** Statistically significant relationship between PSEO participation and attending postsecondary within one year of high school graduation (χ²=14083.91, df=2, p\<0.001, Cramer's V=0.356 — strong association).
+
+Students who **participated in PSEO** were far more likely to attend postsecondary within one year (81.4%) compared to those who did not participate (46.8%). Non-participants were also more likely to not attend at all (47.7% vs. 16.3%).
+
+```{r}
+tab_xtab(var.row = master.original$attended.ps.within.first.year.hsgrad,
+         var.col = master.original$pseo.participant,
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### cte.achievement
+
+-   **Association:** Statistically significant relationship between CTE achievement level and attending postsecondary within one year of high school graduation (χ²=1393.87, df=4, p\<0.001, Cramer's V=0.071 — weak association).
+
+Attendance within one year was highest among students with **no CTE involvement** (67.7%), slightly lower for **CTE participants** (64.9%), and lowest for **CTE concentrators/completors** (57.2%). Students with higher levels of CTE involvement were more likely to not attend postsecondary immediately after graduation.
+
+```{r}
+tab_xtab(var.row = master.original$attended.ps.within.first.year.hsgrad,
+         var.col = master.original$cte.achievement,
+         show.exp = TRUE,
+         show.col.prc = TRUE)
+```
+
+### total.cte.courses.taken
+
+-   **Association:** The number of CTE courses taken was significantly related to whether a student attended postsecondary within one year of high school graduation (F(2,137619)=1002.0, p\<0.001).
+
+Students who **attended and completed** within one year had taken the fewest CTE courses on average, followed by those who attended but did not complete, with those who did not attend postsecondary taking the most. The largest gap was between completers and non-attenders, with completers averaging nearly one fewer CTE course.
+
+```{r}
+summary <- aov(total.cte.courses.taken ~ attended.ps.within.first.year.hsgrad, data = master.original)
+
+summary(summary)
+
+TukeyHSD(summary)
+```
+
+### MCA.M
+
+-   **Association:** MCA Math scores were significantly related to whether a student attended postsecondary within one year of high school graduation (F(2,132989)=4798.0, p\<0.001).
+
+Students who **attended and completed** within one year scored highest, averaging 0.59 points above those who attended but did not complete and 0.54 points above those who did not attend at all. Students who attended but did not complete scored slightly higher than non-attenders (0.05 points).
+
+```{r}
+summary <- aov(MCA.M ~ attended.ps.within.first.year.hsgrad, data = master.original)
+
+summary(summary)
+
+TukeyHSD(summary)
+```
+
+### MCA.R
+
+-   **Association:** MCA Reading scores were significantly related to whether a student attended postsecondary within one year of high school graduation (F(2,131898)=6197.0, p\<0.001).
+
+Students who **attended and completed** within one year scored highest, averaging 0.56 points above those who did not attend at all and 0.37 points above those who attended but did not complete. Students who attended but did not complete scored about 0.20 points higher than non-attenders.
+
+```{r}
+  summary <- aov(MCA.R ~ attended.ps.within.first.year.hsgrad, data = master.original)
+
+summary(summary)
+
+TukeyHSD(summary)
+
+```
+
+### MCA.S
+
+-   **Association:** MCA Science scores were significantly related to whether a student attended postsecondary within one year of high school graduation (F(2,114534)=4178.0, p\<0.001).
+
+Students who **attended and completed** within one year scored highest, averaging 0.49 points above those who did not attend and 0.42 points above those who attended but did not complete. Students who attended but did not complete scored slightly higher than non-attenders (0.07 points).
+
+```{r}
+summary <- aov(MCA.S ~ attended.ps.within.first.year.hsgrad, data = master.original)
+
+summary(summary)
+
+TukeyHSD(summary)
+```
+:::

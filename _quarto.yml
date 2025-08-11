@@ -48,10 +48,11 @@ website:
             href: analysis_dep_var_states.qmd
           - text: Local Employment Cross-tabs
             href: analysis_local_employment_ct.qmd
-          - text: Local Employment CART Analysis
-            href: analysis_local_employment_CART.qmd
           - text: Post-secondary pathways
             href: analysis_post_secondary_pathways.qmd
+          - text: Local Employment CART Analysis
+            href: analysis_local_employment_CART.qmd
+
         
 
 

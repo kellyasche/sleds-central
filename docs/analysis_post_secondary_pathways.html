@@ -239,6 +239,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#predictors" id="toc-predictors" class="nav-link" data-scroll-target="#predictors">Predictors</a></li>
   <li><a href="#attended.ps.within.first.year.hsgrad" id="toc-attended.ps.within.first.year.hsgrad" class="nav-link" data-scroll-target="#attended.ps.within.first.year.hsgrad">attended.ps.within.first.year.hsgrad</a>
   <ul class="collapse">
+  <li><a href="#interpretation-of-findings" id="toc-interpretation-of-findings" class="nav-link" data-scroll-target="#interpretation-of-findings">Interpretation of findings</a></li>
   <li><a href="#demographics" id="toc-demographics" class="nav-link" data-scroll-target="#demographics">Demographics</a>
   <ul class="collapse">
   <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><strong>Interpretation</strong></a></li>
@@ -1042,6 +1043,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="attended.ps.within.first.year.hsgrad" class="level1">
 <h1>attended.ps.within.first.year.hsgrad</h1>
+<section id="interpretation-of-findings" class="level2">
+<h2 class="anchored" data-anchor-id="interpretation-of-findings">Interpretation of findings</h2>
+<p>Immediate postsecondary enrollment within one year of high school graduation is shaped by a combination of <strong>individual</strong>, <strong>school-level</strong>, and <strong>academic preparation</strong> factors.</p>
+<p>From a <strong>demographic perspective</strong>, the strongest influences were special education status and economic status. Students who had received special education services and those who were economically disadvantaged were substantially less likely to attend immediately, suggesting barriers related to academic support needs and financial resources. Race/ethnicity also played a role, with Asian/PI and White students having the highest rates and American Indian students the lowest, reflecting broader systemic disparities.</p>
+<p><strong>High school characteristics</strong> added another layer of influence. Economic conditions in the community—particularly lower unemployment rates and higher wages relative to the state average—were more strongly associated with immediate enrollment than rurality alone. While urban students had slightly higher attendance rates than their rural counterparts, community economic health appeared to be the more critical driver, potentially reflecting both the local opportunity structure and the resources available to schools and families.</p>
+<p><strong>High school accomplishments</strong> showed the most direct and consistent relationship with postsecondary entry. Strong academic performance (ACT and MCA scores) and early college exposure through PSEO were powerful predictors of immediate enrollment, with PSEO standing out as the single strongest individual factor. In contrast, greater engagement in Career and Technical Education was linked to lower immediate enrollment, likely reflecting alternative workforce-oriented pathways.</p>
+<p>Taken together, these findings suggest that <strong>academic readiness, early exposure to college, and favorable economic contexts all facilitate rapid postsecondary transition</strong>, while financial, academic support, and systemic equity barriers can slow or divert that path. At the same time, CTE participation highlights that not all students aim for immediate college enrollment—emphasizing the importance of supporting multiple, equally viable pathways into adulthood.</p>
+</section>
 <section id="demographics" class="level2">
 <h2 class="anchored" data-anchor-id="demographics">Demographics</h2>
 <p>Here are the variables we will be exploring;</p>
@@ -1401,6 +1410,304 @@ Yes-No                 0.010297541  0.008481026  0.0121140570 0.0000000</code></
 </section>
 <section id="high-school-accomplishments" class="level2">
 <h2 class="anchored" data-anchor-id="high-school-accomplishments">High School Accomplishments</h2>
+<p>Here are the variables we will explore.</p>
+<ul>
+<li><p>ACTCompositeScore</p></li>
+<li><p>pseo.participant</p></li>
+<li><p>cte.achievement</p></li>
+<li><p>total.cte.courses.taken</p></li>
+<li><p>MCA.M</p></li>
+<li><p>MCA.R</p></li>
+<li><p>MCA.S</p></li>
+</ul>
+<p><strong>Interpretation</strong><br>
+</p>
+<p>High school accomplishment measures reveal two distinct patterns in immediate postsecondary enrollment. First, indicators of <strong>college readiness and academic achievement</strong>—such as higher ACT scores, stronger MCA performance in math, reading, and science, and participation in PSEO—are strongly linked to higher rates of attending and completing postsecondary within one year. The particularly strong relationship with PSEO suggests that early exposure to college coursework not only signals readiness but may also build momentum toward rapid postsecondary transition.</p>
+<p>Second, <strong>greater involvement in Career and Technical Education (CTE)</strong>—both in terms of number of courses taken and concentrator/completer status—was associated with lower immediate postsecondary attendance. This may reflect intentional pathway choices, where students prepare for direct workforce entry rather than college, or differences in academic preparation and postsecondary aspirations.</p>
+<p>Overall, these findings indicate that <strong>college-oriented academic preparation supports immediate postsecondary entry</strong>, while <strong>career-oriented pathways may divert graduates toward alternative post–high school options</strong>. This divergence highlights the importance of aligning supports with students’ chosen pathways—ensuring that those pursuing workforce entry have strong employment prospects, while those aiming for college receive the preparation and early exposure that promotes successful transition.</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">ACTCompositeScore</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">pseo.participant</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-3" role="tab" aria-controls="tabset-3-3" aria-selected="false">cte.achievement</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-4" role="tab" aria-controls="tabset-3-4" aria-selected="false">total.cte.courses.taken</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-5" role="tab" aria-controls="tabset-3-5" aria-selected="false">MCA.M</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-6" role="tab" aria-controls="tabset-3-6" aria-selected="false">MCA.R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-7-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-7" role="tab" aria-controls="tabset-3-7" aria-selected="false">MCA.S</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<ul>
+<li><strong>Association:</strong> ACT Composite Score was significantly related to whether a student attended postsecondary within one year of high school graduation (F(2,86268)=2827.0, p&lt;0.001).</li>
+</ul>
+<p>Students who <strong>attended and completed</strong> within one year had the highest average ACT scores, scoring about 3.03 points higher than those who did not attend postsecondary, and 1.85 points higher than those who attended but did not complete. Students who attended but did not complete scored about 1.18 points higher than those who did not attend at all.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>summary <span class="ot">&lt;-</span> <span class="fu">aov</span>(ACTCompositeScore <span class="sc">~</span> attended.ps.within.first.year.hsgrad, <span class="at">data =</span> master.original)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                        Df  Sum Sq Mean Sq F value Pr(&gt;F)    
+attended.ps.within.first.year.hsgrad     2  120160   60080    2827 &lt;2e-16 ***
+Residuals                            86268 1833331      21                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+51351 observations deleted due to missingness</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">TukeyHSD</span>(summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = ACTCompositeScore ~ attended.ps.within.first.year.hsgrad, data = master.original)
+
+$attended.ps.within.first.year.hsgrad
+                          diff      lwr      upr p adj
+No-Did not attend ps  1.180672 0.957233 1.404111     0
+Yes-Did not attend ps 3.031267 2.934993 3.127541     0
+Yes-No                1.850595 1.640627 2.060563     0</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<ul>
+<li><strong>Association:</strong> Statistically significant relationship between PSEO participation and attending postsecondary within one year of high school graduation (χ²=14083.91, df=2, p&lt;0.001, Cramer’s V=0.356 — strong association).</li>
+</ul>
+<p>Students who <strong>participated in PSEO</strong> were far more likely to attend postsecondary within one year (81.4%) compared to those who did not participate (46.8%). Non-participants were also more likely to not attend at all (47.7% vs.&nbsp;16.3%).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tab_xtab</span>(<span class="at">var.row =</span> master.original<span class="sc">$</span>attended.ps.within.first.year.hsgrad,</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">var.col =</span> master.original<span class="sc">$</span>pseo.participant,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">show.exp =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">show.col.prc =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table style="border-collapse:collapse; border:none;">
+ <tbody><tr>
+ <th style="border-top:double; text-align:center; font-style:italic; font-weight:normal; border-bottom:1px solid;" rowspan="2">attended.ps.within.first.year.hsgrad</th>
+ <th style="border-top:double; text-align:center; font-style:italic; font-weight:normal;" colspan="2">pseo.participant</th>
+ <th style="border-top:double; text-align:center; font-style:italic; font-weight:normal; font-weight:bolder; font-style:italic; border-bottom:1px solid; " rowspan="2">Total</th>
+ </tr>
+ 
+<tr>
+ <td style="border-bottom:1px solid; text-align:center; padding:0.2cm;">0</td>
+ <td style="border-bottom:1px solid; text-align:center; padding:0.2cm;">1</td>
+ </tr>
+ 
+<tr> 
+<td style="padding:0.2cm;  text-align:left; vertical-align:middle;">Did not attend ps</td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">29337</span><br><span style="color:#339999;">20678</span><br><span style="color:#339933;">47.7&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">8128</span><br><span style="color:#339999;">16787</span><br><span style="color:#339933;">16.3&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center;  "><span style="color:black;">37465</span><br><span style="color:#339999;">37465</span><br><span style="color:#339933;">33.6&nbsp;%</span></td> 
+</tr>
+ 
+<tr> 
+<td style="padding:0.2cm;  text-align:left; vertical-align:middle;">No</td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">3373</span><br><span style="color:#339999;">2495</span><br><span style="color:#339933;">5.5&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">1148</span><br><span style="color:#339999;">2026</span><br><span style="color:#339933;">2.3&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center;  "><span style="color:black;">4521</span><br><span style="color:#339999;">4521</span><br><span style="color:#339933;">4.1&nbsp;%</span></td> 
+</tr>
+ 
+<tr> 
+<td style="padding:0.2cm;  text-align:left; vertical-align:middle;">Yes</td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">28742</span><br><span style="color:#339999;">38279</span><br><span style="color:#339933;">46.8&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">40612</span><br><span style="color:#339999;">31075</span><br><span style="color:#339933;">81.4&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center;  "><span style="color:black;">69354</span><br><span style="color:#339999;">69354</span><br><span style="color:#339933;">62.3&nbsp;%</span></td> 
+</tr>
+ 
+<tr> 
+<td style="padding:0.2cm;  border-bottom:double; font-weight:bolder; font-style:italic; text-align:left; vertical-align:middle;">Total</td>
+<td style="padding:0.2cm; text-align:center;   border-bottom:double;"><span style="color:black;">61452</span><br><span style="color:#339999;">61452</span><br><span style="color:#339933;">100&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center;   border-bottom:double;"><span style="color:black;">49888</span><br><span style="color:#339999;">49888</span><br><span style="color:#339933;">100&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center;   border-bottom:double;"><span style="color:black;">111340</span><br><span style="color:#339999;">111340</span><br><span style="color:#339933;">100&nbsp;%</span></td> 
+</tr>
+<tr><td style="text-align:right; font-size:0.9em; font-style:italic; padding:0.2cm;" colspan="4">χ<sup>2</sup>=14083.908 · df=2 · Cramer's V=0.356 · p=0.000</td> 
+</tr>
+ 
+</tbody></table>
+</div>
+</div>
+</div>
+<div id="tabset-3-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-3-tab">
+<ul>
+<li><strong>Association:</strong> Statistically significant relationship between CTE achievement level and attending postsecondary within one year of high school graduation (χ²=1393.87, df=4, p&lt;0.001, Cramer’s V=0.071 — weak association).</li>
+</ul>
+<p>Attendance within one year was highest among students with <strong>no CTE involvement</strong> (67.7%), slightly lower for <strong>CTE participants</strong> (64.9%), and lowest for <strong>CTE concentrators/completors</strong> (57.2%). Students with higher levels of CTE involvement were more likely to not attend postsecondary immediately after graduation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tab_xtab</span>(<span class="at">var.row =</span> master.original<span class="sc">$</span>attended.ps.within.first.year.hsgrad,</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">var.col =</span> master.original<span class="sc">$</span>cte.achievement,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">show.exp =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">show.col.prc =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table style="border-collapse:collapse; border:none;">
+ <tbody><tr>
+ <th style="border-top:double; text-align:center; font-style:italic; font-weight:normal; border-bottom:1px solid;" rowspan="2">attended.ps.within.first.year.hsgrad</th>
+ <th style="border-top:double; text-align:center; font-style:italic; font-weight:normal;" colspan="3">cte.achievement</th>
+ <th style="border-top:double; text-align:center; font-style:italic; font-weight:normal; font-weight:bolder; font-style:italic; border-bottom:1px solid; " rowspan="2">Total</th>
+ </tr>
+ 
+<tr>
+ <td style="border-bottom:1px solid; text-align:center; padding:0.2cm;">CTE Concentrator or<br>Completor</td>
+ <td style="border-bottom:1px solid; text-align:center; padding:0.2cm;">CTE Participant</td>
+ <td style="border-bottom:1px solid; text-align:center; padding:0.2cm;">No CTE</td>
+ </tr>
+ 
+<tr> 
+<td style="padding:0.2cm;  text-align:left; vertical-align:middle;">Did not attend ps</td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">21043</span><br><span style="color:#339999;">17972</span><br><span style="color:#339933;">38.1&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">12488</span><br><span style="color:#339999;">13421</span><br><span style="color:#339933;">30.3&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">11282</span><br><span style="color:#339999;">13420</span><br><span style="color:#339933;">27.4&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center;  "><span style="color:black;">44813</span><br><span style="color:#339999;">44813</span><br><span style="color:#339933;">32.6&nbsp;%</span></td> 
+</tr>
+ 
+<tr> 
+<td style="padding:0.2cm;  text-align:left; vertical-align:middle;">No</td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">2565</span><br><span style="color:#339999;">2636</span><br><span style="color:#339933;">4.6&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">1969</span><br><span style="color:#339999;">1969</span><br><span style="color:#339933;">4.8&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">2039</span><br><span style="color:#339999;">1968</span><br><span style="color:#339933;">4.9&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center;  "><span style="color:black;">6573</span><br><span style="color:#339999;">6573</span><br><span style="color:#339933;">4.8&nbsp;%</span></td> 
+</tr>
+ 
+<tr> 
+<td style="padding:0.2cm;  text-align:left; vertical-align:middle;">Yes</td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">31585</span><br><span style="color:#339999;">34585</span><br><span style="color:#339933;">57.2&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">26760</span><br><span style="color:#339999;">25827</span><br><span style="color:#339933;">64.9&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center; "><span style="color:black;">27891</span><br><span style="color:#339999;">25824</span><br><span style="color:#339933;">67.7&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center;  "><span style="color:black;">86236</span><br><span style="color:#339999;">86236</span><br><span style="color:#339933;">62.7&nbsp;%</span></td> 
+</tr>
+ 
+<tr> 
+<td style="padding:0.2cm;  border-bottom:double; font-weight:bolder; font-style:italic; text-align:left; vertical-align:middle;">Total</td>
+<td style="padding:0.2cm; text-align:center;   border-bottom:double;"><span style="color:black;">55193</span><br><span style="color:#339999;">55193</span><br><span style="color:#339933;">100&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center;   border-bottom:double;"><span style="color:black;">41217</span><br><span style="color:#339999;">41217</span><br><span style="color:#339933;">100&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center;   border-bottom:double;"><span style="color:black;">41212</span><br><span style="color:#339999;">41212</span><br><span style="color:#339933;">100&nbsp;%</span></td>
+<td style="padding:0.2cm; text-align:center;   border-bottom:double;"><span style="color:black;">137622</span><br><span style="color:#339999;">137622</span><br><span style="color:#339933;">100&nbsp;%</span></td> 
+</tr>
+<tr><td style="text-align:right; font-size:0.9em; font-style:italic; padding:0.2cm;" colspan="5">χ<sup>2</sup>=1393.867 · df=4 · Cramer's V=0.071 · p=0.000</td> 
+</tr>
+ 
+</tbody></table>
+</div>
+</div>
+</div>
+<div id="tabset-3-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-4-tab">
+<ul>
+<li><strong>Association:</strong> The number of CTE courses taken was significantly related to whether a student attended postsecondary within one year of high school graduation (F(2,137619)=1002.0, p&lt;0.001).</li>
+</ul>
+<p>Students who <strong>attended and completed</strong> within one year had taken the fewest CTE courses on average, followed by those who attended but did not complete, with those who did not attend postsecondary taking the most. The largest gap was between completers and non-attenders, with completers averaging nearly one fewer CTE course.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>summary <span class="ot">&lt;-</span> <span class="fu">aov</span>(total.cte.courses.taken <span class="sc">~</span> attended.ps.within.first.year.hsgrad, <span class="at">data =</span> master.original)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                         Df  Sum Sq Mean Sq F value Pr(&gt;F)    
+attended.ps.within.first.year.hsgrad      2   27284   13642    1002 &lt;2e-16 ***
+Residuals                            137619 1873924      14                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">TukeyHSD</span>(summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = total.cte.courses.taken ~ attended.ps.within.first.year.hsgrad, data = master.original)
+
+$attended.ps.within.first.year.hsgrad
+                            diff        lwr        upr p adj
+No-Did not attend ps  -0.5624405 -0.6766698 -0.4482112     0
+Yes-Did not attend ps -0.9613451 -1.0117078 -0.9109823     0
+Yes-No                -0.3989046 -0.5095689 -0.2882402     0</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-3-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-5-tab">
+<ul>
+<li><strong>Association:</strong> MCA Math scores were significantly related to whether a student attended postsecondary within one year of high school graduation (F(2,132989)=4798.0, p&lt;0.001).</li>
+</ul>
+<p>Students who <strong>attended and completed</strong> within one year scored highest, averaging 0.59 points above those who attended but did not complete and 0.54 points above those who did not attend at all. Students who attended but did not complete scored slightly higher than non-attenders (0.05 points).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>summary <span class="ot">&lt;-</span> <span class="fu">aov</span>(MCA.M <span class="sc">~</span> attended.ps.within.first.year.hsgrad, <span class="at">data =</span> master.original)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                         Df Sum Sq Mean Sq F value Pr(&gt;F)    
+attended.ps.within.first.year.hsgrad      2   9228    4614    4798 &lt;2e-16 ***
+Residuals                            132989 127903       1                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+4630 observations deleted due to missingness</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">TukeyHSD</span>(summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = MCA.M ~ attended.ps.within.first.year.hsgrad, data = master.original)
+
+$attended.ps.within.first.year.hsgrad
+                             diff         lwr         upr     p adj
+No-Did not attend ps  -0.04984263 -0.08083261 -0.01885265 0.0004801
+Yes-Did not attend ps  0.54173391  0.52797875  0.55548907 0.0000000
+Yes-No                 0.59157654  0.56165435  0.62149874 0.0000000</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-3-6" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-6-tab">
+<ul>
+<li><strong>Association:</strong> MCA Reading scores were significantly related to whether a student attended postsecondary within one year of high school graduation (F(2,131898)=6197.0, p&lt;0.001).</li>
+</ul>
+<p>Students who <strong>attended and completed</strong> within one year scored highest, averaging 0.56 points above those who did not attend at all and 0.37 points above those who attended but did not complete. Students who attended but did not complete scored about 0.20 points higher than non-attenders.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>  summary <span class="ot">&lt;-</span> <span class="fu">aov</span>(MCA.R <span class="sc">~</span> attended.ps.within.first.year.hsgrad, <span class="at">data =</span> master.original)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                         Df Sum Sq Mean Sq F value Pr(&gt;F)    
+attended.ps.within.first.year.hsgrad      2   8973    4487    6197 &lt;2e-16 ***
+Residuals                            131898  95489       1                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+5721 observations deleted due to missingness</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">TukeyHSD</span>(summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = MCA.R ~ attended.ps.within.first.year.hsgrad, data = master.original)
+
+$attended.ps.within.first.year.hsgrad
+                           diff       lwr       upr p adj
+No-Did not attend ps  0.1985251 0.1714649 0.2255853     0
+Yes-Did not attend ps 0.5637434 0.5517439 0.5757428     0
+Yes-No                0.3652183 0.3390988 0.3913377     0</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-3-7" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-7-tab">
+<ul>
+<li><strong>Association:</strong> MCA Science scores were significantly related to whether a student attended postsecondary within one year of high school graduation (F(2,114534)=4178.0, p&lt;0.001).</li>
+</ul>
+<p>Students who <strong>attended and completed</strong> within one year scored highest, averaging 0.49 points above those who did not attend and 0.42 points above those who attended but did not complete. Students who attended but did not complete scored slightly higher than non-attenders (0.07 points).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>summary <span class="ot">&lt;-</span> <span class="fu">aov</span>(MCA.S <span class="sc">~</span> attended.ps.within.first.year.hsgrad, <span class="at">data =</span> master.original)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                         Df Sum Sq Mean Sq F value Pr(&gt;F)    
+attended.ps.within.first.year.hsgrad      2   6107  3053.4    4178 &lt;2e-16 ***
+Residuals                            114534  83699     0.7                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+23085 observations deleted due to missingness</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">TukeyHSD</span>(summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = MCA.S ~ attended.ps.within.first.year.hsgrad, data = master.original)
+
+$attended.ps.within.first.year.hsgrad
+                            diff        lwr        upr p adj
+No-Did not attend ps  0.06799999 0.03745703 0.09854294 5e-07
+Yes-Did not attend ps 0.48836258 0.47550876 0.50121640 0e+00
+Yes-No                0.42036259 0.39074592 0.44997927 0e+00</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 
 
 </section>
