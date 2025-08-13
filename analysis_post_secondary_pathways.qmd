@@ -569,35 +569,21 @@ Two notable shifts emerged: **Total CTE courses** rose in importance for ever at
 
 Overall, academic readiness, early exposure to college coursework, and key demographic factors remain the most consistent drivers of postsecondary participation, regardless of timing, while some contextual factors shift in influence over time.
 
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
-| Variable                      | Immediate (Effect Size / F) | Ever (Effect Size / F) | Immediate Rank | Ever Rank |
-+===============================+=============================+========================+================+===========+
-| PSEO participation            | 0.356                       | 0.331                  | 1              | 1         |
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
-| Special education status      | 0.282                       | 0.277                  | 2              | 2         |
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
-| ACT Composite Score           | 2827.0                      | 5202.0                 | 3              | 3         |
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
-| Economic status               | 0.225                       | 0.209                  | 4              | 4         |
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
-| MCA – Reading                 | 6197.0                      | 11229.0                | 5              | 5         |
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
-| MCA – Math                    | 4798.0                      | 7330.0                 | 6              | 6         |
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
-| MCA – Science                 | 4178.0                      | 7181.0                 | 7              | 7         |
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
-| Avg. county unemployment rate | 575.6                       | 109.7                  | 8              | **11**    |
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
-| Avg. wages (% of state)       | 324.7                       | 472.3                  | 9              | 9         |
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
-| Race/ethnicity                | 0.113                       | 0.135                  | 10             | 10        |
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
-| Total CTE courses             | 1002.0                      | 1931.0                 | 11             | **8**     |
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
-| CTE achievement               | 0.071                       | 0.100                  | 12             | 12        |
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
-| RUCA classification           | 0.035                       | 0.048                  | 13             | 13        |
-+-------------------------------+-----------------------------+------------------------+----------------+-----------+
+| Variable | Immediate (Effect Size / F) | Ever (Effect Size / F) | Immediate Rank | Ever Rank |
+|----|----|----|----|----|
+| PSEO participation | 0.356 | 0.331 | 1 | 1 |
+| Special education status | 0.282 | 0.277 | 2 | 2 |
+| ACT Composite Score | 2827.0 | 5202.0 | 3 | 3 |
+| Economic status | 0.225 | 0.209 | 4 | 4 |
+| MCA – Reading | 6197.0 | 11229.0 | 5 | 5 |
+| MCA – Math | 4798.0 | 7330.0 | 6 | 6 |
+| MCA – Science | 4178.0 | 7181.0 | 7 | 7 |
+| Avg. county unemployment rate | 575.6 | 109.7 | 8 | **11** |
+| Avg. wages (% of state) | 324.7 | 472.3 | 9 | 9 |
+| Race/ethnicity | 0.113 | 0.135 | 10 | 10 |
+| Total CTE courses | 1002.0 | 1931.0 | 11 | **8** |
+| CTE achievement | 0.071 | 0.100 | 12 | 12 |
+| RUCA classification | 0.035 | 0.048 | 13 | 13 |
 
 **Note:** Effect sizes are reported as Cramer's V or φ for categorical predictors and F-values for continuous predictors.\
 **Bolded ranks** indicate a change in relative importance between immediate and ever attendance.
@@ -878,35 +864,21 @@ CTE pathways present a nuanced picture: while achieving concentrator/completer s
 
 ## Rank of variable importance
 
-+-----------------------------------+----------------+-------------------------------+--------------------+
-| Variable                          | Rank – ps.grad | Rank – attended.ps.within.1yr | Rank – attended.ps |
-+===================================+================+===============================+====================+
-| **PSEO participation**            | **1**          | **1**                         | **1**              |
-+-----------------------------------+----------------+-------------------------------+--------------------+
-| **Special education status**      | **2**          | **2**                         | **2**              |
-+-----------------------------------+----------------+-------------------------------+--------------------+
-| **ACT Composite Score**           | **3**          | **3**                         | **3**              |
-+-----------------------------------+----------------+-------------------------------+--------------------+
-| **Economic status**               | **4**          | **4**                         | **4**              |
-+-----------------------------------+----------------+-------------------------------+--------------------+
-| *MCA – Reading*                   | *5*            | *5*                           | *6*                |
-+-----------------------------------+----------------+-------------------------------+--------------------+
-| *MCA – Math*                      | *6*            | *6*                           | *5*                |
-+-----------------------------------+----------------+-------------------------------+--------------------+
-| *MCA – Science*                   | *7*            | *7*                           | *7*                |
-+-----------------------------------+----------------+-------------------------------+--------------------+
-| *CTE achievement*                 | *8*            | *8*                           | *8*                |
-+-----------------------------------+----------------+-------------------------------+--------------------+
-| *Race/ethnicity*                  | *9*            | *9*                           | *9*                |
-+-----------------------------------+----------------+-------------------------------+--------------------+
-| Total CTE courses taken           | 10             | 10                            | 10                 |
-+-----------------------------------+----------------+-------------------------------+--------------------+
-| Rural–urban descriptor (Dem_Desc) | 11             | 11                            | 11                 |
-+-----------------------------------+----------------+-------------------------------+--------------------+
-| Average unemployment rate         | 12             | 12                            | 12                 |
-+-----------------------------------+----------------+-------------------------------+--------------------+
-| Average wages % of state          | 13             | 13                            | 13                 |
-+-----------------------------------+----------------+-------------------------------+--------------------+
+| Variable | Rank – ps.grad | Rank – attended.ps.within.1yr | Rank – attended.ps |
+|----|----|----|----|
+| **PSEO participation** | **1** | **1** | **1** |
+| **Special education status** | **2** | **2** | **2** |
+| **ACT Composite Score** | **3** | **3** | **3** |
+| **Economic status** | **4** | **4** | **4** |
+| *MCA – Reading* | *5* | *5* | *6* |
+| *MCA – Math* | *6* | *6* | *5* |
+| *MCA – Science* | *7* | *7* | *7* |
+| *CTE achievement* | *8* | *8* | *8* |
+| *Race/ethnicity* | *9* | *9* | *9* |
+| Total CTE courses taken | 10 | 10 | 10 |
+| Rural–urban descriptor (Dem_Desc) | 11 | 11 | 11 |
+| Average unemployment rate | 12 | 12 | 12 |
+| Average wages % of state | 13 | 13 | 13 |
 
 Across all three outcomes—postsecondary graduation (`ps.grad`), attendance within one year of high school graduation (`attended.ps.within.1yr`), and eventual postsecondary attendance (`attended.ps`)—the rank ordering of predictors is remarkably consistent. **PSEO participation, special education status, ACT Composite Score, and economic status** consistently emerge as the four strongest predictors, suggesting these factors play a dominant role both in access to and completion of postsecondary education.
 
@@ -942,8 +914,7 @@ Overall, while all three variables are significantly associated with graduation 
 -   χ²(1, N=119,386) = 6365.98, p \< .001
 -   φ = 0.231 (moderate association)
 
-**Interpretation**
-Economic status shows a clear relationship with postsecondary graduation. Among higher economic status individuals, exactly half (50.1%) graduated, compared to just over a quarter (25.9%) of those from lower economic status backgrounds. Conversely, the non-graduation rate is substantially higher for lower economic status individuals (74.1%) than for higher status individuals (49.9%). This suggests that socioeconomic background is a significant factor in determining postsecondary graduation likelihood.
+**Interpretation** Economic status shows a clear relationship with postsecondary graduation. Among higher economic status individuals, exactly half (50.1%) graduated, compared to just over a quarter (25.9%) of those from lower economic status backgrounds. Conversely, the non-graduation rate is substantially higher for lower economic status individuals (74.1%) than for higher status individuals (49.9%). This suggests that socioeconomic background is a significant factor in determining postsecondary graduation likelihood.
 
 ```{r}
 data <- master.original %>%
@@ -962,8 +933,7 @@ tab_xtab(var.row = data$ps.grad,
 -   χ²(5, N=119,386) = 8763.59, p \< .001
 -   Cramer's V = 0.271 (moderate-to-strong association)
 
-**Interpretation**
-Graduation rates vary sharply by race/ethnicity. Asian/Pacific Islander individuals had the highest graduation rate (43.7%), followed closely by White individuals (48%) and Hispanic individuals (24.2%). Black (25.4%) and American Indian (15.8%) populations showed lower graduation rates, with American Indian students having the lowest overall. The “Unknown” group also showed low graduation (8.1%), though this may reflect data limitations rather than actual outcomes. Non-graduation rates were particularly high for American Indian (84.2%) and Unknown (91.9%) categories, highlighting significant disparities across racial/ethnic groups.
+**Interpretation** Graduation rates vary sharply by race/ethnicity. Asian/Pacific Islander individuals had the highest graduation rate (43.7%), followed closely by White individuals (48%) and Hispanic individuals (24.2%). Black (25.4%) and American Indian (15.8%) populations showed lower graduation rates, with American Indian students having the lowest overall. The “Unknown” group also showed low graduation (8.1%), though this may reflect data limitations rather than actual outcomes. Non-graduation rates were particularly high for American Indian (84.2%) and Unknown (91.9%) categories, highlighting significant disparities across racial/ethnic groups.
 
 ```{r}
 
@@ -980,8 +950,7 @@ tab_xtab(var.row = data$ps.grad,
 -   χ²(1, N=119,386) = 7035.36, p \< .001
 -   φ = 0.243 (moderate association)
 
-**Interpretation**
-Special education status is strongly associated with postsecondary graduation outcomes. Among non–special education students, 47.1% graduated, compared to just 13.4% of those who received special education services. Conversely, non-graduation was far more prevalent among special education students (86.6%) than their peers (52.9%). This indicates a substantial attainment gap linked to special education status.
+**Interpretation** Special education status is strongly associated with postsecondary graduation outcomes. Among non–special education students, 47.1% graduated, compared to just 13.4% of those who received special education services. Conversely, non-graduation was far more prevalent among special education students (86.6%) than their peers (52.9%). This indicates a substantial attainment gap linked to special education status.
 
 ```{r}
 tab_xtab(var.row = data$ps.grad,
@@ -1008,11 +977,9 @@ These results suggest that traditional rural-urban distinctions have little bear
 ::: panel-tabset
 ### Dem_Desc
 
-**Association:**
-The chi-square test shows a statistically significant but very small association between high school rurality and postsecondary graduation (χ²=128.644, df=2, p\<0.001, Cramer's V=0.033).
+**Association:** The chi-square test shows a statistically significant but very small association between high school rurality and postsecondary graduation (χ²=128.644, df=2, p\<0.001, Cramer's V=0.033).
 
-**Interpretation:**
-Graduation rates were highest among students from entirely urban schools (43.9%) and lowest among those from town/rural mix schools (39.1%). Urban/town/rural mix schools were near the overall average (42.5%). However, the effect size is minimal, suggesting that while rurality has some association with graduation, it is far less influential than other demographic variables such as race/ethnicity or economic status.
+**Interpretation:** Graduation rates were highest among students from entirely urban schools (43.9%) and lowest among those from town/rural mix schools (39.1%). Urban/town/rural mix schools were near the overall average (42.5%). However, the effect size is minimal, suggesting that while rurality has some association with graduation, it is far less influential than other demographic variables such as race/ethnicity or economic status.
 
 ```{r}
 tab_xtab(var.row = data$ps.grad,
@@ -1023,11 +990,9 @@ tab_xtab(var.row = data$ps.grad,
 
 ### avg.unemp.rate
 
-**Association:**
-A one-way ANOVA found a statistically significant association between postsecondary graduation and the average unemployment rate of a student’s high school community (F(1, 119384)=245.1, p\<0.001).
+**Association:** A one-way ANOVA found a statistically significant association between postsecondary graduation and the average unemployment rate of a student’s high school community (F(1, 119384)=245.1, p\<0.001).
 
-**Interpretation:**
-Graduates came from areas with an average unemployment rate about 0.17 percentage points higher than those who did not graduate from postsecondary. While statistically significant, the absolute difference is modest, indicating that community-level unemployment is associated with graduation status but not as strongly as student-level demographic or academic variables.
+**Interpretation:** Graduates came from areas with an average unemployment rate about 0.17 percentage points higher than those who did not graduate from postsecondary. While statistically significant, the absolute difference is modest, indicating that community-level unemployment is associated with graduation status but not as strongly as student-level demographic or academic variables.
 
 ```{r}
 summary <- aov(avg.unemp.rate ~ ps.grad, data = data)
@@ -1040,11 +1005,9 @@ TukeyHSD(summary)
 
 ### avg.wage.pct.state
 
-**Association:**
-A one-way ANOVA found a statistically significant association between postsecondary graduation and the average wages of a student’s high school community as a percent of the Minnesota state average (F(1, 119384)=163.7, p\<0.001).
+**Association:** A one-way ANOVA found a statistically significant association between postsecondary graduation and the average wages of a student’s high school community as a percent of the Minnesota state average (F(1, 119384)=163.7, p\<0.001).
 
-**Interpretation:**
-Graduates came from high school communities with average wages about 0.46 percentage points higher (relative to the state average) than those who did not graduate from postsecondary. While the effect size is small, it suggests that community economic conditions are slightly more favorable for those who complete postsecondary education.
+**Interpretation:** Graduates came from high school communities with average wages about 0.46 percentage points higher (relative to the state average) than those who did not graduate from postsecondary. While the effect size is small, it suggests that community economic conditions are slightly more favorable for those who complete postsecondary education.
 
 ```{r}
 summary <- aov(avg.wages.pct.state ~ ps.grad, data = data)
@@ -1082,11 +1045,9 @@ Measures of academic readiness—particularly ACT performance, state assessment 
 ::: panel-tabset
 ### ACTCompositeScore
 
-**Association:**
-ACT Composite Score was strongly associated with postsecondary graduation status (F(1, 72,127) = 7547, p \< 0.001). On average, graduates scored nearly 2.95 points higher than non-graduates (95% CI \[2.88, 3.02\]), indicating a substantial academic performance gap.
+**Association:** ACT Composite Score was strongly associated with postsecondary graduation status (F(1, 72,127) = 7547, p \< 0.001). On average, graduates scored nearly 2.95 points higher than non-graduates (95% CI \[2.88, 3.02\]), indicating a substantial academic performance gap.
 
-**Interpretation:**
-Higher ACT scores in high school are strongly linked to eventual completion of postsecondary education. This suggests that the skills and academic readiness reflected in standardized test performance play a significant role in persistence and graduation. The nearly three-point difference represents a meaningful performance distinction, reinforcing that academic preparation at high school exit remains a robust predictor of college completion outcomes.
+**Interpretation:** Higher ACT scores in high school are strongly linked to eventual completion of postsecondary education. This suggests that the skills and academic readiness reflected in standardized test performance play a significant role in persistence and graduation. The nearly three-point difference represents a meaningful performance distinction, reinforcing that academic preparation at high school exit remains a robust predictor of college completion outcomes.
 
 ```{r}
 summary <- aov(ACTCompositeScore ~ ps.grad, data = data)
@@ -1098,11 +1059,9 @@ TukeyHSD(summary)
 
 ### pseo.participant
 
-**Association:**
-Participation in PSEO was strongly associated with postsecondary graduation (χ²(1, N = 93,104) = 12,745.16, φ = 0.370, p \< 0.001). Among non-PSEO students, 25.6% graduated, while among PSEO participants, 62.5% graduated—a gap of nearly 37 percentage points.
+**Association:** Participation in PSEO was strongly associated with postsecondary graduation (χ²(1, N = 93,104) = 12,745.16, φ = 0.370, p \< 0.001). Among non-PSEO students, 25.6% graduated, while among PSEO participants, 62.5% graduated—a gap of nearly 37 percentage points.
 
-**Interpretation:**
-PSEO participation is one of the strongest high school predictors of postsecondary completion observed in this analysis. The substantial graduation gap suggests that dual-enrollment experiences not only prepare students academically but may also build confidence, familiarity with college expectations, and momentum toward degree completion. The magnitude of association (φ = 0.370) indicates that PSEO is more predictive than most other high school characteristics or accomplishments.
+**Interpretation:** PSEO participation is one of the strongest high school predictors of postsecondary completion observed in this analysis. The substantial graduation gap suggests that dual-enrollment experiences not only prepare students academically but may also build confidence, familiarity with college expectations, and momentum toward degree completion. The magnitude of association (φ = 0.370) indicates that PSEO is more predictive than most other high school characteristics or accomplishments.
 
 ```{r}
 tab_xtab(var.row = data$ps.grad,
@@ -1113,11 +1072,9 @@ tab_xtab(var.row = data$ps.grad,
 
 ### cte.achievement
 
-**Association:**
-CTE achievement level showed a moderate association with postsecondary graduation (χ²(2, N = 119,386) = 2,650.21, Cramer's V = 0.149, p \< 0.001). Graduation rates were lowest for CTE Concentrators/Completers (33.8%) compared to CTE Participants (42.7%) and highest for students with no CTE (51.4%).
+**Association:** CTE achievement level showed a moderate association with postsecondary graduation (χ²(2, N = 119,386) = 2,650.21, Cramer's V = 0.149, p \< 0.001). Graduation rates were lowest for CTE Concentrators/Completers (33.8%) compared to CTE Participants (42.7%) and highest for students with no CTE (51.4%).
 
-**Interpretation:**
-Students heavily engaged in CTE coursework—especially those reaching Concentrator or Completer status—were less likely to graduate from postsecondary than peers with less or no CTE involvement. This pattern may reflect differing postsecondary pathways, with more intensive CTE participation aligning with workforce entry or certificate programs rather than four-year degree completion. While the relationship is weaker than for PSEO participation, it is still meaningful and points to the importance of understanding how career-focused high school experiences shape long-term educational trajectories.
+**Interpretation:** Students heavily engaged in CTE coursework—especially those reaching Concentrator or Completer status—were less likely to graduate from postsecondary than peers with less or no CTE involvement. This pattern may reflect differing postsecondary pathways, with more intensive CTE participation aligning with workforce entry or certificate programs rather than four-year degree completion. While the relationship is weaker than for PSEO participation, it is still meaningful and points to the importance of understanding how career-focused high school experiences shape long-term educational trajectories.
 
 ```{r}
 tab_xtab(var.row = data$ps.grad,
@@ -1128,11 +1085,9 @@ tab_xtab(var.row = data$ps.grad,
 
 ### total.cte.courses.taken
 
-**Association:**
-Postsecondary graduation status was strongly related to the total number of CTE courses taken in high school (F(1, 119,384) = 2,726, p \< 0.001). On average, graduates completed 1.13 fewer CTE courses than non-graduates (95% CI: -1.17 to -1.09).
+**Association:** Postsecondary graduation status was strongly related to the total number of CTE courses taken in high school (F(1, 119,384) = 2,726, p \< 0.001). On average, graduates completed 1.13 fewer CTE courses than non-graduates (95% CI: -1.17 to -1.09).
 
-**Interpretation:**
-Students who went on to graduate from postsecondary tended to have taken fewer CTE courses in high school compared to those who did not complete a postsecondary degree. This mirrors the CTE achievement pattern, reinforcing the possibility that heavier CTE engagement is associated with alternative career paths or shorter-term credentials rather than degree completion. The effect size here is notable, indicating that CTE course load is meaningfully linked to long-term educational outcomes.
+**Interpretation:** Students who went on to graduate from postsecondary tended to have taken fewer CTE courses in high school compared to those who did not complete a postsecondary degree. This mirrors the CTE achievement pattern, reinforcing the possibility that heavier CTE engagement is associated with alternative career paths or shorter-term credentials rather than degree completion. The effect size here is notable, indicating that CTE course load is meaningfully linked to long-term educational outcomes.
 
 ```{r}
 summary <- aov(total.cte.courses.taken ~ ps.grad, data = data)
@@ -1144,11 +1099,9 @@ TukeyHSD(summary)
 
 ### MCA.M
 
-**Association:**
-Postsecondary graduation status showed a strong and highly significant association with Minnesota Comprehensive Assessment (MCA) Math scores (F(1, 115,056) = 8,276, p \< 0.001). Graduates scored on average 0.54 points higher than non-graduates (95% CI: 0.53 to 0.55).
+**Association:** Postsecondary graduation status showed a strong and highly significant association with Minnesota Comprehensive Assessment (MCA) Math scores (F(1, 115,056) = 8,276, p \< 0.001). Graduates scored on average 0.54 points higher than non-graduates (95% CI: 0.53 to 0.55).
 
-**Interpretation:**
-Higher math proficiency in high school was a substantial predictor of eventual postsecondary graduation. This difference, while less than one point, is statistically robust and consistent with the broader pattern that stronger academic preparation—particularly in quantitative skills—supports persistence to degree completion. This suggests that math readiness may play a more direct role in postsecondary success than some other high school performance indicators.
+**Interpretation:** Higher math proficiency in high school was a substantial predictor of eventual postsecondary graduation. This difference, while less than one point, is statistically robust and consistent with the broader pattern that stronger academic preparation—particularly in quantitative skills—supports persistence to degree completion. This suggests that math readiness may play a more direct role in postsecondary success than some other high school performance indicators.
 
 ```{r}
 summary <- aov(MCA.M ~ ps.grad, data = data)
@@ -1160,11 +1113,9 @@ TukeyHSD(summary)
 
 ### MCA.R
 
-**Association:**
-Postsecondary graduation status was strongly associated with Minnesota Comprehensive Assessment (MCA) Reading scores (F(1, 114,040) = 10,919, p \< 0.001). Postsecondary graduates scored on average 0.54 points higher than non-graduates (95% CI: 0.53 to 0.55).
+**Association:** Postsecondary graduation status was strongly associated with Minnesota Comprehensive Assessment (MCA) Reading scores (F(1, 114,040) = 10,919, p \< 0.001). Postsecondary graduates scored on average 0.54 points higher than non-graduates (95% CI: 0.53 to 0.55).
 
-**Interpretation:**
-Reading proficiency in high school was a significant predictor of completing postsecondary education. The effect size, nearly identical to that for MCA Math, reinforces the importance of strong foundational skills in both literacy and numeracy for academic persistence. This suggests that balanced academic preparation across core subject areas—not just math—supports long-term educational attainment.
+**Interpretation:** Reading proficiency in high school was a significant predictor of completing postsecondary education. The effect size, nearly identical to that for MCA Math, reinforces the importance of strong foundational skills in both literacy and numeracy for academic persistence. This suggests that balanced academic preparation across core subject areas—not just math—supports long-term educational attainment.
 
 ```{r}
 summary <- aov(MCA.R ~ ps.grad, data = data)
@@ -1177,11 +1128,9 @@ TukeyHSD(summary)
 
 ### MCA.S
 
-**Association:**
-Postsecondary graduation status was strongly associated with Minnesota Comprehensive Assessment (MCA) Science scores (F(1, 96,765) = 7,181, p \< 0.001). Postsecondary graduates scored on average 0.47 points higher than non-graduates (95% CI: 0.46 to 0.48).
+**Association:** Postsecondary graduation status was strongly associated with Minnesota Comprehensive Assessment (MCA) Science scores (F(1, 96,765) = 7,181, p \< 0.001). Postsecondary graduates scored on average 0.47 points higher than non-graduates (95% CI: 0.46 to 0.48).
 
-**Interpretation:**
-Science proficiency in high school was a meaningful predictor of postsecondary completion, though the gap between graduates and non-graduates was somewhat smaller than for MCA Math or Reading. This pattern suggests that while science skills contribute to long-term academic success, literacy and numeracy may play a slightly more central role in supporting persistence through college.
+**Interpretation:** Science proficiency in high school was a meaningful predictor of postsecondary completion, though the gap between graduates and non-graduates was somewhat smaller than for MCA Math or Reading. This pattern suggests that while science skills contribute to long-term academic success, literacy and numeracy may play a slightly more central role in supporting persistence through college.
 
 ```{r}
 summary <- aov(MCA.S ~ ps.grad, data = data)
@@ -1224,33 +1173,20 @@ The sector of graduation reflects a sorting process shaped most strongly by soci
 
 ## Comparative Rankings of Variable Importance
 
-+-----------------------------------+--------------------------------------+-------------+----------+---------------------------+-------------+
-| Variable                          | attended.ps.within.first.year.hsgrad | attended.ps | ps.grad  | ps.grad.InstitutionSector | Total Shift |
-+===================================+======================================+=============+==========+===========================+=============+
-| ACTCompositeScore                 | 8                                    | 7           | 5        | **1** 🟢                  | **7**       |
-+-----------------------------------+--------------------------------------+-------------+----------+---------------------------+-------------+
-| Economic Status                   | **1**                                | **1**       | **1**    | 4 🔴                      | **3**       |
-+-----------------------------------+--------------------------------------+-------------+----------+---------------------------+-------------+
-| Special Education Status          | 4                                    | 5 🔴        | 3 🟢     | 6 🔴                      | **3**       |
-+-----------------------------------+--------------------------------------+-------------+----------+---------------------------+-------------+
-| Race/Ethnicity                    | 2                                    | 3 🔴        | 2 🟢     | 5 🔴                      | **3**       |
-+-----------------------------------+--------------------------------------+-------------+----------+---------------------------+-------------+
-| Average Unemployment Rate         | 7                                    | 8 🔴        | 6 🟢     | **2** 🟢                  | **6**       |
-+-----------------------------------+--------------------------------------+-------------+----------+---------------------------+-------------+
-| Average Wages (% of State Median) | 6                                    | 6           | 4 🟢     | 3 🟢                      | **3**       |
-+-----------------------------------+--------------------------------------+-------------+----------+---------------------------+-------------+
-| PSEO Participation                | 3                                    | 4 🔴        | 7 🔴     | 7                         | **4**       |
-+-----------------------------------+--------------------------------------+-------------+----------+---------------------------+-------------+
-| CTE Achievement                   | 5                                    | **2** 🟢    | 8 🔴     | 8                         | **6**       |
-+-----------------------------------+--------------------------------------+-------------+----------+---------------------------+-------------+
-| Total CTE Courses Taken           | 10                                   | 10          | 9 🟢     | 9                         | **1**       |
-+-----------------------------------+--------------------------------------+-------------+----------+---------------------------+-------------+
-| MCA Math                          | 9                                    | 9           | 10 🔴    | 10                        | **1**       |
-+-----------------------------------+--------------------------------------+-------------+----------+---------------------------+-------------+
-| MCA Reading                       | 11                                   | 11          | 11       | 11                        | **0**       |
-+-----------------------------------+--------------------------------------+-------------+----------+---------------------------+-------------+
-| MCA Science                       | 12                                   | 12          | 12       | 12                        | **0**       |
-+-----------------------------------+--------------------------------------+-------------+----------+---------------------------+-------------+
+| Variable | attended.ps.within.first.year.hsgrad | attended.ps | ps.grad | ps.grad.InstitutionSector | Total Shift |
+|----|----|----|----|----|----|
+| ACTCompositeScore | 8 | 7 | 5 | **1** 🟢 | **7** |
+| Economic Status | **1** | **1** | **1** | 4 🔴 | **3** |
+| Special Education Status | 4 | 5 🔴 | 3 🟢 | 6 🔴 | **3** |
+| Race/Ethnicity | 2 | 3 🔴 | 2 🟢 | 5 🔴 | **3** |
+| Average Unemployment Rate | 7 | 8 🔴 | 6 🟢 | **2** 🟢 | **6** |
+| Average Wages (% of State Median) | 6 | 6 | 4 🟢 | 3 🟢 | **3** |
+| PSEO Participation | 3 | 4 🔴 | 7 🔴 | 7 | **4** |
+| CTE Achievement | 5 | **2** 🟢 | 8 🔴 | 8 | **6** |
+| Total CTE Courses Taken | 10 | 10 | 9 🟢 | 9 | **1** |
+| MCA Math | 9 | 9 | 10 🔴 | 10 | **1** |
+| MCA Reading | 11 | 11 | 11 | 11 | **0** |
+| MCA Science | 12 | 12 | 12 | 12 | **0** |
 
 **Legend:**\
 - 🟢 = improved in ranking (more important)\
@@ -1290,11 +1226,9 @@ Overall, compared to the broader population analysis, demographic factors show a
 ::: panel-tabset
 ### economic.status
 
-**Associations**
-Economic status shows a statistically significant association with the type of postsecondary institution sector among graduates (**χ² = 1051.546, df = 2, p \< 0.001, Cramer’s V = 0.145**), indicating a small-to-moderate effect size.
+**Associations** Economic status shows a statistically significant association with the type of postsecondary institution sector among graduates (**χ² = 1051.546, df = 2, p \< 0.001, Cramer’s V = 0.145**), indicating a small-to-moderate effect size.
 
-**Interpretations**
-Among graduates, lower-income individuals are more likely to have earned their degrees from **public 2-year institutions** (40.5% vs. 24.6% of higher-income graduates) and less likely to have graduated from **public 4-year institutions** (32.8% vs. 45.1%). Higher-income graduates are also more represented in the **“other” institution category** (30.3% vs. 26.7%). While the association is weaker than in unfiltered analyses—reflecting the removal of attendance differences—**economic disparities persist in shaping institutional pathways**, suggesting that affordability, selectivity, and program structure still influence where graduates complete their degrees.
+**Interpretations** Among graduates, lower-income individuals are more likely to have earned their degrees from **public 2-year institutions** (40.5% vs. 24.6% of higher-income graduates) and less likely to have graduated from **public 4-year institutions** (32.8% vs. 45.1%). Higher-income graduates are also more represented in the **“other” institution category** (30.3% vs. 26.7%). While the association is weaker than in unfiltered analyses—reflecting the removal of attendance differences—**economic disparities persist in shaping institutional pathways**, suggesting that affordability, selectivity, and program structure still influence where graduates complete their degrees.
 
 ```{r}
 data <- master.original %>%
@@ -1308,11 +1242,9 @@ tab_xtab(var.row = data$ps.grad.InstitutionSector,
 
 ### RaceEthnicity
 
-**Associations**
-Race/ethnicity is significantly associated with the sector of postsecondary graduation (**χ² = 2035.182, df = 10, p \< 0.001, Cramer’s V = 0.143**), reflecting a small-to-moderate association.
+**Associations** Race/ethnicity is significantly associated with the sector of postsecondary graduation (**χ² = 2035.182, df = 10, p \< 0.001, Cramer’s V = 0.143**), reflecting a small-to-moderate association.
 
-**Interpretations**
-Institution type distributions differ markedly by race/ethnicity among graduates. **Public 4-year institutions** are the most common pathway for White (43.4%), Asian/PI (32.0%), and Black graduates (51.2%), but representation varies—Asian/PI and Black graduates are more heavily concentrated in this sector than AI or Hispanic graduates. **Public 2-year institutions** have particularly high representation among American Indian graduates (42.7%) and those identifying as Unknown race (88.5%), suggesting localized or access-driven enrollment patterns. The **Other institution category** sees higher shares among Asian/PI (29.7%), Black (30.1%), and Hispanic (27.9%) graduates compared to some White and AI peers. Overall, the patterns suggest that racial/ethnic disparities in institutional type remain even when focusing solely on completers, likely reflecting a combination of geographic, economic, and structural factors influencing college choice and persistence.
+**Interpretations** Institution type distributions differ markedly by race/ethnicity among graduates. **Public 4-year institutions** are the most common pathway for White (43.4%), Asian/PI (32.0%), and Black graduates (51.2%), but representation varies—Asian/PI and Black graduates are more heavily concentrated in this sector than AI or Hispanic graduates. **Public 2-year institutions** have particularly high representation among American Indian graduates (42.7%) and those identifying as Unknown race (88.5%), suggesting localized or access-driven enrollment patterns. The **Other institution category** sees higher shares among Asian/PI (29.7%), Black (30.1%), and Hispanic (27.9%) graduates compared to some White and AI peers. Overall, the patterns suggest that racial/ethnic disparities in institutional type remain even when focusing solely on completers, likely reflecting a combination of geographic, economic, and structural factors influencing college choice and persistence.
 
 ```{r}
 
@@ -1324,11 +1256,9 @@ tab_xtab(var.row = data$ps.grad.InstitutionSector,
 
 ### SpecialEdStatus
 
-**Associations**
-Special education status is significantly associated with the type of postsecondary institution from which an individual graduates (**χ² = 1665.997, df = 2, p \< 0.001, Cramer’s V = 0.183**), reflecting a moderate association.
+**Associations** Special education status is significantly associated with the type of postsecondary institution from which an individual graduates (**χ² = 1665.997, df = 2, p \< 0.001, Cramer’s V = 0.183**), reflecting a moderate association.
 
-**Interpretations**
-Among graduates, individuals **without special education status** are most likely to complete degrees at **Public 4-year institutions** (43.8%), followed by **Other institutions** (30.1%) and **Public 2-year institutions** (26.1%). In contrast, those **with special education status** overwhelmingly graduate from **Public 2-year institutions** (64.6%), with far smaller shares completing at Public 4-year (18.1%) or Other institutions (17.3%). This concentration in the 2-year sector among special education graduates suggests that accessibility, academic support, and program structure in 2-year colleges may play a substantial role in enabling degree completion for this group, while 4-year pathways are less frequently realized.
+**Interpretations** Among graduates, individuals **without special education status** are most likely to complete degrees at **Public 4-year institutions** (43.8%), followed by **Other institutions** (30.1%) and **Public 2-year institutions** (26.1%). In contrast, those **with special education status** overwhelmingly graduate from **Public 2-year institutions** (64.6%), with far smaller shares completing at Public 4-year (18.1%) or Other institutions (17.3%). This concentration in the 2-year sector among special education graduates suggests that accessibility, academic support, and program structure in 2-year colleges may play a substantial role in enabling degree completion for this group, while 4-year pathways are less frequently realized.
 
 ```{r}
 tab_xtab(var.row = data$ps.grad.InstitutionSector,
@@ -1355,11 +1285,9 @@ Unemployment rate and especially relative wages — play a stronger role in dist
 ::: panel-tabset
 ### Dem_Desc
 
-**Associations**
-The association between high school location type and postsecondary graduation sector is statistically significant (χ²=714.392, df=4, p\<0.001) but weak in strength (Cramer's V=0.085). Public 4-year graduates are overrepresented among students from entirely urban (46.0%) and urban/town/rural mix (44.4%) schools. Public 2-year graduates are most common among students from town/rural mix schools (38.0%). Graduates from “Other” institutions have a more even distribution across all location types, with a slight concentration in entirely urban schools (30.1%).
+**Associations** The association between high school location type and postsecondary graduation sector is statistically significant (χ²=714.392, df=4, p\<0.001) but weak in strength (Cramer's V=0.085). Public 4-year graduates are overrepresented among students from entirely urban (46.0%) and urban/town/rural mix (44.4%) schools. Public 2-year graduates are most common among students from town/rural mix schools (38.0%). Graduates from “Other” institutions have a more even distribution across all location types, with a slight concentration in entirely urban schools (30.1%).
 
-**Interpretations**
-High school location type plays a modest role in determining the type of postsecondary institution from which a student graduates. Urban and mixed-community backgrounds appear to facilitate pathways toward public 4-year institutions, possibly due to greater access to college preparatory resources, advanced coursework, and proximity to such institutions. Town/rural mix students are more likely to complete degrees at public 2-year colleges, reflecting factors such as geographic proximity, affordability, and program alignment with local labor markets. “Other” institution graduates show less variation by location, suggesting that specialized or private pathways may draw from a broader geographic mix.
+**Interpretations** High school location type plays a modest role in determining the type of postsecondary institution from which a student graduates. Urban and mixed-community backgrounds appear to facilitate pathways toward public 4-year institutions, possibly due to greater access to college preparatory resources, advanced coursework, and proximity to such institutions. Town/rural mix students are more likely to complete degrees at public 2-year colleges, reflecting factors such as geographic proximity, affordability, and program alignment with local labor markets. “Other” institution graduates show less variation by location, suggesting that specialized or private pathways may draw from a broader geographic mix.
 
 ```{r}
 tab_xtab(var.row = data$ps.grad.InstitutionSector,
@@ -1370,11 +1298,9 @@ tab_xtab(var.row = data$ps.grad.InstitutionSector,
 
 ### avg.unemp.rate
 
-**Associations**
-Average unemployment rate shows a statistically significant relationship with postsecondary graduation sector (F(2, 49944)=93.27, p\<0.001), though the effect size is small. Tukey’s post-hoc tests indicate that graduates from public 4-year institutions come from areas with significantly lower unemployment rates than both public 2-year (-0.137) and “Other” (-0.261) institution graduates. Public 2-year graduates also come from areas with modestly lower unemployment than “Other” graduates (-0.124).
+**Associations** Average unemployment rate shows a statistically significant relationship with postsecondary graduation sector (F(2, 49944)=93.27, p\<0.001), though the effect size is small. Tukey’s post-hoc tests indicate that graduates from public 4-year institutions come from areas with significantly lower unemployment rates than both public 2-year (-0.137) and “Other” (-0.261) institution graduates. Public 2-year graduates also come from areas with modestly lower unemployment than “Other” graduates (-0.124).
 
-**Interpretations**
-Lower local unemployment rates are associated with a higher likelihood of graduating from a public 4-year institution. This pattern suggests that students in stronger labor markets may have better economic stability, community resources, and pathways to pursue and complete degrees at 4-year public universities. Conversely, students from higher-unemployment areas are more represented among public 2-year and “Other” institution graduates, which may reflect economic constraints, geographic limitations, or a preference for shorter, more affordable programs.
+**Interpretations** Lower local unemployment rates are associated with a higher likelihood of graduating from a public 4-year institution. This pattern suggests that students in stronger labor markets may have better economic stability, community resources, and pathways to pursue and complete degrees at 4-year public universities. Conversely, students from higher-unemployment areas are more represented among public 2-year and “Other” institution graduates, which may reflect economic constraints, geographic limitations, or a preference for shorter, more affordable programs.
 
 ```{r}
 summary <- aov(avg.unemp.rate ~ ps.grad.InstitutionSector, data = data)
@@ -1387,11 +1313,9 @@ TukeyHSD(summary)
 
 ### avg.wage.pct.state
 
-**Associations**
-Average wages as a percentage of the state median vary significantly by postsecondary graduation sector (F(2, 49944)=420.2, p\<0.001), though the effect size is small. Tukey’s post-hoc comparisons reveal that public 4-year graduates come from areas with higher relative wages than both “Other” (+0.009) and public 2-year (+0.018) graduates. Conversely, public 2-year graduates originate from areas with slightly lower wages compared to “Other” graduates (-0.009).
+**Associations** Average wages as a percentage of the state median vary significantly by postsecondary graduation sector (F(2, 49944)=420.2, p\<0.001), though the effect size is small. Tukey’s post-hoc comparisons reveal that public 4-year graduates come from areas with higher relative wages than both “Other” (+0.009) and public 2-year (+0.018) graduates. Conversely, public 2-year graduates originate from areas with slightly lower wages compared to “Other” graduates (-0.009).
 
-**Interpretations**
-Graduating from a public 4-year institution is more common among students from higher-income communities, even within the same state. This could indicate that higher local wages may enable greater access to 4-year programs, either through reduced financial barriers, stronger school funding, or broader educational aspirations. In contrast, public 2-year graduates are more likely to come from lower-wage areas, suggesting that economic context may influence the choice of more affordable or locally accessible options.
+**Interpretations** Graduating from a public 4-year institution is more common among students from higher-income communities, even within the same state. This could indicate that higher local wages may enable greater access to 4-year programs, either through reduced financial barriers, stronger school funding, or broader educational aspirations. In contrast, public 2-year graduates are more likely to come from lower-wage areas, suggesting that economic context may influence the choice of more affordable or locally accessible options.
 
 ```{r}
 summary <- aov(avg.wages.pct.state ~ ps.grad.InstitutionSector, data = data)
@@ -1569,35 +1493,21 @@ Overall, academic achievement emerges as the most powerful differentiator of gra
 
 ## Rank of variable importance
 
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
-| Variable                       | attended.ps.within.first.year.hsgrad | attended.ps | ps.grad  | ps.grad.location | ps.grad.InstitutionSector |
-+================================+======================================+=============+==========+==================+===========================+
-| Economic Status                | 1                                    | 1           | 1        | 🟥 **4**         | 4                         |
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
-| Race/Ethnicity                 | 2                                    | 2           | 2        | 🟥 **6**         | 5                         |
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
-| Special Education Status       | 3                                    | 3           | 4        | 5                | 3                         |
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
-| Demographic Description (RUCA) | 4                                    | 4           | 5        | 🟩 **3**         | 6                         |
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
-| Avg. Unemployment Rate         | 5                                    | 5           | 6        | 🟩 **2**         | 2                         |
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
-| Avg. Wages (% of State Median) | 6                                    | 6           | 7        | 7                | 7                         |
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
-| ACT Composite Score            | 7                                    | 7           | 8        | 🟩 **1**         | 1                         |
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
-| PSEO Participation             | 8                                    | 8           | 🟩 **3** | 8                | 8                         |
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
-| CTE Achievement                | 9                                    | 9           | 9        | 9                | 9                         |
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
-| Total CTE Courses Taken        | 10                                   | 10          | 10       | 10               | 10                        |
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
-| MCA Math                       | 11                                   | 11          | 11       | 11               | 11                        |
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
-| MCA Reading                    | 12                                   | 12          | 12       | 12               | 12                        |
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
-| MCA Science                    | 13                                   | 13          | 13       | 13               | 13                        |
-+--------------------------------+--------------------------------------+-------------+----------+------------------+---------------------------+
+| Variable | attended.ps.within.first.year.hsgrad | attended.ps | ps.grad | ps.grad.location | ps.grad.InstitutionSector |
+|----|----|----|----|----|----|
+| Economic Status | 1 | 1 | 1 | 🟥 **4** | 4 |
+| Race/Ethnicity | 2 | 2 | 2 | 🟥 **6** | 5 |
+| Special Education Status | 3 | 3 | 4 | 5 | 3 |
+| Demographic Description (RUCA) | 4 | 4 | 5 | 🟩 **3** | 6 |
+| Avg. Unemployment Rate | 5 | 5 | 6 | 🟩 **2** | 2 |
+| Avg. Wages (% of State Median) | 6 | 6 | 7 | 7 | 7 |
+| ACT Composite Score | 7 | 7 | 8 | 🟩 **1** | 1 |
+| PSEO Participation | 8 | 8 | 🟩 **3** | 8 | 8 |
+| CTE Achievement | 9 | 9 | 9 | 9 | 9 |
+| Total CTE Courses Taken | 10 | 10 | 10 | 10 | 10 |
+| MCA Math | 11 | 11 | 11 | 11 | 11 |
+| MCA Reading | 12 | 12 | 12 | 12 | 12 |
+| MCA Science | 13 | 13 | 13 | 13 | 13 |
 
 -   **ACT Composite Score** jumped from mid-tier (rank 8 in *ps.grad*) to the very top (rank 1) in *ps.grad.location* and *ps.grad.InstitutionSector*.
 -   **Economic Status** dropped from consistent #1 in early analyses to rank 4 in *ps.grad.location*.
@@ -1621,11 +1531,9 @@ Graduates’ postsecondary location choices show clear socioeconomic and mobilit
 ::: panel-tabset
 ### economic.status
 
-**Associations:**
-Cramer’s V = 0.101 (χ² = 507.534, df = 2, p \< 0.001) indicates a small but statistically significant relationship between economic status and postsecondary graduation location among graduates. Higher-income individuals are more likely to graduate from out-of-state institutions (20.6% vs. 12.9% for lower-income). Lower-income individuals are more likely to graduate from a college in their high school region (36.9% vs. 27.4% for higher-income). The share graduating from a Minnesota institution outside their home region is similar between income groups (about 50%).
+**Associations:** Cramer’s V = 0.101 (χ² = 507.534, df = 2, p \< 0.001) indicates a small but statistically significant relationship between economic status and postsecondary graduation location among graduates. Higher-income individuals are more likely to graduate from out-of-state institutions (20.6% vs. 12.9% for lower-income). Lower-income individuals are more likely to graduate from a college in their high school region (36.9% vs. 27.4% for higher-income). The share graduating from a Minnesota institution outside their home region is similar between income groups (about 50%).
 
-**Interpretation:**
-Economic status has a modest influence on postsecondary graduation location among graduates. Lower-income graduates tend to remain closer to home, with over a third staying in their high school region, while higher-income graduates display more geographic mobility, especially toward out-of-state institutions. Similar rates of graduation in other parts of Minnesota suggest that the main difference lies in the ability or willingness to leave the state entirely.
+**Interpretation:** Economic status has a modest influence on postsecondary graduation location among graduates. Lower-income graduates tend to remain closer to home, with over a third staying in their high school region, while higher-income graduates display more geographic mobility, especially toward out-of-state institutions. Similar rates of graduation in other parts of Minnesota suggest that the main difference lies in the ability or willingness to leave the state entirely.
 
 ```{r}
 data <- master.original %>%
@@ -1639,11 +1547,9 @@ tab_xtab(var.row = data$ps.grad.location,
 
 ### RaceEthnicity
 
-**Associations**
-The relationship between race/ethnicity and postsecondary graduation location is statistically significant (χ²=307.902, df=10, p\<0.001) but small in strength (Cramer's V=0.056). Across racial/ethnic groups, the proportion graduating from a college in their high school region, within Minnesota but outside their region, or out-of-state varies only modestly. Notable differences include American Indian and Asian/PI graduates having slightly higher rates of graduating in their high school region compared to other groups, and Black graduates showing a relatively higher share graduating in-region as well. White graduates closely align with the overall distribution but lean slightly toward graduating in-state but outside their high school region.
+**Associations** The relationship between race/ethnicity and postsecondary graduation location is statistically significant (χ²=307.902, df=10, p\<0.001) but small in strength (Cramer's V=0.056). Across racial/ethnic groups, the proportion graduating from a college in their high school region, within Minnesota but outside their region, or out-of-state varies only modestly. Notable differences include American Indian and Asian/PI graduates having slightly higher rates of graduating in their high school region compared to other groups, and Black graduates showing a relatively higher share graduating in-region as well. White graduates closely align with the overall distribution but lean slightly toward graduating in-state but outside their high school region.
 
-**Interpretation**
-Race/ethnicity appears to have a limited but measurable association with where individuals graduate from college. The small effect size suggests that location of graduation is more evenly distributed across groups, but some patterns emerge:
+**Interpretation** Race/ethnicity appears to have a limited but measurable association with where individuals graduate from college. The small effect size suggests that location of graduation is more evenly distributed across groups, but some patterns emerge:
 
 -   **Asian/PI and AI graduates** lean toward in-region graduation.
 -   **Black graduates** show the highest in-region proportion among groups, suggesting potential ties to community or geographic access factors.
@@ -1661,11 +1567,9 @@ tab_xtab(var.row = data$ps.grad.location,
 
 ### SpecialEdStatus
 
-**Associations**
-Special education status is significantly associated with postsecondary graduation location (χ²=259.006, df=2, p\<0.001), though the strength of the association is small (Cramer's V=0.072). Students without special education status are proportionally more likely to graduate from a Minnesota college outside their high school region (19.5% vs. 9.8%) and slightly more likely to graduate in-region (28.7% vs. 42.3%). Those with special education status are notably more concentrated in the “PS grad region” category and underrepresented in the out-of-state group.
+**Associations** Special education status is significantly associated with postsecondary graduation location (χ²=259.006, df=2, p\<0.001), though the strength of the association is small (Cramer's V=0.072). Students without special education status are proportionally more likely to graduate from a Minnesota college outside their high school region (19.5% vs. 9.8%) and slightly more likely to graduate in-region (28.7% vs. 42.3%). Those with special education status are notably more concentrated in the “PS grad region” category and underrepresented in the out-of-state group.
 
-**Interpretation**
-The data suggest that special education status may be linked to a stronger tendency to stay local for college completion. Graduates with special education status have higher in-region graduation rates and lower out-of-state rates, potentially reflecting greater reliance on local support networks, familiarity with nearby institutions, or barriers to relocating. Conversely, students without special education status display more geographic mobility both within and outside Minnesota, indicating broader postsecondary location flexibility.
+**Interpretation** The data suggest that special education status may be linked to a stronger tendency to stay local for college completion. Graduates with special education status have higher in-region graduation rates and lower out-of-state rates, potentially reflecting greater reliance on local support networks, familiarity with nearby institutions, or barriers to relocating. Conversely, students without special education status display more geographic mobility both within and outside Minnesota, indicating broader postsecondary location flexibility.
 
 ```{r}
 tab_xtab(var.row = data$ps.grad.location,
@@ -1692,11 +1596,9 @@ Overall, high school context appears to influence *where* students graduate more
 ::: panel-tabset
 ### Dem_Desc
 
-**Associations**
-Graduates from entirely urban high schools are most likely to graduate from a Minnesota institution outside their high school region (60.1%) and have the highest proportion of out-of-state graduates (22.1%). Town/rural mix graduates are more likely to remain in-region (34.3%), while urban/town/rural mix graduates show a balanced distribution between in-region (31.3%) and outside-region (49.6%) Minnesota completions
+**Associations** Graduates from entirely urban high schools are most likely to graduate from a Minnesota institution outside their high school region (60.1%) and have the highest proportion of out-of-state graduates (22.1%). Town/rural mix graduates are more likely to remain in-region (34.3%), while urban/town/rural mix graduates show a balanced distribution between in-region (31.3%) and outside-region (49.6%) Minnesota completions
 
-**Interpretations**
-High school location type appears to modestly shape where graduates complete their postsecondary education. Urban graduates display greater geographic mobility, both within Minnesota (outside their home region) and out-of-state. In contrast, rural and mixed-area graduates are more likely to stay closer to home, particularly in-region. The effect size is small (Cramer's V = 0.090), and notably weaker than associations observed in earlier analyses of *college completion versus non-completion*, indicating that once students graduate, location type plays a smaller role in determining *where* they graduate.
+**Interpretations** High school location type appears to modestly shape where graduates complete their postsecondary education. Urban graduates display greater geographic mobility, both within Minnesota (outside their home region) and out-of-state. In contrast, rural and mixed-area graduates are more likely to stay closer to home, particularly in-region. The effect size is small (Cramer's V = 0.090), and notably weaker than associations observed in earlier analyses of *college completion versus non-completion*, indicating that once students graduate, location type plays a smaller role in determining *where* they graduate.
 
 ```{r}
 tab_xtab(var.row = data$ps.grad.location,
@@ -1707,11 +1609,9 @@ tab_xtab(var.row = data$ps.grad.location,
 
 ### avg.unemp.rate
 
-**Associations**
-Unemployment rates differ modestly by graduation location. Graduates from Minnesota institutions outside their high school region have the lowest unemployment rates on average, about 0.21 percentage points lower than out-of-state graduates and 0.046 percentage points lower than in-region graduates. Out-of-state graduates have the highest unemployment rates.
+**Associations** Unemployment rates differ modestly by graduation location. Graduates from Minnesota institutions outside their high school region have the lowest unemployment rates on average, about 0.21 percentage points lower than out-of-state graduates and 0.046 percentage points lower than in-region graduates. Out-of-state graduates have the highest unemployment rates.
 
-**Interpretations**
-Where graduates complete their postsecondary education appears to have a small but statistically significant association with average unemployment rates. Completing college outside Minnesota correlates with slightly higher unemployment, while completing in Minnesota—especially outside one’s high school region—aligns with marginally better employment outcomes. These differences, though significant, are small in magnitude and weaker than the associations observed in earlier analyses on whether an individual graduates college at all. This suggests that location of graduation plays a secondary role compared to *whether* graduation occurs.
+**Interpretations** Where graduates complete their postsecondary education appears to have a small but statistically significant association with average unemployment rates. Completing college outside Minnesota correlates with slightly higher unemployment, while completing in Minnesota—especially outside one’s high school region—aligns with marginally better employment outcomes. These differences, though significant, are small in magnitude and weaker than the associations observed in earlier analyses on whether an individual graduates college at all. This suggests that location of graduation plays a secondary role compared to *whether* graduation occurs.
 
 ```{r}
 summary <- aov(avg.unemp.rate ~ ps.grad.location, data = data)
@@ -1724,11 +1624,9 @@ TukeyHSD(summary)
 
 ### avg.wage.pct.state
 
-**Associations**
-Wage outcomes vary slightly but significantly by postsecondary graduation location. Out-of-state graduates earn about 0.96 percentage points more than Minnesota graduates, while graduates from institutions within their high school region earn about 0.46 percentage points less than other Minnesota graduates. The largest gap—about 1.42 percentage points—is between out-of-state graduates and in-region graduates.
+**Associations** Wage outcomes vary slightly but significantly by postsecondary graduation location. Out-of-state graduates earn about 0.96 percentage points more than Minnesota graduates, while graduates from institutions within their high school region earn about 0.46 percentage points less than other Minnesota graduates. The largest gap—about 1.42 percentage points—is between out-of-state graduates and in-region graduates.
 
-**Interpretations**
-Although the associations are statistically robust, the effect sizes are small. Graduating from an out-of-state institution aligns with slightly higher relative wages compared to both in-state and in-region graduates. Conversely, graduating from a college within one’s high school region corresponds to marginally lower wages. These differences are notably weaker than those found in analyses focused on *whether* an individual graduates at all, reinforcing that location plays a more nuanced role in wage outcomes.
+**Interpretations** Although the associations are statistically robust, the effect sizes are small. Graduating from an out-of-state institution aligns with slightly higher relative wages compared to both in-state and in-region graduates. Conversely, graduating from a college within one’s high school region corresponds to marginally lower wages. These differences are notably weaker than those found in analyses focused on *whether* an individual graduates at all, reinforcing that location plays a more nuanced role in wage outcomes.
 
 ```{r}
 summary <- aov(avg.wages.pct.state ~ ps.grad.location, data = data)
@@ -1768,11 +1666,9 @@ By contrast, CTE participation and achievement appear less tied to postsecondary
 ::: panel-tabset
 ### ACTCompositeScore
 
-**Associations**
-ACTCompositeScore shows a strong and highly significant relationship with postsecondary graduation location (F(2, 41611) = 895.9, p \< 0.001). Mean ACT scores are highest among graduates from out-of-state institutions, followed by those graduating from other Minnesota institutions outside their high school region, and lowest for those graduating from institutions within their high school region.
+**Associations** ACTCompositeScore shows a strong and highly significant relationship with postsecondary graduation location (F(2, 41611) = 895.9, p \< 0.001). Mean ACT scores are highest among graduates from out-of-state institutions, followed by those graduating from other Minnesota institutions outside their high school region, and lowest for those graduating from institutions within their high school region.
 
-**Interpretation**
-Students who ultimately graduate from out-of-state colleges tend to have notably higher ACT scores, suggesting greater academic readiness or competitiveness that may facilitate admission to institutions beyond Minnesota. Conversely, those who remain within their high school region for postsecondary graduation tend to have the lowest ACT scores, which may reflect more limited access to selective institutions or a preference for local, potentially less competitive options. This pattern mirrors broader findings that higher standardized test scores expand geographic mobility for postsecondary attainment.
+**Interpretation** Students who ultimately graduate from out-of-state colleges tend to have notably higher ACT scores, suggesting greater academic readiness or competitiveness that may facilitate admission to institutions beyond Minnesota. Conversely, those who remain within their high school region for postsecondary graduation tend to have the lowest ACT scores, which may reflect more limited access to selective institutions or a preference for local, potentially less competitive options. This pattern mirrors broader findings that higher standardized test scores expand geographic mobility for postsecondary attainment.
 
 ```{r}
 summary <- aov(ACTCompositeScore ~ ps.grad.location, data = data)
@@ -1784,11 +1680,9 @@ TukeyHSD(summary)
 
 ### pseo.participant
 
-**Associations**
-PSEO participation is significantly but weakly associated with postsecondary graduation location (χ²(2) = 114.671, p \< 0.001, Cramer's V = 0.055). Among postsecondary graduates, those who graduated from institutions outside Minnesota have slightly higher rates of PSEO participation (20.4%) compared to those graduating within Minnesota (both in-region and out-of-region), while in-region graduates have the lowest participation rate (26.7%).
+**Associations** PSEO participation is significantly but weakly associated with postsecondary graduation location (χ²(2) = 114.671, p \< 0.001, Cramer's V = 0.055). Among postsecondary graduates, those who graduated from institutions outside Minnesota have slightly higher rates of PSEO participation (20.4%) compared to those graduating within Minnesota (both in-region and out-of-region), while in-region graduates have the lowest participation rate (26.7%).
 
-**Interpretation**
-The modest association suggests that while PSEO participation is not a dominant factor in determining where a student graduates from college, there is a small tendency for students with PSEO experience to pursue and complete degrees outside their high school region, and especially outside Minnesota. This may reflect that early college experience broadens academic options and geographic mobility, even if the effect size is small.
+**Interpretation** The modest association suggests that while PSEO participation is not a dominant factor in determining where a student graduates from college, there is a small tendency for students with PSEO experience to pursue and complete degrees outside their high school region, and especially outside Minnesota. This may reflect that early college experience broadens academic options and geographic mobility, even if the effect size is small.
 
 ```{r}
 tab_xtab(var.row = data$ps.grad.location,
@@ -1799,11 +1693,9 @@ tab_xtab(var.row = data$ps.grad.location,
 
 ### cte.achievement
 
-**Associations**
-CTE achievement shows a statistically significant but weak association with postsecondary graduation location (χ²(4) = 163.869, p \< 0.001, Cramer's V = 0.041). CTE concentrators/completors and participants are slightly more represented among graduates from their high school region or from outside Minnesota compared to non-CTE students, although differences are small in magnitude.
+**Associations** CTE achievement shows a statistically significant but weak association with postsecondary graduation location (χ²(4) = 163.869, p \< 0.001, Cramer's V = 0.041). CTE concentrators/completors and participants are slightly more represented among graduates from their high school region or from outside Minnesota compared to non-CTE students, although differences are small in magnitude.
 
-**Interpretation**
-The very small effect size suggests that CTE involvement has little bearing on whether students graduate in-region, in-state but out-of-region, or out-of-state. The slight overrepresentation of CTE concentrators/completors in out-of-region and out-of-state categories may reflect targeted career pathways or program-specific mobility, but overall, CTE engagement does not appear to strongly influence geographic patterns of postsecondary completion.
+**Interpretation** The very small effect size suggests that CTE involvement has little bearing on whether students graduate in-region, in-state but out-of-region, or out-of-state. The slight overrepresentation of CTE concentrators/completors in out-of-region and out-of-state categories may reflect targeted career pathways or program-specific mobility, but overall, CTE engagement does not appear to strongly influence geographic patterns of postsecondary completion.
 
 ```{r}
 tab_xtab(var.row = data$ps.grad.location,
@@ -1814,11 +1706,9 @@ tab_xtab(var.row = data$ps.grad.location,
 
 ### total.cte.courses.taken
 
-**Associations**
-Total CTE courses taken is significantly associated with postsecondary graduation location (F(2, 49,942) = 46.97, p \< 0.001). Although statistically significant, the magnitude of differences between groups is modest. Graduates from outside Minnesota took slightly fewer CTE courses on average compared to those graduating in Minnesota, while graduates from the high school region took slightly more than either group.
+**Associations** Total CTE courses taken is significantly associated with postsecondary graduation location (F(2, 49,942) = 46.97, p \< 0.001). Although statistically significant, the magnitude of differences between groups is modest. Graduates from outside Minnesota took slightly fewer CTE courses on average compared to those graduating in Minnesota, while graduates from the high school region took slightly more than either group.
 
-**Interpretation**
-The pattern suggests a mild regional influence in CTE course-taking, with in-region graduates showing the highest participation. This may reflect local program availability or a stronger integration between high school CTE pathways and nearby postsecondary institutions. Out-of-state graduates' lower CTE course counts could signal different career pathways, less reliance on CTE preparation, or stronger academic alignment with non-local institutions. Overall, the relationship is statistically clear but practically small.
+**Interpretation** The pattern suggests a mild regional influence in CTE course-taking, with in-region graduates showing the highest participation. This may reflect local program availability or a stronger integration between high school CTE pathways and nearby postsecondary institutions. Out-of-state graduates' lower CTE course counts could signal different career pathways, less reliance on CTE preparation, or stronger academic alignment with non-local institutions. Overall, the relationship is statistically clear but practically small.
 
 ```{r}
 summary <- aov(total.cte.courses.taken ~ ps.grad.location, data = data)
@@ -1830,11 +1720,9 @@ TukeyHSD(summary)
 
 ### MCA.M
 
-**Associations**
-Mathematics MCA scores show a strong and statistically significant association with postsecondary graduation location (F(2, 49,396) = 614, p \< 0.001). Graduates from outside Minnesota have higher average MCA math scores compared to in-state graduates, while those graduating within their high school region have lower scores than both groups.
+**Associations** Mathematics MCA scores show a strong and statistically significant association with postsecondary graduation location (F(2, 49,396) = 614, p \< 0.001). Graduates from outside Minnesota have higher average MCA math scores compared to in-state graduates, while those graduating within their high school region have lower scores than both groups.
 
-**Interpretation**
-The differences are large enough to be practically meaningful, suggesting that math achievement in high school is a key differentiator in postsecondary pathways and destinations. Higher scores among out-of-state graduates may indicate stronger academic profiles enabling broader geographic mobility, while lower scores among in-region graduates may reflect more localized postsecondary options or less selective entry requirements. This pattern reinforces the role of academic preparation—particularly in math—in shaping the scope of postsecondary choices.
+**Interpretation** The differences are large enough to be practically meaningful, suggesting that math achievement in high school is a key differentiator in postsecondary pathways and destinations. Higher scores among out-of-state graduates may indicate stronger academic profiles enabling broader geographic mobility, while lower scores among in-region graduates may reflect more localized postsecondary options or less selective entry requirements. This pattern reinforces the role of academic preparation—particularly in math—in shaping the scope of postsecondary choices.
 
 ```{r}
 summary <- aov(MCA.M ~ ps.grad.location, data = data)
@@ -1846,11 +1734,9 @@ TukeyHSD(summary)
 
 ### MCA.R
 
-**Associations**
-Reading MCA scores show a strong and statistically significant association with postsecondary graduation location (F(2, 49,191) = 527.1, p \< 0.001). Out-of-state graduates score higher than in-state graduates, while those graduating within their high school region score the lowest, with substantial gaps between each group.
+**Associations** Reading MCA scores show a strong and statistically significant association with postsecondary graduation location (F(2, 49,191) = 527.1, p \< 0.001). Out-of-state graduates score higher than in-state graduates, while those graduating within their high school region score the lowest, with substantial gaps between each group.
 
-**Interpretation**
-Reading achievement follows a clear gradient aligned with postsecondary mobility: higher scores are linked to graduating out-of-state, moderate scores to in-state graduation, and lower scores to remaining within the high school region. This suggests that strong reading skills—like math—may broaden postsecondary opportunities and geographic reach, while lower reading proficiency is more common among those whose postsecondary education remains tied to their home region.
+**Interpretation** Reading achievement follows a clear gradient aligned with postsecondary mobility: higher scores are linked to graduating out-of-state, moderate scores to in-state graduation, and lower scores to remaining within the high school region. This suggests that strong reading skills—like math—may broaden postsecondary opportunities and geographic reach, while lower reading proficiency is more common among those whose postsecondary education remains tied to their home region.
 
 ```{r}
 summary <- aov(MCA.R ~ ps.grad.location, data = data)
@@ -1863,11 +1749,9 @@ TukeyHSD(summary)
 
 ### MCA.S
 
-**Associations**
-Science MCA scores have a strong and highly significant association with postsecondary graduation location (F(2, 41,071) = 525.5, p \< 0.001). Out-of-state graduates score the highest, in-state graduates have moderate scores, and those graduating within their high school region score the lowest, with clear and substantial gaps between each group.
+**Associations** Science MCA scores have a strong and highly significant association with postsecondary graduation location (F(2, 41,071) = 525.5, p \< 0.001). Out-of-state graduates score the highest, in-state graduates have moderate scores, and those graduating within their high school region score the lowest, with clear and substantial gaps between each group.
 
-**Interpretation**
-Science proficiency mirrors the patterns seen in math and reading: higher achievement is associated with greater postsecondary mobility, particularly graduating from institutions outside Minnesota. Graduating within the high school region is linked with noticeably lower science performance, reinforcing the broader trend that higher academic achievement across core subjects is tied to pursuing education beyond local and state boundaries.
+**Interpretation** Science proficiency mirrors the patterns seen in math and reading: higher achievement is associated with greater postsecondary mobility, particularly graduating from institutions outside Minnesota. Graduating within the high school region is linked with noticeably lower science performance, reinforcing the broader trend that higher academic achievement across core subjects is tied to pursuing education beyond local and state boundaries.
 
 ```{r}
 summary <- aov(MCA.S ~ ps.grad.location, data = data)

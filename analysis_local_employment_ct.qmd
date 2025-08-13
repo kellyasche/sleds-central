@@ -976,7 +976,7 @@ We will take a look at the following variables;
 ## Summary
 
 | Variable | Type | Statistical Test | Year 1 (V/F) | Year 5 (V/F) | Year 10 (V/F) | Interpretation Summary |
-|----------|:--------:|:--------:|:--------:|:--------:|:--------:|------------|
+|-----------|:---------:|:---------:|:---------:|:---------:|:---------:|-----------|
 | Dem_Desc | Discrete | Cramer's V | 0.097 | 0.103 | 0.094 | Rural and town high schools have higher early regional employment but lower postsecondary attendance. Urban students are more likely to attend postsecondary, especially in Year 1. Effects slightly taper over time but persist. |
 | EDR | Discrete | Cramer's V | 0.072 | 0.079 | 0.081 | Central MN (EDR 7W) consistently shows the strongest regional and statewide employment. North Central (EDR 5) has high disconnection rates. East Central (EDR 7E) shifts toward statewide employment over time. |
 | avg.unemp.rate | Continuous | ANOVA | F = 56.7 | F = 27.4 | F = 20.5 | Higher county unemployment during high school is associated with disconnection and non-meaningful outcomes in early years. Gaps shrink by Year 10, suggesting delayed recovery. |
@@ -3685,7 +3685,7 @@ data <- meaningful.emp.central %>%
 These variables **consistently show strong or moderate Cramer's V values** and **clear differences in meaningful employment in the region**, making them strong candidates for inclusion in modeling.
 
 | Variable | Type | Key Insights |
-|----------------|----------------|----------------------------------------|
+|-----------------|-----------------|--------------------------------------|
 | ps.grad.location | Postsecondary | Strongest predictor of regional employment. Local grads more likely to stay. |
 | ps.grad | Postsecondary | Graduation itself reduces disconnection and improves employment outcomes. |
 | highest.cred.level | Postsecondary | Clear stepwise value: higher credential = better outcomes. |
@@ -3696,12 +3696,12 @@ These variables **consistently show strong or moderate Cramer's V values** and *
 | ACTCompositeScore | Accomplishment (cont.) | Higher scores = more statewide mobility, but not always regional. |
 | pseo.participant | Accomplishment | Linked to early employment or enrollment; reduces disconnection. |
 
-### **2. Moderate Predictors — Some Association, Less Consistency**
+## **2. Moderate Predictors — Some Association, Less Consistency**
 
 These variables show **moderate associations** with outcomes. Their predictive value may depend on how they interact with other variables and could be useful in modeling, especially when looking for cumulative effects.
 
 | Variable | Type | Key Insights |
-|----------------|----------------|----------------------------------------|
+|-----------------|-----------------|--------------------------------------|
 | SpecialEdStatus | Demographic | Somewhat lower employment, higher disconnection. |
 | Grad.year.covid | Demographic | Post-COVID grads slightly more disconnected early on. |
 | cte.achievement | Accomplishment | Boosts regional employment, especially early. |
@@ -3710,12 +3710,12 @@ These variables show **moderate associations** with outcomes. Their predictive v
 | avg.wage.pct.state | HS Characteristic (cont.) | Higher wage counties → less disconnection. Small but consistent. |
 | MCA Math & Reading | Accomplishment (cont.) | Slight association with higher employment, mostly MN-wide. |
 
-### **3. Weak or Inconsistent Predictors — Candidates for Dropping**
+## **3. Weak or Inconsistent Predictors — Candidates for Dropping**
 
 These variables showed **very weak associations** (low Cramer's V, minimal group differences) and could be considered for **dropping from modeling**, unless interaction effects suggest otherwise.
 
 | Variable | Type | Notes |
-|----------------|----------------|----------------------------------------|
+|-----------------|-----------------|--------------------------------------|
 | english.learner | Demographic | Minimal differences, especially when controlling for other variables. |
 | non.english.home | Demographic | Weak signal, may overlap with other demographics. |
 | sat.taken | Accomplishment | Tiny population, not informative. |

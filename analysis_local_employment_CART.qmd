@@ -1,0 +1,647 @@
+---
+title: "Local Employment CART Analysis"
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(fastDummies)
+library(car)
+library(glmnet)
+library(glmnetUtils)
+library(pscl)
+library(sjPlot)
+library(ggforce)
+library(rpart)
+library(rpart.plot)
+library(tidymodels)
+library(caret)
+library(themis)
+library(ranger)
+```
+
+```{r themes and shapefiles, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+```
+
+```{r master}
+master.original <- read_csv("Data/SLEDS/Masters/After analysis/Master-after-ct.csv") %>%
+  mutate(ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector == "1", "Public, 4-year", as.character(ps.grad.InstitutionSector)),
+         ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector == "4", "Public, 2-year", as.character(ps.grad.InstitutionSector)),
+         ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector == "11", "Other", as.character(ps.grad.InstitutionSector)),
+         ps.grad.location = ifelse(ps.grad.location == "PS grad EDR", "PS grad region", ps.grad.location))
+
+kable(names(master.original))
+
+kable(head(master.original))
+```
+
+# Rank of predictors
+
+Our analysis of local employment using cross-tabs, Kramer v-test, and ANOVA tables, we identified the following rank of importance regarding independent variable relationships to employment outcomes after high school;
+
+## **1. Strong Predictors of Regional Employment and Disconnection**
+
+These variables **consistently show strong or moderate Cramer's V values** and **clear differences in meaningful employment in the region**, making them strong candidates for inclusion in modeling.
+
+| Variable | Type | Key Insights |
+|-------------------|-------------------|------------------------------------|
+| ps.grad.location | Postsecondary | Strongest predictor of regional employment. Local grads more likely to stay. |
+| ps.grad | Postsecondary | Graduation itself reduces disconnection and improves employment outcomes. |
+| highest.cred.level | Postsecondary | Clear stepwise value: higher credential = better outcomes. |
+| ps.grad.InstitutionSector | Postsecondary | 2-year grads more likely to stay regional; 4-year grads more mobile. |
+| economic.status | Demographic | Low-income students consistently more disconnected, especially early. |
+| RaceEthnicity | Demographic | Persistent racial gaps. Black, AI, Hispanic students more likely disconnected. |
+| Dem_Desc | High School Characteristic | Rural grads more regionally tied; metro students more mobile/disconnected. |
+| ACTCompositeScore | Accomplishment (cont.) | Higher scores = more statewide mobility, but not always regional. |
+| pseo.participant | Accomplishment | Linked to early employment or enrollment; reduces disconnection. |
+
+## **2. Moderate Predictors — Some Association, Less Consistency**
+
+These variables show **moderate associations** with outcomes. Their predictive value may depend on how they interact with other variables and could be useful in modeling, especially when looking for cumulative effects.
+
+| Variable | Type | Key Insights |
+|-------------------|-------------------|------------------------------------|
+| SpecialEdStatus | Demographic | Somewhat lower employment, higher disconnection. |
+| Grad.year.covid | Demographic | Post-COVID grads slightly more disconnected early on. |
+| cte.achievement | Accomplishment | Boosts regional employment, especially early. |
+| total.cte.courses.taken | Accomplishment (cont.) | More courses = slight boost in employment, especially regionally. |
+| avg.unemp.rate | HS Characteristic (cont.) | Higher unemployment → more disconnection. Small effect. |
+| avg.wage.pct.state | HS Characteristic (cont.) | Higher wage counties → less disconnection. Small but consistent. |
+| MCA Math & Reading | Accomplishment (cont.) | Slight association with higher employment, mostly MN-wide. |
+
+## **3. Weak or Inconsistent Predictors — Candidates for Dropping**
+
+These variables showed **very weak associations** (low Cramer's V, minimal group differences) and could be considered for **dropping from modeling**, unless interaction effects suggest otherwise.
+
+| Variable | Type | Notes |
+|-------------------|-------------------|------------------------------------|
+| english.learner | Demographic | Minimal differences, especially when controlling for other variables. |
+| non.english.home | Demographic | Weak signal, may overlap with other demographics. |
+| sat.taken | Accomplishment | Tiny population, not informative. |
+| took.ACT | Accomplishment | Near-universal participation, little discriminatory value. |
+| ap.exam | Accomplishment | Modest effect, likely overlapping with other academic indicators. |
+
+: We now want to build a model to see which variables are most predictive and resulting in clear guidance in how regional workforce organizations can influence workforce retainment/growth among their high school graduates. We will only use the strong and moderate predictors for this analysis. Here are the predictors I will use by the type of variable;
+
+-   Demographic
+    -   economic.status
+    -   RaceEthnicity
+    -   SpecialEdStatus
+-   High school characteristics
+    -   Dem_Desc
+    -   avg.unemp.rate
+    -   avg.wage.pct.state
+-   High school accomplishments
+    -   ACTCompositeScore
+    -   pseo.participant
+    -   cte.achievement
+    -   total.cte.courses.taken
+    -   MCA Math
+    -   MCA Reading
+    -   MCA Science
+-   Post-secondary
+    -   ps.grad.location
+    -   ps.grad
+    -   highest.cred.level
+    -   ps.grad.InstitutionSector
+
+<br>
+
+# Employment states
+
+Currently, we have the following employment states for 1-, 5- and 10-years after graduating high school.
+
+-   Meaningful emp region: Individual has meaningful employment in the region of their high school.
+-   Meaningful emp MN: Individual has meaningful employment in Minnesota, but not in the region of their high school.
+-   Attending ps: Individual is attending post-secondary and does not have meaningful employment.
+-   Not meaningful, not attending ps: Individual is working in Minnesota, but it is not meaningful and is not attending post-secondary.
+-   No MN record, not attending ps: Individual does not have a MN employment record and is not attending post-secondary.
+
+<br>
+
+# Methodology
+
+This study investigates the factors that influence whether high school graduates achieve *meaningful employment in the same region* as their high school at 1, 5, and 10 years after graduation. To isolate and understand the predictors of this specific outcome, the analysis compares it separately against three alternative post-graduation statuses:
+
+1.  **Meaningful employment in Minnesota, but outside the region**
+2.  **Not meaningful employment in Minnesota and not attending post-secondary**
+3.  **No Minnesota employment record and not attending post-secondary**
+
+Graduates classified as *Attending post-secondary* at the time of measurement are excluded from the analysis, as their employment pathways are distinct and not directly comparable to full-time workforce participation.
+
+For each of the three alternative statuses and each time point (1, 5, and 10 years after graduation), a separate binary classification model is created, resulting in nine total models. This binary framework ensures that “Meaningful employment in the region” is always the positive class, allowing a direct focus on distinguishing regional retention from each alternative pathway.
+
+The modeling process follows these steps:
+
+1.  **Data Preparation** All predictor variables include demographic characteristics, high school achievement indicators, and postsecondary attainment measures. Records with missing target outcome categories are excluded. For each binary comparison, the dataset is filtered to only include the two relevant classes, with “Meaningful employment in the region” coded as the positive class.
+
+2.  **Training and Test Split** For each binary dataset, the data is randomly split into a training set (70–80%) and a testing set (20–30%) to ensure that model evaluation is conducted on previously unseen data.
+
+3.  **Preprocessing** Preprocessing steps are applied to the training data using a `recipe` in the tidymodels framework:
+
+    -   Remove near-zero variance predictors.
+    -   Impute missing values for categorical predictors with the mode and numeric predictors with the median.
+    -   Encode categorical predictors as dummy variables.
+    -   Upsample the minority class to balance class representation.
+
+4.  **Modeling**
+
+    Two machine learning methods are applied to each binary comparison:
+
+    -   **CART (Classification and Regression Tree)** for interpretability and identification of clear decision rules.
+    -   **Random Forest** for potentially higher predictive performance and more robust variable importance estimation.
+
+5.  **Evaluation** Models are evaluated on the testing set using accuracy, Cohen’s kappa, balanced accuracy, sensitivity, and specificity. Variable importance is examined to identify the most influential predictors for each comparison and time point.
+
+This approach emphasizes clarity in interpretation by focusing each model on a single binary distinction, making it easier to identify which factors most strongly differentiate graduates who achieve meaningful regional employment from those on alternative pathways.
+
+Here is the final dataset I will be using.
+
+```{r}
+data <- master.original %>%
+  select(economic.status, RaceEthnicity, SpecialEdStatus, Dem_Desc, avg.unemp.rate, avg.wages.pct.state, ACTCompositeScore, pseo.participant, cte.achievement, total.cte.courses.taken, MCA.M, MCA.R, MCA.S, ps.grad.location, ps.grad, highest.cred.level, ps.grad.InstitutionSector, grad.year.1, grad.year.5, grad.year.10)
+```
+
+<br>
+
+# Analysis - Meaningful employment region vs. Meaningful employment MN
+
+## One year after graduation
+
+### CART
+
+First I'm going to filter out the data so only individuals that had meaningful employment in the region or Minnesota are in the dataset.
+
+The table below shows that 64% of the individuals have meaningful employment in their high school region compared to 36% that have meaningful employment in Minnesota, but not their region.
+
+```{r}
+meaningful.emp.mn.grad.year.1 <- data %>%
+  select(-grad.year.5, -grad.year.10) %>%
+  filter(grad.year.1 %in% c("Meaningful emp region", "Meaningful emp MN")) %>%
+  mutate(grad.year.1 = as.factor(grad.year.1))
+
+comma(nrow(meaningful.emp.mn.grad.year.1))
+
+datatable(data = meaningful.emp.mn.grad.year.1 %>%
+            group_by(grad.year.1) %>%
+            summarize(n = n()) %>%
+            ungroup() %>%
+            mutate(pct = n / sum(n)) %>%
+            ungroup() %>%
+            select(1:3),
+          class = "cell-border stripe", 
+          filter = "top", 
+          rownames = FALSE,
+          options = list(
+            columnDefs = list(list(className = "dt-center", targets = 1:2)))) %>%
+  formatCurrency(2, "", digits = 0) %>%
+  formatPercentage(3, digits = 1)
+```
+
+<br>
+
+#### Base Model
+
+I know the base model is going to overfit and provide an overly complex tree due to having a cost penalty of 0. So I'm just going to print the complexity plot in order to see what the appropriate CP would be to minimize xerror.
+
+```{r}
+set.seed(1234)
+
+sample_ind <- sample(nrow(meaningful.emp.mn.grad.year.1), nrow(meaningful.emp.mn.grad.year.1) *.7)
+
+train <- meaningful.emp.mn.grad.year.1[sample_ind,]
+
+test <- meaningful.emp.mn.grad.year.1[-sample_ind,]
+
+#Base model
+
+meaningful.emp.mn.grad.year.1.model <- rpart(grad.year.1 ~ ., data = train, method = "class", control = rpart.control(cp = 0))
+
+# Examine the complexity plot
+printcp(meaningful.emp.mn.grad.year.1.model)
+
+plotcp(meaningful.emp.mn.grad.year.1.model)
+```
+
+The resulting model produced a VERY complex tree with too many nodes that it isn't interpretable. The xerror bottoms out at 11 splits, so there is definitely room to simplify.
+
+Next, the accuracy of the model is computed and stored in a variable base_accuracy so we can compare it to our pruned trees later.
+
+```{r}
+# Make predictions on the test set
+
+test$pred <- predict(meaningful.emp.mn.grad.year.1.model, test, type = "class")
+
+base_accuracy <- mean(test$pred == test$grad.year.1)
+
+percent(base_accuracy, accuracy = .1)
+
+# Create a confusion matrix
+cm <- caret::confusionMatrix(
+  data = factor(test$pred),
+  reference = test$grad.year.1,
+  positive = "Meaningful emp region"  # whichever class you want as "positive"
+)
+
+cm
+```
+
+The resulting test for accuracy gives me a 61.4%.
+
+**Overall Performance**
+
+-   **Accuracy (61.4%)** – The model is correct in a little over six out of ten predictions, which is worse than simply guessing the majority class ("Meaningful emp region", 63.4%). This is why the **p-value for Acc \> NIR is \~1**, meaning there’s no statistically significant improvement over the naive baseline.
+-   **Kappa (0.139)** – Very low agreement beyond chance; the model isn’t capturing much true discriminatory power between the two groups.
+
+**Class-Level Performance** (with “Meaningful emp region” as the *positive* class):
+
+-   **Sensitivity (74.2%)** – The model is fairly good at identifying actual “Meaningful emp region” cases.
+-   **Specificity (39.3%)** – The model is poor at correctly identifying “Meaningful emp MN” cases; it confuses many of them for “Meaningful emp region.”
+-   **Positive Predictive Value (68.0%)** – When the model predicts “Meaningful emp region,” it’s correct about two-thirds of the time.
+-   **Negative Predictive Value (46.7%)** – When the model predicts “Meaningful emp MN,” it’s correct less than half the time.
+
+**Balanced Accuracy (56.7%)**
+
+-   This average of sensitivity and specificity shows the model is performing only slightly better than random guessing for this binary classification.
+
+**Interpretation** Your CART model in this configuration is **over-predicting "Meaningful emp region"** and struggling to correctly identify “Meaningful emp MN” cases. This is reflected in the large difference between sensitivity (\~74%) and specificity (\~39%).\
+
+In practical terms, this means your model catches most of the “Meaningful emp region” group, but at the cost of misclassifying a lot of “Meaningful emp MN” students.
+
+<br>
+
+#### Pre-pruning
+
+Next, we need to prune. We can either pre-prune or post-prune. We will start with pre-pruning and use each method - max depth, min depth, and min bucket. It's recommended that I start with the following parameters;
+
+-   maxdepth: 6
+-   minsplit: 5% of nrow(train) which is 928.25.
+-   minbucket: round(minsplit / 3) which is 309
+
+<br>
+
+```{r pre pruning  meaningful emp MN grad year 1, echo=TRUE}
+maxdepth = 6
+
+minsplit = .05*nrow(train)
+
+minbucket = round(minsplit / 3)
+
+meaningful.emp.mn.grad.year.1.model.preprune <- rpart(grad.year.1 ~ ., data = train, method = "class", 
+                   control = rpart.control(cp = 0, maxdepth = maxdepth, minsplit = minsplit, minbucket = minbucket))
+
+test$pred <- predict(meaningful.emp.mn.grad.year.1.model.preprune, test, type = "class")
+
+accuracy_preprun <- mean(test$pred == test$grad.year.1)
+
+percent(accuracy_preprun, accuracy = .1)
+
+```
+
+Pre-pruning shows an slight increase in accuracy compared to the base model. But not much. Here is the full confusion Matrix.
+
+```{r}
+cm <- caret::confusionMatrix(
+  data = factor(test$pred, levels = levels(test$grad.year.1)),
+  reference = test$grad.year.1,
+  positive = "Meaningful emp region"  # whichever class you want as "positive"
+)
+
+cm
+```
+
+**Interpretation**
+
+-   Pre-pruning **simplified the tree**, which increased its ability to generalize — you got a noticeable accuracy bump.
+-   The model is **biased toward predicting “Meaningful emp region”**, which is why sensitivity is high but specificity is low.
+-   If your main interest is *catching* “Meaningful emp region” cases and you don’t mind some false alarms, this is okay.
+-   If you need better balance between the two classes, you might need to tweak the pruning parameters or use a more balanced model (Random Forest, or adjusting class weights).
+
+```{r pre pruning plot meaningful emp MN grad year 1, echo=TRUE}
+#Plot tree
+rpart.plot(meaningful.emp.mn.grad.year.1.model.preprune)
+
+# Examine the complexity plot
+printcp(meaningful.emp.mn.grad.year.1.model.preprune)
+
+```
+
+<br>
+
+#### Post-pruning
+
+Next, let's try postpruning. The idea here is to allow the decision tree to grow fully and observe the CP value. There are two methods for identifying the CP code;
+
+1.  Use the cp value with the lowest xerror from the base model.
+2.  Use the cp value with the next lowest xerror that is within the standard error.
+
+<br>
+
+```{r postpruning meaningful emp MN grad year 1, echo=TRUE}
+
+cp_table <- meaningful.emp.mn.grad.year.1.model$cptable
+
+min_xerror <- min(cp_table[, "xerror"])
+min_xerror_se <- cp_table[which.min(cp_table[,"xerror"]), "xstd"]
+
+threshold <- min_xerror + min_xerror_se
+
+one_se_index <- which(cp_table[, "xerror"] <= threshold)[1] 
+
+cp_1se <- cp_table[one_se_index, "CP"]
+
+optimal_cp <- meaningful.emp.mn.grad.year.1.model$cptable[which.min(meaningful.emp.mn.grad.year.1.model$cptable[, "xerror"]), "CP"]
+
+
+# Prune the hr_base_model based on the optimal cp value
+meaningful.emp.mn.grad.year.1.model.postprune <- rpart::prune(meaningful.emp.mn.grad.year.1.model, cp = optimal_cp)
+
+# Compute the accuracy of the pruned tree
+
+test$pred <- predict(meaningful.emp.mn.grad.year.1.model.postprune, test, type = "class")
+
+accuracy_postprun <- mean(test$pred == test$grad.year.1)
+
+percent(accuracy_postprun, accuracy = .1)
+
+cm <- caret::confusionMatrix(
+  data = factor(test$pred, levels = levels(test$grad.year.1)),
+  reference = test$grad.year.1,
+  positive = "Meaningful emp region"  # whichever class you want as "positive"
+)
+
+cm
+```
+
+Interpretation
+
+-   **Accuracy 64.5%** (vs NIR 63.4%): only a *small* gain over always predicting the majority (“Meaningful emp region”).
+-   **Kappa 0.13**: very low agreement beyond chance → limited discriminatory power.
+-   **Sensitivity 88.5%** (for *Meaningful emp region*): you catch most region cases.
+-   **Specificity 22.7%**: you miss a lot of *Meaningful emp MN* (many false positives for region).
+-   **Balanced accuracy 55.6%**: only slightly better than coin‑flip once we account for both classes equally.
+
+The pruned tree is **biased toward predicting “Meaningful emp region.”** It’s good at *finding* region cases, but it calls too many “Other MN” cases as region. Pruning didn’t fix that trade‑off; it just made the tree smaller.
+
+Because my **base**, **pre-pruned**, and **post-pruned** CART models all suffer from:
+
+-   **Low specificity** for “Meaningful emp MN” (lots of false positives for “Region”)
+-   **Low Kappa** (poor agreement beyond chance)
+-   **Balanced accuracy barely above 50%**
+
+…any variable importance rankings they produce will be unreliable for **identifying strong predictors** of *meaningful employment in the region*.
+
+In other words:
+
+-   The tree is **biased toward predicting “Region”**, so the splits are mostly optimized for catching Region cases rather than separating Region from MN employment accurately.
+-   That bias skews which variables get selected and how their importance is scored.
+-   You could end up over- or under-estimating the influence of certain predictors simply because the model struggles with the minority class.
+
+To get *trustworthy* importance for this question, I'll want a method that:
+
+1.  Handles class imbalance better (e.g., class weights, upsampling, balanced RF).
+2.  Achieves **balanced accuracy ≥ \~0.65–0.70** so it’s actually distinguishing the classes in a meaningful way.
+
+Once that’s in place, our variable importance will reflect *both* sides of the classification instead of just the majority class.
+
+<br>
+
+### Random Forest
+
+```{r}
+
+# --- 1. Filter to only the two classes ---
+levels_to_use <- c("Meaningful emp region", "Meaningful emp MN")
+train_rf <- subset(train, grad.year.1 %in% levels_to_use)
+test_rf  <- subset(test, grad.year.1 %in% levels_to_use)
+
+# Drop unused factor levels
+train_rf$grad.year.1 <- droplevels(train_rf$grad.year.1)
+test_rf$grad.year.1  <- droplevels(test_rf$grad.year.1)
+
+# --- 2. Compute class weights (inverse of frequency) ---
+class_counts <- table(train_rf$grad.year.1)
+class_weights <- as.numeric(sum(class_counts) / (length(class_counts) * class_counts))
+names(class_weights) <- names(class_counts)
+
+# --- 3. Train Random Forest with balanced weights ---
+rf_model <- ranger(
+  grad.year.1 ~ .,
+  data = train_rf,
+  num.trees = 500,
+  mtry = floor(sqrt(ncol(train_rf) - 1)),
+  importance = "impurity",       # or "permutation" for more reliable scores
+  probability = FALSE,
+  class.weights = class_weights,
+  seed = 123
+)
+
+# --- 4. Predict on the test set ---
+rf_pred <- predict(rf_model, data = test_rf)$predictions
+
+# --- 5. Confusion matrix & metrics ---
+cm <- caret::confusionMatrix(
+  factor(rf_pred, levels = levels(test_rf$grad.year.1)),
+  test_rf$grad.year.1,
+  positive = "Meaningful emp region"
+)
+print(cm)
+```
+
+**Overall performance**
+
+-   **Accuracy = 63.5%** → Your model is correct about two-thirds of the time, which is only marginally above the no-information baseline (63.4%).
+-   **Kappa = 0.189** → Indicates only a slight improvement over random guessing once class imbalance is accounted for.
+-   **P-Value \[Acc \> NIR\] = 0.44** → Statistically, the improvement over the baseline is not significant.
+
+**By Positive Class: Meaningful emp region**
+
+-   **Sensitivity (Recall) = 75.4%** → When someone truly has meaningful employment in the region, the model catches them about **3 out of 4 times**.
+-   **Specificity = 42.9%** → When someone does **not** have meaningful employment in the region (meaning they have meaningful emp MN instead), the model correctly identifies them less than half the time.
+-   **Balanced Accuracy = 59.2%** → Shows that performance is skewed toward detecting positives well but struggles on negatives.
+
+**Predictive Value**
+
+-   **Positive Predictive Value (Precision) = 69.6%** → About **7 out of 10** people the model predicts as “Meaningful emp region” actually are.
+-   **Negative Predictive Value = 50.1%** → If the model predicts “Meaningful emp MN,” it’s only right about half the time.
+
+### **Interpretation**
+
+-   The model is **better at detecting people in the region than excluding them**, meaning it leans toward predicting the positive class.
+-   This bias toward positives leads to **high recall but low specificity**—good for not missing positives, but at the cost of misclassifying many negatives.
+-   Because accuracy is barely better than the baseline and specificity is low, the model is **not reliable for differentiating MN from regional employment**.
+-   Random forest does give us variable importance insights, but its classification performance here is limited.
+
+If your main goal is **understanding drivers of regional employment** rather than building a highly accurate classifier, this model is still useful—**but** it won’t be great for prediction in new cases without rebalancing or improving feature engineering.
+
+```{r}
+# --- 6. Variable importance ---
+var_imp <- data.frame(
+  Variable = names(rf_model$variable.importance),
+  Importance = rf_model$variable.importance
+)
+var_imp <- var_imp[order(-var_imp$Importance), ]
+head(var_imp, 20)  # Top 20 important variables
+
+```
+
+**Key Predictors**
+
+1.  **avg.wages.pct.state** (Highest importance)
+    -   Indicates that local wage competitiveness compared to the state average is the strongest differentiator between working in MN vs in the region.
+    -   Higher relative wages may be drawing individuals into regional employment or retaining them locally.
+2.  **total.cte.courses.taken**
+    -   Suggests that the number of career and technical education (CTE) courses taken in high school plays a major role in predicting where graduates end up employed.
+    -   This might reflect how CTE programs link to local/regional job pipelines.
+3.  **avg.unemp.rate**
+    -   Regional unemployment levels are highly predictive, likely capturing labor market pull/push effects.
+4.  **MCA Math & Reading scores (MCA.M, MCA.R)**
+    -   Higher academic performance may influence mobility and employability, indirectly affecting job location.
+5.  **cte.achievement**
+    -   Not just the number of CTE courses, but completing recognized CTE achievements is important.
+
+**Moderate Predictors**
+
+-   **Demographic and background factors**: `Dem_Desc`, `RaceEthnicity`, `economic.status`
+    -   These appear in the middle of the ranking, suggesting socioeconomic and demographic patterns in mobility or job placement.
+-   **Postsecondary factors**: `highest.cred.level`, `ps.grad.InstitutionSector`, `ps.grad.location`
+    -   These indicate that where someone graduates from and at what credential level can matter, but less than the core labor market and high school preparation variables.
+
+**Notable Finding**
+
+-   **ACTCompositeScore** has a **negative importance** in your model output.
+
+    -   This can happen if the variable adds noise when controlling for others, or if it is inversely correlated with the target after accounting for stronger predictors.
+
+    -   In practice, this means ACT score is not helpful in distinguishing between MN vs regional meaningful employment here.
+
+**Bottom line:**
+Your model suggests that **local labor market conditions** (wages, unemployment), **high school CTE engagement**, and **academic performance in MCA tests** are the strongest drivers of whether someone has meaningful employment in the region vs Minnesota overall. Demographic and postsecondary factors still matter, but to a lesser extent.
+
+Let's try adding weights to see if I can get the specificity to improve.
+
+```{r}
+library(randomForest)
+
+rf_tuned <- randomForest(
+  grad.year.1 ~ ., 
+  data = train,
+  ntree = 1000,
+  mtry = floor(sqrt(ncol(train) - 1)),  # typical RF default
+  classwt = c("Meaningful emp MN" = 1.2, "Meaningful emp region" = 1),  # adjust weight for MN
+  importance = TRUE,
+  na.action = na.omit
+)
+```
