@@ -259,13 +259,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">Methodology</a></li>
   <li><a href="#analysis---meaningful-employment-region-vs.-meaningful-employment-mn" id="toc-analysis---meaningful-employment-region-vs.-meaningful-employment-mn" class="nav-link" data-scroll-target="#analysis---meaningful-employment-region-vs.-meaningful-employment-mn">Analysis - Meaningful employment region vs.&nbsp;Meaningful employment MN</a>
   <ul class="collapse">
+  <li><a href="#summary-of-analysis" id="toc-summary-of-analysis" class="nav-link" data-scroll-target="#summary-of-analysis">Summary of analysis</a></li>
+  <li><a href="#model-overviews" id="toc-model-overviews" class="nav-link" data-scroll-target="#model-overviews">Model Overviews</a></li>
   <li><a href="#one-year-after-graduation" id="toc-one-year-after-graduation" class="nav-link" data-scroll-target="#one-year-after-graduation">One year after graduation</a>
   <ul class="collapse">
-  <li><a href="#cart" id="toc-cart" class="nav-link" data-scroll-target="#cart">CART</a></li>
-  <li><a href="#random-forest" id="toc-random-forest" class="nav-link" data-scroll-target="#random-forest">Random Forest</a></li>
-  <li><a href="#key-predictors" id="toc-key-predictors" class="nav-link" data-scroll-target="#key-predictors"><strong>Key Predictors</strong></a></li>
-  <li><a href="#moderate-predictors" id="toc-moderate-predictors" class="nav-link" data-scroll-target="#moderate-predictors"><strong>Moderate Predictors</strong></a></li>
-  <li><a href="#notable-finding" id="toc-notable-finding" class="nav-link" data-scroll-target="#notable-finding"><strong>Notable Finding</strong></a></li>
+  <li><a href="#base-model" id="toc-base-model" class="nav-link" data-scroll-target="#base-model">Base Model</a></li>
+  <li><a href="#pre-pruning" id="toc-pre-pruning" class="nav-link" data-scroll-target="#pre-pruning">Pre-pruning</a></li>
+  <li><a href="#post-pruning" id="toc-post-pruning" class="nav-link" data-scroll-target="#post-pruning">Post-pruning</a></li>
+  <li><a href="#main-takeaway" id="toc-main-takeaway" class="nav-link" data-scroll-target="#main-takeaway"><strong>Main takeaway</strong></a></li>
+  </ul></li>
+  <li><a href="#five-years-after-graduation" id="toc-five-years-after-graduation" class="nav-link" data-scroll-target="#five-years-after-graduation">Five years after graduation</a>
+  <ul class="collapse">
+  <li><a href="#base-model-1" id="toc-base-model-1" class="nav-link" data-scroll-target="#base-model-1">Base Model</a></li>
+  <li><a href="#pre-pruning-1" id="toc-pre-pruning-1" class="nav-link" data-scroll-target="#pre-pruning-1">Pre-pruning</a></li>
+  <li><a href="#post-pruning-1" id="toc-post-pruning-1" class="nav-link" data-scroll-target="#post-pruning-1">Post-pruning</a></li>
+  <li><a href="#main-takeaway-1" id="toc-main-takeaway-1" class="nav-link" data-scroll-target="#main-takeaway-1"><strong>Main takeaway</strong></a></li>
+  </ul></li>
+  <li><a href="#ten-years-after-graduation" id="toc-ten-years-after-graduation" class="nav-link" data-scroll-target="#ten-years-after-graduation">Ten years after graduation</a>
+  <ul class="collapse">
+  <li><a href="#base-model-2" id="toc-base-model-2" class="nav-link" data-scroll-target="#base-model-2">Base Model</a></li>
+  <li><a href="#pre-pruning-2" id="toc-pre-pruning-2" class="nav-link" data-scroll-target="#pre-pruning-2">Pre-pruning</a></li>
+  <li><a href="#post-pruning-2" id="toc-post-pruning-2" class="nav-link" data-scroll-target="#post-pruning-2">Post-pruning</a></li>
+  <li><a href="#main-takeaway-2" id="toc-main-takeaway-2" class="nav-link" data-scroll-target="#main-takeaway-2"><strong>Main takeaway</strong></a></li>
+  <li><a href="#left-branch-postsecondary-link" id="toc-left-branch-postsecondary-link" class="nav-link" data-scroll-target="#left-branch-postsecondary-link"><strong>Left Branch – Postsecondary link</strong></a></li>
+  <li><a href="#right-branch-economic-context" id="toc-right-branch-economic-context" class="nav-link" data-scroll-target="#right-branch-economic-context"><strong>Right Branch – Economic context</strong></a></li>
   </ul></li>
   </ul></li>
   </ul>
@@ -973,9 +990,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>These variables <strong>consistently show strong or moderate Cramer’s V values</strong> and <strong>clear differences in meaningful employment in the region</strong>, making them strong candidates for inclusion in modeling.</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 48%">
+<col style="width: 26%">
+<col style="width: 26%">
+<col style="width: 47%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1038,9 +1055,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>These variables show <strong>moderate associations</strong> with outcomes. Their predictive value may depend on how they interact with other variables and could be useful in modeling, especially when looking for cumulative effects.</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 48%">
+<col style="width: 26%">
+<col style="width: 26%">
+<col style="width: 47%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1094,9 +1111,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <table class="caption-top table">
 <caption>We now want to build a model to see which variables are most predictive and resulting in clear guidance in how regional workforce organizations can influence workforce retainment/growth among their high school graduates. We will only use the strong and moderate predictors for this analysis. Here are the predictors I will use by the type of variable;</caption>
 <colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 48%">
+<col style="width: 26%">
+<col style="width: 26%">
+<col style="width: 47%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1193,18 +1210,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="1">
 <li><p><strong>Data Preparation</strong> All predictor variables include demographic characteristics, high school achievement indicators, and postsecondary attainment measures. Records with missing target outcome categories are excluded. For each binary comparison, the dataset is filtered to only include the two relevant classes, with “Meaningful employment in the region” coded as the positive class.</p></li>
 <li><p><strong>Training and Test Split</strong> For each binary dataset, the data is randomly split into a training set (70–80%) and a testing set (20–30%) to ensure that model evaluation is conducted on previously unseen data.</p></li>
-<li><p><strong>Preprocessing</strong> Preprocessing steps are applied to the training data using a <code>recipe</code> in the tidymodels framework:</p>
-<ul>
-<li>Remove near-zero variance predictors.</li>
-<li>Impute missing values for categorical predictors with the mode and numeric predictors with the median.</li>
-<li>Encode categorical predictors as dummy variables.</li>
-<li>Upsample the minority class to balance class representation.</li>
-</ul></li>
 <li><p><strong>Modeling</strong></p>
-<p>Two machine learning methods are applied to each binary comparison:</p>
+<p>We are going to use the following method to each binary comparison:</p>
 <ul>
-<li><strong>CART (Classification and Regression Tree)</strong> for interpretability and identification of clear decision rules.</li>
-<li><strong>Random Forest</strong> for potentially higher predictive performance and more robust variable importance estimation.</li>
+<li><strong>CART (Classification and Regression Tree)</strong> for interpretability and identification of clear decision rules. We will start by developing the base model, and then do pre- and post-pruning to determine which model provides the best accuracy.</li>
 </ul></li>
 <li><p><strong>Evaluation</strong> Models are evaluated on the testing set using accuracy, Cohen’s kappa, balanced accuracy, sensitivity, and specificity. Variable importance is examined to identify the most influential predictors for each comparison and time point.</p></li>
 </ol>
@@ -1212,20 +1221,67 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Here is the final dataset I will be using.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> master.original <span class="sc">%&gt;%</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(economic.status, RaceEthnicity, SpecialEdStatus, Dem_Desc, avg.unemp.rate, avg.wages.pct.state, ACTCompositeScore, pseo.participant, cte.achievement, total.cte.courses.taken, MCA.M, MCA.R, MCA.S, ps.grad.location, ps.grad, highest.cred.level, ps.grad.InstitutionSector, grad.year<span class="fl">.1</span>, grad.year<span class="fl">.5</span>, grad.year<span class="fl">.10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(economic.status, RaceEthnicity, SpecialEdStatus, Dem_Desc, avg.unemp.rate, avg.wages.pct.state, ACTCompositeScore, pseo.participant, cte.achievement, total.cte.courses.taken, MCA.M, MCA.R, MCA.S, ps.grad.location, ps.grad, highest.cred.level, ps.grad.InstitutionSector, grad.year<span class="fl">.1</span>, grad.year<span class="fl">.5</span>, grad.year<span class="fl">.10</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>data.grad.year<span class="fl">.1</span> <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>ps.grad.location, <span class="sc">-</span>ps.grad, <span class="sc">-</span>highest.cred.level, <span class="sc">-</span>ps.grad.InstitutionSector) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><br></p>
 </section>
 <section id="analysis---meaningful-employment-region-vs.-meaningful-employment-mn" class="level1">
 <h1>Analysis - Meaningful employment region vs.&nbsp;Meaningful employment MN</h1>
+<section id="summary-of-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="summary-of-analysis">Summary of analysis</h2>
+<p>One year after graduation, employment location is driven primarily by <strong>local economic conditions</strong> and <strong>high school characteristics</strong>. The most important split is <strong>regional wage competitiveness</strong> — higher-wage regions relative to the state average are strongly associated with graduates staying in the region. <strong>High school urbanicity</strong> further refines this relationship, with entirely urban schools showing distinct retention and mobility patterns. Individual-level factors like <strong>economic status</strong>, <strong>race/ethnicity</strong>, and <strong>career and technical education (CTE) achievement</strong> also play a role, suggesting that both community context and student background influence early employment geography.</p>
+<p>By five years after graduation, the influence shifts markedly toward <strong>postsecondary experiences</strong>. The single most important factor is <strong>where the graduate attended or completed postsecondary education</strong> — in-state or out-of-state. This variable dominates the first split of the tree. <strong>Educational attainment</strong> (especially holding a bachelor’s degree or higher) and <strong>ACT Composite Score</strong> further distinguish mobility patterns, with higher academic performance often linked to greater geographic mobility. While <strong>regional wages</strong> and <strong>high school urbanicity</strong> still matter, their influence is secondary to postsecondary pathways at this stage.</p>
+<p>A decade after graduation, <strong>postsecondary location</strong> remains the most powerful predictor of employment location, underscoring its long-lasting impact. However, <strong>regional wage competitiveness</strong> regains prominence as a major pull factor, suggesting that economic opportunities increasingly drive retention over time. <strong>Educational attainment</strong> remains a strong differentiator, and <strong>ACT Composite Score</strong> continues to be associated with mobility among certain educational groups. <strong>High school urbanicity</strong> still appears in the decision path, indicating that the geographic context of secondary education has a lasting, if smaller, influence even after ten years.</p>
+<p><strong>Overall trend:</strong> The models show a clear transition from <strong>local economic and high school contextual factors dominating immediately after graduation</strong> to <strong>postsecondary location and attainment driving employment geography mid- and long-term</strong>, with <strong>regional wage competitiveness</strong> and <strong>school context</strong> maintaining a consistent but evolving role throughout.</p>
+<p><br></p>
+</section>
+<section id="model-overviews" class="level2">
+<h2 class="anchored" data-anchor-id="model-overviews">Model Overviews</h2>
+<p><strong>One Year After Graduation</strong><br>
+Model: Pre-pruned classification tree<br>
+Key predictors:</p>
+<ul>
+<li><strong>Average wages (percent of state average)</strong> – higher wages in the region strongly linked to local employment.</li>
+<li><strong>High school location (urbanicity)</strong> – graduates from entirely urban schools follow different employment patterns than those from rural or mixed settings.</li>
+<li><strong>Economic status</strong> – low-income students follow different employment patterns.</li>
+<li><strong>Race/Ethnicity</strong> – certain groups (Asian/PI, Black, Hispanic) show distinct employment trends.</li>
+<li><strong>CTE achievement</strong> – CTE completion or participation is associated with remaining in the region.</li>
+</ul>
+<p>Main takeaway: At one year, <strong>local economic conditions and high school context dominate</strong>, with additional influence from economic status and race/ethnicity. Higher-wage, lower-unemployment regions predict regional employment, while high school urbanicity modifies that relationship.</p>
+<p><strong>Five Years After Graduation</strong><br>
+Model: Pre-pruned classification tree</p>
+<p>Key predictors:</p>
+<ul>
+<li><strong>Postsecondary location</strong> – whether the person graduated or attended postsecondary in-state or out-of-state is the root split.</li>
+<li><strong>Highest credential level</strong> – bachelor’s degree or higher vs.&nbsp;less education.</li>
+<li><strong>Average wages (percent of state average)</strong> – higher wages in the region predict regional employment.</li>
+<li><strong>ACT Composite Score</strong> – higher scores linked with leaving the region in certain branches.</li>
+<li><strong>High school location (urbanicity)</strong> – continues to shape employment location patterns.</li>
+</ul>
+<p>Main takeaway: By year five, <strong>postsecondary pathways become the most important factor</strong> in determining employment location, with credential level and ACT scores indicating mobility. Regional wages and high school urbanicity still matter, but education after high school is now central.</p>
+<p><strong>Ten Years After Graduation</strong><br>
+Model: Post-pruned classification tree<br>
+</p>
+<p>Key predictors:</p>
+<ul>
+<li><strong>Postsecondary location</strong> – attending or graduating in-state/out-of-state remains the root split.</li>
+<li><strong>Average wages (percent of state average)</strong> – high regional wages predict staying in-region.</li>
+<li><strong>Highest credential level</strong> – bachelor’s degree or higher, no college, or some college differentiate outcomes.</li>
+<li><strong>ACT Composite Score</strong> – higher scores linked with leaving the region in certain educational groups.</li>
+<li><strong>High school location (urbanicity)</strong> – continues to refine employment location patterns even a decade out.</li>
+</ul>
+<p>Main takeaway: At ten years, <strong>postsecondary location remains the dominant driver</strong> of where people work, but <strong>regional wage competitiveness</strong> and <strong>educational attainment</strong> heavily influence retention. ACT scores and high school urbanicity refine the picture, suggesting long-term mobility is shaped by both economic pull factors and the educational trajectory set in the first few years after graduation.</p>
+<p><br></p>
+</section>
 <section id="one-year-after-graduation" class="level2">
 <h2 class="anchored" data-anchor-id="one-year-after-graduation">One year after graduation</h2>
-<section id="cart" class="level3">
-<h3 class="anchored" data-anchor-id="cart">CART</h3>
-<p>First I’m going to filter out the data so only individuals that had meaningful employment in the region or Minnesota are in the dataset.</p>
+<p>First I’m going to filter out the data so only individuals that had meaningful employment in the region or Minnesota are in the dataset. In addition, I’m going to remove all the post-secondary variables from the model since those are variables that take place in the future. In addition, I’m going to remove individuals that are currently attending college one year after graduation. This should keep the model clean.</p>
 <p>The table below shows that 64% of the individuals have meaningful employment in their high school region compared to 36% that have meaningful employment in Minnesota, but not their region.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year<span class="fl">.1</span> <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year<span class="fl">.1</span> <span class="ot">&lt;-</span> data.grad.year<span class="fl">.1</span> <span class="sc">%&gt;%</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>grad.year<span class="fl">.5</span>, <span class="sc">-</span>grad.year<span class="fl">.10</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(grad.year<span class="fl">.1</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Meaningful emp region"</span>, <span class="st">"Meaningful emp MN"</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">grad.year.1 =</span> <span class="fu">as.factor</span>(grad.year<span class="fl">.1</span>))</span>
@@ -1249,13 +1305,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">formatCurrency</span>(<span class="dv">2</span>, <span class="st">""</span>, <span class="at">digits =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">formatPercentage</span>(<span class="dv">3</span>, <span class="at">digits =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-b600bc8c4982aeb4bc5b" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-b600bc8c4982aeb4bc5b">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"factor\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"width: 100%; display: none;\">\n      <select multiple=\"multiple\" style=\"width: 100%;\" data-options=\"[&quot;Meaningful emp MN&quot;,&quot;Meaningful emp region&quot;]\"><\/select>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"9653\" data-max=\"16869\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.363961993816454\" data-max=\"0.636038006183546\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["Meaningful emp MN","Meaningful emp region"],[9653,16869],[0.3639619938164543,0.6360380061835458]],"container":"<table class=\"cell-border stripe\">\n  <thead>\n    <tr>\n      <th>grad.year.1<\/th>\n      <th>n<\/th>\n      <th>pct<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"targets":2,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatPercentage(data, 1, 3, \",\", \".\", null);\n  }"},{"targets":1,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatCurrency(data, \"\", 0, 3, \",\", \".\", true, null);\n  }"},{"className":"dt-center","targets":[1,2]},{"name":"grad.year.1","targets":0},{"name":"n","targets":1},{"name":"pct","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render"],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-d1ea51afe5c48a4f86d6" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-d1ea51afe5c48a4f86d6">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"factor\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"width: 100%; display: none;\">\n      <select multiple=\"multiple\" style=\"width: 100%;\" data-options=\"[&quot;Meaningful emp MN&quot;,&quot;Meaningful emp region&quot;]\"><\/select>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"9653\" data-max=\"16869\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.363961993816454\" data-max=\"0.636038006183546\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["Meaningful emp MN","Meaningful emp region"],[9653,16869],[0.3639619938164543,0.6360380061835458]],"container":"<table class=\"cell-border stripe\">\n  <thead>\n    <tr>\n      <th>grad.year.1<\/th>\n      <th>n<\/th>\n      <th>pct<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"targets":2,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatPercentage(data, 1, 3, \",\", \".\", null);\n  }"},{"targets":1,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatCurrency(data, \"\", 0, 3, \",\", \".\", true, null);\n  }"},{"className":"dt-center","targets":[1,2]},{"name":"grad.year.1","targets":0},{"name":"n","targets":1},{"name":"pct","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render"],"jsHooks":[]}</script>
 </div>
 </div>
 <p><br></p>
-<section id="base-model" class="level4">
-<h4 class="anchored" data-anchor-id="base-model">Base Model</h4>
+<section id="base-model" class="level3">
+<h3 class="anchored" data-anchor-id="base-model">Base Model</h3>
 <p>I know the base model is going to overfit and provide an overly complex tree due to having a cost penalty of 0. So I’m just going to print the complexity plot in order to see what the appropriate CP would be to minimize xerror.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
@@ -1270,8 +1326,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year.<span class="fl">1.</span>model <span class="ot">&lt;-</span> <span class="fu">rpart</span>(grad.year<span class="fl">.1</span> <span class="sc">~</span> ., <span class="at">data =</span> train, <span class="at">method =</span> <span class="st">"class"</span>, <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="dv">0</span>))</span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Examine the complexity plot</span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Accuracy</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model, test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>accuracy_base <span class="ot">&lt;-</span> <span class="fu">mean</span>(test<span class="sc">$</span>pred <span class="sc">==</span> test<span class="sc">$</span>grad.year<span class="fl">.1</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="fu">percent</span>(accuracy_base, <span class="at">accuracy =</span> .<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "59.4%"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Examine the complexity plot</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Classification tree:
@@ -1279,14 +1345,11 @@ rpart(formula = grad.year.1 ~ ., data = train, method = "class",
     control = rpart.control(cp = 0))
 
 Variables actually used in tree construction:
- [1] ACTCompositeScore         avg.unemp.rate           
- [3] avg.wages.pct.state       cte.achievement          
- [5] Dem_Desc                  economic.status          
- [7] highest.cred.level        MCA.M                    
- [9] MCA.R                     MCA.S                    
-[11] ps.grad.InstitutionSector ps.grad.location         
-[13] pseo.participant          RaceEthnicity            
-[15] SpecialEdStatus           total.cte.courses.taken  
+ [1] ACTCompositeScore       avg.unemp.rate          avg.wages.pct.state    
+ [4] cte.achievement         Dem_Desc                economic.status        
+ [7] MCA.M                   MCA.R                   MCA.S                  
+[10] pseo.participant        RaceEthnicity           SpecialEdStatus        
+[13] total.cte.courses.taken
 
 Root node error: 6744/18565 = 0.36326
 
@@ -1294,60 +1357,52 @@ n= 18565
 
            CP nsplit rel error  xerror      xstd
 1  1.4087e-02      0   1.00000 1.00000 0.0097167
-2  4.7944e-03      2   0.97183 0.97183 0.0096556
-3  4.1518e-03      5   0.95744 0.97375 0.0096599
-4  2.9656e-03      6   0.95329 0.96204 0.0096332
-5  2.4466e-03      8   0.94736 0.96085 0.0096304
-6  1.7794e-03     10   0.94247 0.96041 0.0096294
-7  1.4828e-03     11   0.94069 0.95922 0.0096266
-8  1.3345e-03     14   0.93550 0.96278 0.0096349
-9  9.3911e-04     16   0.93283 0.96174 0.0096325
-10 8.8968e-04     19   0.93001 0.96812 0.0096472
-11 8.4025e-04     20   0.92912 0.96975 0.0096509
-12 8.1554e-04     24   0.92556 0.97109 0.0096539
-13 7.9083e-04     34   0.91578 0.97583 0.0096646
-14 7.7847e-04     37   0.91340 0.97435 0.0096612
-15 7.4140e-04     51   0.89961 0.97420 0.0096609
-16 7.0433e-04     55   0.89665 0.97464 0.0096619
-17 6.6726e-04     64   0.88953 0.97257 0.0096572
-18 5.9312e-04     72   0.88419 0.97494 0.0096626
-19 5.4369e-04    104   0.86343 0.97583 0.0096646
-20 5.3381e-04    129   0.84653 0.97672 0.0096665
-21 5.1898e-04    135   0.84297 0.97805 0.0096695
-22 4.9427e-04    137   0.84193 0.97865 0.0096708
-23 4.4484e-04    147   0.83674 0.98324 0.0096809
-24 4.0777e-04    196   0.81435 0.98873 0.0096928
-25 3.9541e-04    207   0.80961 0.99303 0.0097021
-26 3.8129e-04    215   0.80620 0.99333 0.0097027
-27 3.7070e-04    223   0.80308 0.99007 0.0096957
-28 3.4599e-04    265   0.78648 0.99125 0.0096983
-29 2.9656e-04    275   0.78277 1.00341 0.0097238
-30 2.5949e-04    395   0.74407 1.01023 0.0097378
-31 2.4713e-04    401   0.74244 1.01394 0.0097452
-32 2.2242e-04    435   0.73339 1.02135 0.0097599
-33 2.1418e-04    472   0.72420 1.02595 0.0097689
-34 1.9771e-04    490   0.71856 1.02728 0.0097715
-35 1.8535e-04    507   0.71471 1.03262 0.0097816
-36 1.7299e-04    511   0.71397 1.03396 0.0097842
-37 1.4828e-04    517   0.71293 1.03811 0.0097919
-38 1.2710e-04    636   0.69469 1.04167 0.0097985
-39 1.1862e-04    643   0.69380 1.04671 0.0098077
-40 1.1121e-04    665   0.68846 1.04953 0.0098128
-41 1.0591e-04    709   0.68238 1.05056 0.0098147
-42 9.8853e-05    716   0.68164 1.05116 0.0098157
-43 8.8968e-05    741   0.67838 1.05086 0.0098152
-44 7.4140e-05    749   0.67719 1.05694 0.0098260
-45 6.1783e-05    799   0.67349 1.05842 0.0098285
-46 5.9312e-05    811   0.67275 1.06421 0.0098385
-47 4.9427e-05    826   0.67186 1.07192 0.0098515
-48 4.2366e-05    850   0.67067 1.07236 0.0098523
-49 3.7070e-05    857   0.67037 1.07503 0.0098567
-50 2.9656e-05    865   0.67008 1.07503 0.0098567
-51 2.4713e-05    870   0.66993 1.07829 0.0098620
-52 1.8535e-05    876   0.66978 1.07903 0.0098632
-53 0.0000e+00    884   0.66963 1.07903 0.0098632</code></pre>
+2  9.9348e-03      1   0.98591 1.00445 0.0097260
+3  2.9656e-03      2   0.97598 0.98384 0.0096822
+4  2.5949e-03      3   0.97301 0.98310 0.0096806
+5  2.2242e-03      6   0.96515 0.97969 0.0096731
+6  1.1121e-03     10   0.95611 0.97894 0.0096715
+7  1.0380e-03     15   0.95003 0.98458 0.0096839
+8  9.4899e-04     16   0.94899 0.98725 0.0096896
+9  8.5261e-04     21   0.94425 0.98977 0.0096951
+10 7.9083e-04     26   0.93995 0.99244 0.0097008
+11 7.4140e-04     29   0.93757 0.99437 0.0097049
+12 7.2286e-04     31   0.93609 0.99437 0.0097049
+13 6.9197e-04     42   0.92749 0.99778 0.0097121
+14 6.6726e-04     49   0.92215 0.99881 0.0097143
+15 5.9312e-04     51   0.92082 0.99970 0.0097161
+16 5.6841e-04     57   0.91726 1.00178 0.0097204
+17 5.4369e-04     65   0.91266 1.00534 0.0097278
+18 5.1898e-04     79   0.90273 1.00593 0.0097290
+19 4.9427e-04    120   0.87559 1.00638 0.0097299
+20 4.4484e-04    134   0.86625 1.00801 0.0097333
+21 4.0777e-04    184   0.84371 1.01260 0.0097426
+22 3.9541e-04    193   0.83971 1.01260 0.0097426
+23 3.7070e-04    200   0.83689 1.01601 0.0097494
+24 3.4599e-04    266   0.80738 1.01572 0.0097488
+25 3.3363e-04    272   0.80531 1.01750 0.0097523
+26 2.9656e-04    276   0.80397 1.02417 0.0097654
+27 2.5949e-04    332   0.78544 1.02432 0.0097657
+28 2.4713e-04    357   0.77758 1.02832 0.0097735
+29 2.2242e-04    363   0.77610 1.03010 0.0097769
+30 2.0759e-04    424   0.76186 1.03499 0.0097861
+31 1.9771e-04    445   0.75638 1.03840 0.0097925
+32 1.8535e-04    480   0.74778 1.04256 0.0098002
+33 1.7794e-04    492   0.74540 1.04493 0.0098045
+34 1.7299e-04    504   0.74318 1.04523 0.0098050
+35 1.6681e-04    516   0.74007 1.04523 0.0098050
+36 1.4828e-04    526   0.73814 1.05664 0.0098254
+37 1.1121e-04    706   0.70878 1.06213 0.0098350
+38 9.8853e-05    734   0.70522 1.06954 0.0098476
+39 8.8968e-05    755   0.70314 1.07162 0.0098510
+40 7.4140e-05    766   0.70181 1.08200 0.0098680
+41 4.9427e-05    819   0.69781 1.08422 0.0098716
+42 3.7070e-05    840   0.69677 1.09238 0.0098844
+43 2.9656e-05    856   0.69617 1.09327 0.0098858
+44 2.1183e-05    876   0.69558 1.09534 0.0098890
+45 0.0000e+00    883   0.69543 1.09534 0.0098890</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1356,165 +1411,46 @@ n= 18565
 </div>
 </div>
 </div>
-<p>The resulting model produced a VERY complex tree with too many nodes that it isn’t interpretable. The xerror bottoms out at 11 splits, so there is definitely room to simplify.</p>
-<p>Next, the accuracy of the model is computed and stored in a variable base_accuracy so we can compare it to our pruned trees later.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Make predictions on the test set</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model, test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>base_accuracy <span class="ot">&lt;-</span> <span class="fu">mean</span>(test<span class="sc">$</span>pred <span class="sc">==</span> test<span class="sc">$</span>grad.year<span class="fl">.1</span>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">percent</span>(base_accuracy, <span class="at">accuracy =</span> .<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "61.4%"</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a confusion matrix</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>cm <span class="ot">&lt;-</span> caret<span class="sc">::</span><span class="fu">confusionMatrix</span>(</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">factor</span>(test<span class="sc">$</span>pred),</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">reference =</span> test<span class="sc">$</span>grad.year<span class="fl">.1</span>,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">positive =</span> <span class="st">"Meaningful emp region"</span>  <span class="co"># whichever class you want as "positive"</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>cm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Confusion Matrix and Statistics
-
-                       Reference
-Prediction              Meaningful emp MN Meaningful emp region
-  Meaningful emp MN                  1142                  1304
-  Meaningful emp region              1767                  3744
-                                               
-               Accuracy : 0.6141               
-                 95% CI : (0.6033, 0.6248)     
-    No Information Rate : 0.6344               
-    P-Value [Acc &gt; NIR] : 0.9999               
-                                               
-                  Kappa : 0.1389               
-                                               
- Mcnemar's Test P-Value : &lt;2e-16               
-                                               
-            Sensitivity : 0.7417               
-            Specificity : 0.3926               
-         Pos Pred Value : 0.6794               
-         Neg Pred Value : 0.4669               
-             Prevalence : 0.6344               
-         Detection Rate : 0.4705               
-   Detection Prevalence : 0.6926               
-      Balanced Accuracy : 0.5671               
-                                               
-       'Positive' Class : Meaningful emp region
-                                               </code></pre>
-</div>
-</div>
-<p>The resulting test for accuracy gives me a 61.4%.</p>
-<p><strong>Overall Performance</strong></p>
+<p><strong>Key takeaways from base tree results</strong></p>
 <ul>
-<li><strong>Accuracy (61.4%)</strong> – The model is correct in a little over six out of ten predictions, which is worse than simply guessing the majority class (“Meaningful emp region”, 63.4%). This is why the <strong>p-value for Acc &gt; NIR is ~1</strong>, meaning there’s no statistically significant improvement over the naive baseline.</li>
-<li><strong>Kappa (0.139)</strong> – Very low agreement beyond chance; the model isn’t capturing much true discriminatory power between the two groups.</li>
+<li>Accuracy: <strong>59.4%</strong> (lower than the ~64% you had with post-secondary variables included)</li>
+<li>The tree is using <strong>13 variables</strong> from demographics, high school characteristics, and high school accomplishments</li>
+<li>The lowest cross-validation error (xerror) in this table is around <strong>0.97894</strong> at <strong>cp ≈ 0.0011121</strong> (nsplit = 10) — although several close values occur between cp = 0.002–0.001</li>
 </ul>
-<p><strong>Class-Level Performance</strong> (with “Meaningful emp region” as the <em>positive</em> class):</p>
-<ul>
-<li><strong>Sensitivity (74.2%)</strong> – The model is fairly good at identifying actual “Meaningful emp region” cases.</li>
-<li><strong>Specificity (39.3%)</strong> – The model is poor at correctly identifying “Meaningful emp MN” cases; it confuses many of them for “Meaningful emp region.”</li>
-<li><strong>Positive Predictive Value (68.0%)</strong> – When the model predicts “Meaningful emp region,” it’s correct about two-thirds of the time.</li>
-<li><strong>Negative Predictive Value (46.7%)</strong> – When the model predicts “Meaningful emp MN,” it’s correct less than half the time.</li>
-</ul>
-<p><strong>Balanced Accuracy (56.7%)</strong></p>
-<ul>
-<li>This average of sensitivity and specificity shows the model is performing only slightly better than random guessing for this binary classification.</li>
-</ul>
-<p><strong>Interpretation</strong> Your CART model in this configuration is <strong>over-predicting “Meaningful emp region”</strong> and struggling to correctly identify “Meaningful emp MN” cases. This is reflected in the large difference between sensitivity (~74%) and specificity (~39%).<br>
-</p>
-<p>In practical terms, this means your model catches most of the “Meaningful emp region” group, but at the cost of misclassifying a lot of “Meaningful emp MN” students.</p>
 <p><br></p>
 </section>
-<section id="pre-pruning" class="level4">
-<h4 class="anchored" data-anchor-id="pre-pruning">Pre-pruning</h4>
+<section id="pre-pruning" class="level3">
+<h3 class="anchored" data-anchor-id="pre-pruning">Pre-pruning</h3>
 <p>Next, we need to prune. We can either pre-prune or post-prune. We will start with pre-pruning and use each method - max depth, min depth, and min bucket. It’s recommended that I start with the following parameters;</p>
 <ul>
-<li>maxdepth: 6</li>
-<li>minsplit: 5% of nrow(train) which is 928.25.</li>
-<li>minbucket: round(minsplit / 3) which is 309</li>
+<li>maxdepth: 5</li>
+<li>minsplit: round(2% of nrow(train)) which is 371.</li>
+<li>minbucket: round(minsplit / 3) which is 124</li>
+<li>cp = 0</li>
 </ul>
 <p><br></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>maxdepth <span class="ot">=</span> <span class="dv">6</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>minsplit <span class="ot">=</span> .<span class="dv">05</span><span class="sc">*</span><span class="fu">nrow</span>(train)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>minbucket <span class="ot">=</span> <span class="fu">round</span>(minsplit <span class="sc">/</span> <span class="dv">3</span>)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.preprune <span class="ot">&lt;-</span> <span class="fu">rpart</span>(grad.year<span class="fl">.1</span> <span class="sc">~</span> ., <span class="at">data =</span> train, <span class="at">method =</span> <span class="st">"class"</span>, </span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>                   <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="dv">0</span>, <span class="at">maxdepth =</span> maxdepth, <span class="at">minsplit =</span> minsplit, <span class="at">minbucket =</span> minbucket))</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.preprune, test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>accuracy_preprun <span class="ot">&lt;-</span> <span class="fu">mean</span>(test<span class="sc">$</span>pred <span class="sc">==</span> test<span class="sc">$</span>grad.year<span class="fl">.1</span>)</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="fu">percent</span>(accuracy_preprun, <span class="at">accuracy =</span> .<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>maxdepth <span class="ot">=</span> <span class="dv">5</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>minsplit <span class="ot">=</span> <span class="fu">round</span>(.<span class="dv">02</span><span class="sc">*</span><span class="fu">nrow</span>(train))</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>minbucket <span class="ot">=</span> <span class="fu">round</span>(minsplit <span class="sc">/</span> <span class="dv">3</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.preprune <span class="ot">&lt;-</span> <span class="fu">rpart</span>(grad.year<span class="fl">.1</span> <span class="sc">~</span> ., <span class="at">data =</span> train, <span class="at">method =</span> <span class="st">"class"</span>, </span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                   <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="dv">0</span>, <span class="at">maxdepth =</span> maxdepth, <span class="at">minsplit =</span> minsplit, <span class="at">minbucket =</span> minbucket))</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Accuracy</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.preprune, test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>accuracy_preprun <span class="ot">&lt;-</span> <span class="fu">mean</span>(test<span class="sc">$</span>pred <span class="sc">==</span> test<span class="sc">$</span>grad.year<span class="fl">.1</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="fu">percent</span>(accuracy_preprun, <span class="at">accuracy =</span> .<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "64.5%"</code></pre>
+<pre><code>[1] "63.9%"</code></pre>
 </div>
-</div>
-<p>Pre-pruning shows an slight increase in accuracy compared to the base model. But not much. Here is the full confusion Matrix.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>cm <span class="ot">&lt;-</span> caret<span class="sc">::</span><span class="fu">confusionMatrix</span>(</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">factor</span>(test<span class="sc">$</span>pred, <span class="at">levels =</span> <span class="fu">levels</span>(test<span class="sc">$</span>grad.year<span class="fl">.1</span>)),</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">reference =</span> test<span class="sc">$</span>grad.year<span class="fl">.1</span>,</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">positive =</span> <span class="st">"Meaningful emp region"</span>  <span class="co"># whichever class you want as "positive"</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>cm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Confusion Matrix and Statistics
-
-                       Reference
-Prediction              Meaningful emp MN Meaningful emp region
-  Meaningful emp MN                   762                   679
-  Meaningful emp region              2147                  4369
-                                               
-               Accuracy : 0.6448               
-                 95% CI : (0.6342, 0.6554)     
-    No Information Rate : 0.6344               
-    P-Value [Acc &gt; NIR] : 0.02722              
-                                               
-                  Kappa : 0.1427               
-                                               
- Mcnemar's Test P-Value : &lt; 2e-16              
-                                               
-            Sensitivity : 0.8655               
-            Specificity : 0.2619               
-         Pos Pred Value : 0.6705               
-         Neg Pred Value : 0.5288               
-             Prevalence : 0.6344               
-         Detection Rate : 0.5491               
-   Detection Prevalence : 0.8189               
-      Balanced Accuracy : 0.5637               
-                                               
-       'Positive' Class : Meaningful emp region
-                                               </code></pre>
-</div>
-</div>
-<p><strong>Interpretation</strong></p>
-<ul>
-<li>Pre-pruning <strong>simplified the tree</strong>, which increased its ability to generalize — you got a noticeable accuracy bump.</li>
-<li>The model is <strong>biased toward predicting “Meaningful emp region”</strong>, which is why sensitivity is high but specificity is low.</li>
-<li>If your main interest is <em>catching</em> “Meaningful emp region” cases and you don’t mind some false alarms, this is okay.</li>
-<li>If you need better balance between the two classes, you might need to tweak the pruning parameters or use a more balanced model (Random Forest, or adjusting class weights).</li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Plot tree</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rpart.plot</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.preprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="analysis_local_employment_CART_files/figure-html/pre pruning plot meaningful emp MN grad year 1-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Examine the complexity plot</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.preprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Examine the complexity plot</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.preprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Classification tree:
@@ -1523,8 +1459,9 @@ rpart(formula = grad.year.1 ~ ., data = train, method = "class",
         minbucket = minbucket))
 
 Variables actually used in tree construction:
-[1] avg.wages.pct.state Dem_Desc            highest.cred.level 
-[4] ps.grad.location   
+[1] avg.unemp.rate          avg.wages.pct.state     cte.achievement        
+[4] Dem_Desc                economic.status         RaceEthnicity          
+[7] total.cte.courses.taken
 
 Root node error: 6744/18565 = 0.36326
 
@@ -1532,278 +1469,1001 @@ n= 18565
 
          CP nsplit rel error  xerror      xstd
 1 0.0140866      0   1.00000 1.00000 0.0097167
-2 0.0099348      1   0.98591 1.00148 0.0097198
-3 0.0068209      2   0.97598 0.98280 0.0096800
-4 0.0063019      3   0.96916 0.98013 0.0096741
-5 0.0023725      5   0.95655 0.96782 0.0096465
-6 0.0000000      6   0.95418 0.96738 0.0096455</code></pre>
+2 0.0099348      1   0.98591 1.00208 0.0097211
+3 0.0037070      2   0.97598 0.97731 0.0096679
+4 0.0029656      3   0.97227 0.97761 0.0096685
+5 0.0025949      4   0.96931 0.98176 0.0096777
+6 0.0019276      7   0.96145 0.97894 0.0096715
+7 0.0011862      8   0.95952 0.97909 0.0096718
+8 0.0007414      9   0.95833 0.98147 0.0096770
+9 0.0000000     11   0.95685 0.99733 0.0097112</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.preprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_local_employment_CART_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
 </div>
+</div>
+<p>This is a nice jump — going from <strong>59.4%</strong> in the base model to <strong>63.9%</strong> with pre-pruning shows the simpler tree is generalizing better.</p>
+<p>A few things stand out:</p>
+<ul>
+<li><strong>Variables used dropped from 13 → 7</strong> — the tree is focusing mostly on economic and regional labor market factors, plus CTE accomplishments and demographics.</li>
+<li>The lowest cross-validation error (<strong>xerror = 0.97731</strong>) happens at <strong>nsplit = 2, cp ≈ 0.003707</strong> — but several later splits are very close in error, so the 1-SE rule will likely choose an even simpler model in post-pruning.</li>
+<li>Pre-pruning has already reduced overfitting by limiting depth and split size — post-pruning now just needs to trim a bit further.</li>
+</ul>
+<p>If we follow the workflow:</p>
+<ol type="1">
+<li><p><strong>Base model</strong> → done (59.4%)</p></li>
+<li><p><strong>Pre-pruning</strong> → done (63.9%)</p></li>
+<li><p><strong>Post-pruning</strong> → use the <strong>cp table from this pre-pruned model</strong>, find the <code>cp</code> using the 1-SE rule, and prune.</p></li>
+</ol>
 <p><br></p>
 </section>
-<section id="post-pruning" class="level4">
-<h4 class="anchored" data-anchor-id="post-pruning">Post-pruning</h4>
-<p>Next, let’s try postpruning. The idea here is to allow the decision tree to grow fully and observe the CP value. There are two methods for identifying the CP code;</p>
+<section id="post-pruning" class="level3">
+<h3 class="anchored" data-anchor-id="post-pruning">Post-pruning</h3>
+<p>The idea here is to allow the decision tree to grow fully and observe the CP value. There are two methods for identifying the CP code;</p>
 <ol type="1">
 <li>Use the cp value with the lowest xerror from the base model.</li>
 <li>Use the cp value with the next lowest xerror that is within the standard error.</li>
 </ol>
+<p>Since the lowest xerror had a CP = 0, we will use the 1-SE rule.</p>
 <p><br></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>cp_table <span class="ot">&lt;-</span> meaningful.emp.mn.grad.year.<span class="fl">1.</span>model<span class="sc">$</span>cptable</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>min_xerror <span class="ot">&lt;-</span> <span class="fu">min</span>(cp_table[, <span class="st">"xerror"</span>])</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>min_xerror_se <span class="ot">&lt;-</span> cp_table[<span class="fu">which.min</span>(cp_table[,<span class="st">"xerror"</span>]), <span class="st">"xstd"</span>]</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">&lt;-</span> min_xerror <span class="sc">+</span> min_xerror_se</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>one_se_index <span class="ot">&lt;-</span> <span class="fu">which</span>(cp_table[, <span class="st">"xerror"</span>] <span class="sc">&lt;=</span> threshold)[<span class="dv">1</span>] </span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>cp_1se <span class="ot">&lt;-</span> cp_table[one_se_index, <span class="st">"CP"</span>]</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>optimal_cp <span class="ot">&lt;-</span> meaningful.emp.mn.grad.year.<span class="fl">1.</span>model<span class="sc">$</span>cptable[<span class="fu">which.min</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model<span class="sc">$</span>cptable[, <span class="st">"xerror"</span>]), <span class="st">"CP"</span>]</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Prune the hr_base_model based on the optimal cp value</span></span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.postprune <span class="ot">&lt;-</span> rpart<span class="sc">::</span><span class="fu">prune</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model, <span class="at">cp =</span> optimal_cp)</span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the accuracy of the pruned tree</span></span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.postprune, test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>accuracy_postprun <span class="ot">&lt;-</span> <span class="fu">mean</span>(test<span class="sc">$</span>pred <span class="sc">==</span> test<span class="sc">$</span>grad.year<span class="fl">.1</span>)</span>
-<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a><span class="fu">percent</span>(accuracy_postprun, <span class="at">accuracy =</span> .<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>cp_table <span class="ot">&lt;-</span> meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.preprune<span class="sc">$</span>cptable</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>min_xerror <span class="ot">&lt;-</span> <span class="fu">min</span>(cp_table[, <span class="st">"xerror"</span>])</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>min_xerror_se <span class="ot">&lt;-</span> cp_table[<span class="fu">which.min</span>(cp_table[,<span class="st">"xerror"</span>]), <span class="st">"xstd"</span>]</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">&lt;-</span> min_xerror <span class="sc">+</span> min_xerror_se</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>one_se_index <span class="ot">&lt;-</span> <span class="fu">which</span>(cp_table[, <span class="st">"xerror"</span>] <span class="sc">&lt;=</span> threshold)[<span class="dv">1</span>] </span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>cp_1se <span class="ot">&lt;-</span> cp_table[one_se_index, <span class="st">"CP"</span>]</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>optimal_cp <span class="ot">&lt;-</span> meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.preprune<span class="sc">$</span>cptable[<span class="fu">which.min</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.preprune<span class="sc">$</span>cptable[, <span class="st">"xerror"</span>]), <span class="st">"CP"</span>]</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Prune the hr_base_model based on the optimal cp value</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.postprune <span class="ot">&lt;-</span> rpart<span class="sc">::</span><span class="fu">prune</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.preprune, <span class="at">cp =</span> cp_1se)</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the accuracy of the pruned tree</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.postprune, test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>accuracy_postprun <span class="ot">&lt;-</span> <span class="fu">mean</span>(test<span class="sc">$</span>pred <span class="sc">==</span> test<span class="sc">$</span>grad.year<span class="fl">.1</span>)</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="fu">percent</span>(accuracy_postprun, <span class="at">accuracy =</span> .<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "64.5%"</code></pre>
+<pre><code>[1] "63.9%"</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>cm <span class="ot">&lt;-</span> caret<span class="sc">::</span><span class="fu">confusionMatrix</span>(</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">factor</span>(test<span class="sc">$</span>pred, <span class="at">levels =</span> <span class="fu">levels</span>(test<span class="sc">$</span>grad.year<span class="fl">.1</span>)),</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">reference =</span> test<span class="sc">$</span>grad.year<span class="fl">.1</span>,</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">positive =</span> <span class="st">"Meaningful emp region"</span>  <span class="co"># whichever class you want as "positive"</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>cm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Examine the complexity plot</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.postprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Confusion Matrix and Statistics
+<pre><code>
+Classification tree:
+rpart(formula = grad.year.1 ~ ., data = train, method = "class", 
+    control = rpart.control(cp = 0, maxdepth = maxdepth, minsplit = minsplit, 
+        minbucket = minbucket))
 
-                       Reference
-Prediction              Meaningful emp MN Meaningful emp region
-  Meaningful emp MN                   660                   579
-  Meaningful emp region              2249                  4469
-                                               
-               Accuracy : 0.6446               
-                 95% CI : (0.634, 0.6551)      
-    No Information Rate : 0.6344               
-    P-Value [Acc &gt; NIR] : 0.03029              
-                                               
-                  Kappa : 0.1277               
-                                               
- Mcnemar's Test P-Value : &lt; 2e-16              
-                                               
-            Sensitivity : 0.8853               
-            Specificity : 0.2269               
-         Pos Pred Value : 0.6652               
-         Neg Pred Value : 0.5327               
-             Prevalence : 0.6344               
-         Detection Rate : 0.5616               
-   Detection Prevalence : 0.8443               
-      Balanced Accuracy : 0.5561               
-                                               
-       'Positive' Class : Meaningful emp region
-                                               </code></pre>
+Variables actually used in tree construction:
+[1] avg.wages.pct.state Dem_Desc           
+
+Root node error: 6744/18565 = 0.36326
+
+n= 18565 
+
+         CP nsplit rel error  xerror      xstd
+1 0.0140866      0   1.00000 1.00000 0.0097167
+2 0.0099348      1   0.98591 1.00208 0.0097211
+3 0.0037070      2   0.97598 0.97731 0.0096679</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.postprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_local_employment_CART_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
 </div>
-<p>Interpretation</p>
+</div>
+<p>So, the accuracy of these are clear;</p>
 <ul>
-<li><strong>Accuracy 64.5%</strong> (vs NIR 63.4%): only a <em>small</em> gain over always predicting the majority (“Meaningful emp region”).</li>
-<li><strong>Kappa 0.13</strong>: very low agreement beyond chance → limited discriminatory power.</li>
-<li><strong>Sensitivity 88.5%</strong> (for <em>Meaningful emp region</em>): you catch most region cases.</li>
-<li><strong>Specificity 22.7%</strong>: you miss a lot of <em>Meaningful emp MN</em> (many false positives for region).</li>
-<li><strong>Balanced accuracy 55.6%</strong>: only slightly better than coin‑flip once we account for both classes equally.</li>
+<li>Base model: 59.4%</li>
+<li>Pre-pruned model: 63.9%</li>
+<li>Post-pruned model: 63.9%</li>
 </ul>
-<p>The pruned tree is <strong>biased toward predicting “Meaningful emp region.”</strong> It’s good at <em>finding</em> region cases, but it calls too many “Other MN” cases as region. Pruning didn’t fix that trade‑off; it just made the tree smaller.</p>
-<p>Because my <strong>base</strong>, <strong>pre-pruned</strong>, and <strong>post-pruned</strong> CART models all suffer from:</p>
+<p>The post-pruned model over simplifies the model and doesn’t make any gains in accuracy. So I’m going to use the pre-pruned model here.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Plot tree</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rpart.plot</span>(meaningful.emp.mn.grad.year.<span class="fl">1.</span>model.preprune, <span class="at">nn =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_local_employment_CART_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="main-takeaway" class="level3">
+<h3 class="anchored" data-anchor-id="main-takeaway"><strong>Main takeaway</strong></h3>
+<p>The model predicts whether someone is in <strong>meaningful employment in their high school region</strong> vs.&nbsp;<strong>meaningful employment elsewhere in MN</strong> one year after graduation, using only <strong>pre-high school graduation factors</strong> (no post-secondary variables).</p>
+<p><strong>Root split – Community type (<code>Dem_Desc</code>)</strong></p>
 <ul>
-<li><strong>Low specificity</strong> for “Meaningful emp MN” (lots of false positives for “Region”)</li>
-<li><strong>Low Kappa</strong> (poor agreement beyond chance)</li>
-<li><strong>Balanced accuracy barely above 50%</strong></li>
+<li>The first and strongest split is whether the graduate is from an <strong>entirely urban</strong> area or not.</li>
+<li><strong>Why important?</strong> This suggests that where a student lives is the single largest driver of whether they stay employed in their home region vs.&nbsp;moving elsewhere in MN.</li>
 </ul>
-<p>…any variable importance rankings they produce will be unreliable for <strong>identifying strong predictors</strong> of <em>meaningful employment in the region</em>.</p>
-<p>In other words:</p>
+<p><strong>Left branch – Entirely urban graduates</strong></p>
 <ul>
-<li>The tree is <strong>biased toward predicting “Region”</strong>, so the splits are mostly optimized for catching Region cases rather than separating Region from MN employment accurately.</li>
-<li>That bias skews which variables get selected and how their importance is scored.</li>
-<li>You could end up over- or under-estimating the influence of certain predictors simply because the model struggles with the minority class.</li>
+<li><strong>Split on avg.wages.pct.state</strong>
+<ul>
+<li>If <strong>≥ 0.835</strong>, meaning local wages are at least 83.5% of the state average, the next factor considered is <strong>avg.unemp.rate</strong>:
+<ul>
+<li><strong>&gt; 5.13%</strong> unemployment → More likely to work elsewhere in MN.</li>
+<li><strong>≤ 5.13%</strong> unemployment → More likely to stay in the region.</li>
+</ul></li>
+<li>If <strong>&lt; 0.835</strong> local wage share, the next split is on <strong>economic.status</strong>:
+<ul>
+<li><strong>Low-income (1)</strong> → Further split on wage pct again (0.84 threshold)
+<ul>
+<li>Low wage % (&lt; 0.84) → Stay in region</li>
+<li>Higher wage % → Leave region</li>
+</ul></li>
+<li><strong>Not low-income</strong> → Split on <strong>total.cte.courses.taken</strong>
+<ul>
+<li><strong>&gt; 3</strong> CTE courses → Stay in region</li>
+<li><strong>≤ 3</strong> → Leave region</li>
+</ul></li>
+</ul></li>
+</ul></li>
 </ul>
-<p>To get <em>trustworthy</em> importance for this question, I’ll want a method that:</p>
+<p><strong>Right branch – Not entirely urban graduates</strong></p>
 <ol type="1">
-<li>Handles class imbalance better (e.g., class weights, upsampling, balanced RF).</li>
-<li>Achieves <strong>balanced accuracy ≥ ~0.65–0.70</strong> so it’s actually distinguishing the classes in a meaningful way.</li>
+<li><strong>Split on avg.wages.pct.state (≥ 0.847)</strong>
+<ul>
+<li>If yes → Next split on <strong>RaceEthnicity</strong>:
+<ul>
+<li><strong>Asian/PI, Black, Hispanic</strong> → More likely to leave region</li>
+<li>Others → Split on <strong>avg.unemp.rate</strong>:
+<ul>
+<li><strong>&lt; 5.13%</strong> → More likely to stay in region</li>
+<li>Higher → Further split on <strong>cte.achievement</strong>:
+<ul>
+<li><strong>CTE concentrator/complete/participant</strong> → More likely to leave</li>
+<li>Others → More likely to stay</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
 </ol>
-<p>Once that’s in place, our variable importance will reflect <em>both</em> sides of the classification instead of just the majority class.</p>
+<p><strong>Patterns emerging</strong></p>
+<ol type="1">
+<li><strong>Local economic conditions</strong> (avg wages relative to state, local unemployment rate) are major predictors in both urban and rural contexts.</li>
+<li><strong>Demographic context</strong> (urbanicity, race/ethnicity, economic status) strongly influences mobility vs.&nbsp;staying.</li>
+<li><strong>CTE involvement</strong> and <strong>number of CTE courses</strong> affect retention, especially for non-urban students with weaker local economies.</li>
+</ol>
+<p><strong>One year after high school graduation</strong>, whether graduates stay employed in their home region or work elsewhere in Minnesota is shaped by a mix of community type, local economic conditions, and student background.</p>
+<p>Graduates from <strong>entirely urban areas</strong> are most influenced by local wages and unemployment rates. If wages are relatively high but unemployment is also high, they are more likely to leave for work elsewhere. Lower-income students in urban areas tend to stay if local wages are decent, while those who took many CTE courses are also more likely to remain in their region.</p>
+<p>Graduates from <strong>non-urban areas</strong> are also shaped by local wage levels, but race and ethnicity play a stronger role. Students from Asian/PI, Black, and Hispanic backgrounds in higher-wage areas are more likely to leave. For others, low local unemployment encourages staying. Among those facing higher unemployment, CTE concentrators and participants tend to leave, while other students often remain.</p>
+<p>Overall, <strong>urbanicity and local labor market health</strong> form the backbone of these predictions, with <strong>economic status, race/ethnicity, and CTE experience</strong> shaping the finer details of whether graduates remain in their home region for work.</p>
 <p><br></p>
 </section>
 </section>
-<section id="random-forest" class="level3">
-<h3 class="anchored" data-anchor-id="random-forest">Random Forest</h3>
+<section id="five-years-after-graduation" class="level2">
+<h2 class="anchored" data-anchor-id="five-years-after-graduation">Five years after graduation</h2>
+<p>I’m going to follow the same process as the one year after graduation process, but I’m going to add in the post-secondary variables now.</p>
+<p>The table below a much more balanced classifications with 47% of the individuals having meaningful employment in their high school region compared to 53% that have meaningful employment in Minnesota, but not their region.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 1. Filter to only the two classes ---</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>levels_to_use <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Meaningful emp region"</span>, <span class="st">"Meaningful emp MN"</span>)</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>train_rf <span class="ot">&lt;-</span> <span class="fu">subset</span>(train, grad.year<span class="fl">.1</span> <span class="sc">%in%</span> levels_to_use)</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>test_rf  <span class="ot">&lt;-</span> <span class="fu">subset</span>(test, grad.year<span class="fl">.1</span> <span class="sc">%in%</span> levels_to_use)</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop unused factor levels</span></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>train_rf<span class="sc">$</span>grad.year<span class="fl">.1</span> <span class="ot">&lt;-</span> <span class="fu">droplevels</span>(train_rf<span class="sc">$</span>grad.year<span class="fl">.1</span>)</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>test_rf<span class="sc">$</span>grad.year<span class="fl">.1</span>  <span class="ot">&lt;-</span> <span class="fu">droplevels</span>(test_rf<span class="sc">$</span>grad.year<span class="fl">.1</span>)</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 2. Compute class weights (inverse of frequency) ---</span></span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>class_counts <span class="ot">&lt;-</span> <span class="fu">table</span>(train_rf<span class="sc">$</span>grad.year<span class="fl">.1</span>)</span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>class_weights <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">sum</span>(class_counts) <span class="sc">/</span> (<span class="fu">length</span>(class_counts) <span class="sc">*</span> class_counts))</span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(class_weights) <span class="ot">&lt;-</span> <span class="fu">names</span>(class_counts)</span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 3. Train Random Forest with balanced weights ---</span></span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>rf_model <span class="ot">&lt;-</span> <span class="fu">ranger</span>(</span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>  grad.year<span class="fl">.1</span> <span class="sc">~</span> .,</span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> train_rf,</span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">num.trees =</span> <span class="dv">500</span>,</span>
-<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">mtry =</span> <span class="fu">floor</span>(<span class="fu">sqrt</span>(<span class="fu">ncol</span>(train_rf) <span class="sc">-</span> <span class="dv">1</span>)),</span>
-<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">importance =</span> <span class="st">"impurity"</span>,       <span class="co"># or "permutation" for more reliable scores</span></span>
-<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">probability =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">class.weights =</span> class_weights,</span>
-<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">123</span></span>
-<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 4. Predict on the test set ---</span></span>
-<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>rf_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(rf_model, <span class="at">data =</span> test_rf)<span class="sc">$</span>predictions</span>
-<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 5. Confusion matrix &amp; metrics ---</span></span>
-<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>cm <span class="ot">&lt;-</span> caret<span class="sc">::</span><span class="fu">confusionMatrix</span>(</span>
-<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">factor</span>(rf_pred, <span class="at">levels =</span> <span class="fu">levels</span>(test_rf<span class="sc">$</span>grad.year<span class="fl">.1</span>)),</span>
-<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>  test_rf<span class="sc">$</span>grad.year<span class="fl">.1</span></span>
-<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(cm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year<span class="fl">.5</span> <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>grad.year<span class="fl">.1</span>, <span class="sc">-</span>grad.year<span class="fl">.10</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(grad.year<span class="fl">.5</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Meaningful emp region"</span>, <span class="st">"Meaningful emp MN"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">grad.year.5 =</span> <span class="fu">as.factor</span>(grad.year<span class="fl">.5</span>))</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="fu">comma</span>(<span class="fu">nrow</span>(meaningful.emp.mn.grad.year<span class="fl">.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Confusion Matrix and Statistics
+<pre><code>[1] "43,763"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">datatable</span>(<span class="at">data =</span> meaningful.emp.mn.grad.year<span class="fl">.5</span> <span class="sc">%&gt;%</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>            <span class="fu">group_by</span>(grad.year<span class="fl">.5</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mutate</span>(<span class="at">pct =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n)) <span class="sc">%&gt;%</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>            <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>),</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">class =</span> <span class="st">"cell-border stripe"</span>, </span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">filter =</span> <span class="st">"top"</span>, </span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">rownames =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">options =</span> <span class="fu">list</span>(</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">columnDefs =</span> <span class="fu">list</span>(<span class="fu">list</span>(<span class="at">className =</span> <span class="st">"dt-center"</span>, <span class="at">targets =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)))) <span class="sc">%&gt;%</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">formatCurrency</span>(<span class="dv">2</span>, <span class="st">""</span>, <span class="at">digits =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">formatPercentage</span>(<span class="dv">3</span>, <span class="at">digits =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-fd6e6985ead750230040" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-fd6e6985ead750230040">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"factor\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"width: 100%; display: none;\">\n      <select multiple=\"multiple\" style=\"width: 100%;\" data-options=\"[&quot;Meaningful emp MN&quot;,&quot;Meaningful emp region&quot;]\"><\/select>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"20698\" data-max=\"23065\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.47295660717958\" data-max=\"0.52704339282042\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["Meaningful emp MN","Meaningful emp region"],[23065,20698],[0.5270433928204191,0.4729566071795809]],"container":"<table class=\"cell-border stripe\">\n  <thead>\n    <tr>\n      <th>grad.year.5<\/th>\n      <th>n<\/th>\n      <th>pct<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"targets":2,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatPercentage(data, 1, 3, \",\", \".\", null);\n  }"},{"targets":1,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatCurrency(data, \"\", 0, 3, \",\", \".\", true, null);\n  }"},{"className":"dt-center","targets":[1,2]},{"name":"grad.year.5","targets":0},{"name":"n","targets":1},{"name":"pct","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render"],"jsHooks":[]}</script>
+</div>
+</div>
+<p><br></p>
+<section id="base-model-1" class="level3">
+<h3 class="anchored" data-anchor-id="base-model-1">Base Model</h3>
+<p>I know the base model is going to overfit and provide an overly complex tree due to having a cost penalty of 0. So I’m just going to print the complexity plot in order to see what the appropriate CP would be to minimize xerror.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>sample_ind <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">nrow</span>(meaningful.emp.mn.grad.year<span class="fl">.5</span>), <span class="fu">nrow</span>(meaningful.emp.mn.grad.year<span class="fl">.5</span>) <span class="sc">*</span>.<span class="dv">7</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>train <span class="ot">&lt;-</span> meaningful.emp.mn.grad.year<span class="fl">.5</span>[sample_ind,]</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> meaningful.emp.mn.grad.year<span class="fl">.5</span>[<span class="sc">-</span>sample_ind,]</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Base model</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year.<span class="fl">5.</span>model <span class="ot">&lt;-</span> <span class="fu">rpart</span>(grad.year<span class="fl">.5</span> <span class="sc">~</span> ., <span class="at">data =</span> train, <span class="at">method =</span> <span class="st">"class"</span>, <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="dv">0</span>))</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Accuracy</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(meaningful.emp.mn.grad.year.<span class="fl">5.</span>model, test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>accuracy_base <span class="ot">&lt;-</span> <span class="fu">mean</span>(test<span class="sc">$</span>pred <span class="sc">==</span> test<span class="sc">$</span>grad.year<span class="fl">.5</span>)</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="fu">percent</span>(accuracy_base, <span class="at">accuracy =</span> .<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "60.9%"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Examine the complexity plot</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(meaningful.emp.mn.grad.year.<span class="fl">5.</span>model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Classification tree:
+rpart(formula = grad.year.5 ~ ., data = train, method = "class", 
+    control = rpart.control(cp = 0))
 
-                       Reference
-Prediction              Meaningful emp MN Meaningful emp region
-  Meaningful emp MN                  1243                  1243
-  Meaningful emp region              1666                  3805
-                                           
-               Accuracy : 0.6344           
-                 95% CI : (0.6237, 0.645)  
-    No Information Rate : 0.6344           
-    P-Value [Acc &gt; NIR] : 0.5051           
-                                           
-                  Kappa : 0.1868           
-                                           
- Mcnemar's Test P-Value : 5.108e-15        
-                                           
-            Sensitivity : 0.4273           
-            Specificity : 0.7538           
-         Pos Pred Value : 0.5000           
-         Neg Pred Value : 0.6955           
-             Prevalence : 0.3656           
-         Detection Rate : 0.1562           
-   Detection Prevalence : 0.3124           
-      Balanced Accuracy : 0.5905           
-                                           
-       'Positive' Class : Meaningful emp MN
-                                           </code></pre>
+Variables actually used in tree construction:
+ [1] ACTCompositeScore         avg.unemp.rate           
+ [3] avg.wages.pct.state       cte.achievement          
+ [5] Dem_Desc                  economic.status          
+ [7] highest.cred.level        MCA.M                    
+ [9] MCA.R                     MCA.S                    
+[11] ps.grad                   ps.grad.InstitutionSector
+[13] ps.grad.location          pseo.participant         
+[15] RaceEthnicity             SpecialEdStatus          
+[17] total.cte.courses.taken  
+
+Root node error: 14521/30634 = 0.47402
+
+n= 30634 
+
+           CP nsplit rel error  xerror      xstd
+1  1.6886e-01      0   1.00000 1.00000 0.0060185
+2  5.6126e-02      1   0.83114 0.83114 0.0058896
+3  3.1334e-02      2   0.77502 0.77694 0.0058138
+4  1.8594e-03      3   0.74368 0.74368 0.0057585
+5  1.7905e-03     13   0.72467 0.74044 0.0057528
+6  1.5564e-03     14   0.72288 0.73266 0.0057387
+7  1.3773e-03     19   0.71510 0.72605 0.0057264
+8  1.3084e-03     20   0.71372 0.72089 0.0057167
+9  1.1707e-03     23   0.70980 0.71799 0.0057111
+10 1.0674e-03     25   0.70746 0.71744 0.0057101
+11 9.6412e-04     27   0.70532 0.71545 0.0057062
+12 8.9526e-04     28   0.70436 0.71655 0.0057083
+13 7.5752e-04     29   0.70346 0.71600 0.0057073
+14 6.8866e-04     31   0.70195 0.71607 0.0057074
+15 4.8206e-04     32   0.70126 0.71469 0.0057047
+16 4.4763e-04     46   0.69293 0.71483 0.0057050
+17 4.1319e-04     48   0.69203 0.71607 0.0057074
+18 3.6155e-04     67   0.68342 0.71655 0.0057083
+19 3.5810e-04     72   0.68150 0.71951 0.0057140
+20 3.4433e-04     78   0.67922 0.71930 0.0057136
+21 3.2137e-04    109   0.66745 0.72089 0.0057167
+22 3.0990e-04    112   0.66648 0.72137 0.0057176
+23 2.7546e-04    120   0.66352 0.72316 0.0057210
+24 2.5825e-04    130   0.66077 0.72371 0.0057220
+25 2.4103e-04    137   0.65891 0.72516 0.0057248
+26 2.2955e-04    141   0.65794 0.72647 0.0057272
+27 2.0660e-04    152   0.65533 0.73466 0.0057423
+28 1.9799e-04    188   0.64768 0.73618 0.0057451
+29 1.8364e-04    221   0.63887 0.74079 0.0057534
+30 1.7216e-04    227   0.63777 0.74320 0.0057577
+31 1.6069e-04    275   0.62888 0.74616 0.0057629
+32 1.5495e-04    286   0.62668 0.74740 0.0057650
+33 1.4757e-04    329   0.61773 0.75071 0.0057707
+34 1.4462e-04    344   0.61511 0.75071 0.0057707
+35 1.3773e-04    354   0.61366 0.75263 0.0057740
+36 1.2052e-04    488   0.59176 0.75601 0.0057798
+37 1.1478e-04    492   0.59128 0.75938 0.0057854
+38 1.0330e-04    589   0.57530 0.76620 0.0057967
+39 9.8380e-05    670   0.56670 0.77254 0.0058068
+40 9.6412e-05    679   0.56580 0.77254 0.0058068
+41 9.1821e-05    691   0.56456 0.77502 0.0058107
+42 8.6082e-05    733   0.56057 0.77832 0.0058159
+43 8.2639e-05    752   0.55816 0.77853 0.0058162
+44 7.5752e-05    797   0.55389 0.77922 0.0058173
+45 6.8866e-05    807   0.55313 0.79285 0.0058378
+46 5.9028e-05   1141   0.52489 0.79616 0.0058426
+47 5.5093e-05   1152   0.52414 0.79967 0.0058477
+48 5.1649e-05   1161   0.52345 0.80063 0.0058490
+49 4.5911e-05   1173   0.52283 0.80270 0.0058520
+50 4.1319e-05   1210   0.52090 0.80449 0.0058545
+51 3.9352e-05   1231   0.51952 0.80477 0.0058549
+52 3.4433e-05   1246   0.51890 0.81000 0.0058621
+53 2.9514e-05   1352   0.51505 0.81014 0.0058623
+54 2.2955e-05   1366   0.51463 0.81103 0.0058635
+55 1.7216e-05   1396   0.51395 0.81392 0.0058674
+56 1.3773e-05   1424   0.51346 0.81585 0.0058700
+57 1.2912e-05   1444   0.51319 0.81716 0.0058717
+58 1.1478e-05   1472   0.51277 0.81757 0.0058722
+59 0.0000e+00   1484   0.51264 0.81778 0.0058725</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(meaningful.emp.mn.grad.year.<span class="fl">5.</span>model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_local_employment_CART_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
 </div>
+</div>
+<p><strong>Key takeaways from base tree results</strong></p>
+<p><strong>Accuracy:</strong></p>
+<p>Achieved <strong>60.9%</strong> accuracy — higher than the 1-year base model (59.4%), likely due to a more balanced outcome distribution and inclusion of post-secondary variables.</p>
+<p><strong>Predictor breadth</strong></p>
 <ul>
-<li><strong>Overall accuracy:</strong> 63.5% — almost identical to your baseline proportion (NIR = 63.4%), meaning the model is not giving a major boost in overall correct classification.</li>
-<li><strong>Kappa:</strong> 0.189 — very low, suggesting weak agreement beyond chance.</li>
-<li><strong>Sensitivity (Meaningful emp MN):</strong> 42.9% — the model catches fewer than half of the people who actually have meaningful employment in MN.</li>
-<li><strong>Specificity (Meaningful emp MN):</strong> 75.4% — better at correctly identifying those <em>not</em> in MN (i.e., in Region).</li>
-<li><strong>Balanced Accuracy:</strong> 59.2% — better than random guessing (50%), but not particularly strong.</li>
+<li>The model used <strong>17 predictors</strong>, covering:
+<ul>
+<li><strong>Labor market context</strong>: <code>avg.unemp.rate</code>, <code>avg.wages.pct.state</code></li>
+<li><strong>Academic performance</strong>: <code>ACTCompositeScore</code>, <code>MCA.M</code>, <code>MCA.R</code>, <code>MCA.S</code></li>
+<li><strong>Career/technical preparation</strong>: <code>cte.achievement</code>, <code>total.cte.courses.taken</code></li>
+<li><strong>Demographics</strong>: <code>Dem_Desc</code>, <code>economic.status</code>, <code>RaceEthnicity</code>, <code>SpecialEdStatus</code></li>
+<li><strong>Post-secondary experience</strong>: <code>ps.grad</code>, <code>ps.grad.InstitutionSector</code>, <code>ps.grad.location</code>, <code>highest.cred.level</code>, <code>pseo.participant</code></li>
+</ul></li>
 </ul>
-<p><strong>Interpretation:</strong> Your Random Forest is biased toward predicting “Meaningful emp region” — that’s why Sensitivity for MN is low, but Specificity is higher. Even with balanced class weights, the model still struggles to find a good set of predictors for MN outcomes.</p>
-<p>The <strong>Variable Importance</strong> plot from this RF will still be useful for identifying the strongest predictors, but we have to keep in mind that the predictive performance is modest, so the ranking is informative but not definitive.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 6. Variable importance ---</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>var_imp <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Variable =</span> <span class="fu">names</span>(rf_model<span class="sc">$</span>variable.importance),</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Importance =</span> rf_model<span class="sc">$</span>variable.importance</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>var_imp <span class="ot">&lt;-</span> var_imp[<span class="fu">order</span>(<span class="sc">-</span>var_imp<span class="sc">$</span>Importance), ]</span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(var_imp, <span class="dv">20</span>)  <span class="co"># Top 20 important variables</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                                           Variable Importance
-avg.wages.pct.state             avg.wages.pct.state 1223.35228
-total.cte.courses.taken     total.cte.courses.taken 1172.92601
-avg.unemp.rate                       avg.unemp.rate  993.75969
-MCA.M                                         MCA.M  488.64534
-MCA.R                                         MCA.R  444.87403
-cte.achievement                     cte.achievement  331.74141
-Dem_Desc                                   Dem_Desc  235.81489
-MCA.S                                         MCA.S  230.25457
-RaceEthnicity                         RaceEthnicity  229.84913
-economic.status                     economic.status  223.53056
-highest.cred.level               highest.cred.level  206.76485
-ps.grad.InstitutionSector ps.grad.InstitutionSector  205.92367
-ps.grad.location                   ps.grad.location  198.85456
-SpecialEdStatus                     SpecialEdStatus  157.51401
-pseo.participant                   pseo.participant   61.27701
-ps.grad                                     ps.grad   53.17420
-ACTCompositeScore                 ACTCompositeScore -110.92504</code></pre>
-</div>
-</div>
+<p><strong>Model structure &amp; complexity</strong></p>
+<ul>
+<li>The first major split (CP ≈ 0.1689) yields a large accuracy gain.</li>
+<li>Substantial improvement again at the second split (CP ≈ 0.0561).</li>
+<li>Beyond ~20 splits, the error reduction flattens, with minimal performance gain from additional complexity.</li>
+<li>The fully grown tree is large (1484 splits at CP = 0), suggesting strong potential for simplification via pre-pruning or post-pruning.</li>
+</ul>
+<p><strong>Early indication of driver patterns</strong></p>
+<ul>
+<li>Both <strong>economic context</strong> and <strong>post-secondary attainment</strong> appear to be influential in early splits, hinting that the 5-year employment outcome is shaped by a combination of local labor market conditions and educational pathways taken after high school.</li>
+</ul>
+<p><br></p>
 </section>
-<section id="key-predictors" class="level3">
-<h3 class="anchored" data-anchor-id="key-predictors"><strong>Key Predictors</strong></h3>
+<section id="pre-pruning-1" class="level3">
+<h3 class="anchored" data-anchor-id="pre-pruning-1">Pre-pruning</h3>
+<p>Next, we need to prune. We can either pre-prune or post-prune. We will start with pre-pruning and use each method - max depth, min depth, and min bucket. It’s recommended that I start with the following parameters;</p>
+<ul>
+<li>maxdepth: 5</li>
+<li>minsplit: round(2% of nrow(train)) which is 371.</li>
+<li>minbucket: round(minsplit / 3) which is 124</li>
+<li>cp = 0</li>
+</ul>
+<p><br></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>maxdepth <span class="ot">=</span> <span class="dv">5</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>minsplit <span class="ot">=</span> <span class="fu">round</span>(.<span class="dv">02</span><span class="sc">*</span><span class="fu">nrow</span>(train))</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>minbucket <span class="ot">=</span> <span class="fu">round</span>(minsplit <span class="sc">/</span> <span class="dv">3</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year.<span class="fl">5.</span>model.preprune <span class="ot">&lt;-</span> <span class="fu">rpart</span>(grad.year<span class="fl">.5</span> <span class="sc">~</span> ., <span class="at">data =</span> train, <span class="at">method =</span> <span class="st">"class"</span>, </span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>                   <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="dv">0</span>, <span class="at">maxdepth =</span> maxdepth, <span class="at">minsplit =</span> minsplit, <span class="at">minbucket =</span> minbucket))</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Accuracy</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(meaningful.emp.mn.grad.year.<span class="fl">5.</span>model.preprune, test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>accuracy_preprun <span class="ot">&lt;-</span> <span class="fu">mean</span>(test<span class="sc">$</span>pred <span class="sc">==</span> test<span class="sc">$</span>grad.year<span class="fl">.5</span>)</span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a><span class="fu">percent</span>(accuracy_preprun, <span class="at">accuracy =</span> .<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "65.6%"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Examine the complexity plot</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(meaningful.emp.mn.grad.year.<span class="fl">5.</span>model.preprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Classification tree:
+rpart(formula = grad.year.5 ~ ., data = train, method = "class", 
+    control = rpart.control(cp = 0, maxdepth = maxdepth, minsplit = minsplit, 
+        minbucket = minbucket))
+
+Variables actually used in tree construction:
+[1] ACTCompositeScore         avg.wages.pct.state      
+[3] Dem_Desc                  highest.cred.level       
+[5] ps.grad.InstitutionSector ps.grad.location         
+
+Root node error: 14521/30634 = 0.47402
+
+n= 30634 
+
+         CP nsplit rel error  xerror      xstd
+1 0.1688589      0   1.00000 1.00000 0.0060185
+2 0.0561256      1   0.83114 0.83114 0.0058896
+3 0.0313339      2   0.77502 0.78156 0.0058209
+4 0.0018594      3   0.74368 0.74368 0.0057585
+5 0.0014290      5   0.73996 0.74389 0.0057589
+6 0.0013084      9   0.73425 0.74506 0.0057609
+7 0.0010674     12   0.73032 0.73941 0.0057509
+8 0.0000000     14   0.72819 0.73831 0.0057489</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(meaningful.emp.mn.grad.year.<span class="fl">5.</span>model.preprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_local_employment_CART_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Takeaways</strong></p>
 <ol type="1">
-<li><strong>avg.wages.pct.state</strong> (Highest importance)
+<li><strong>Accuracy gain:</strong>
 <ul>
-<li>Indicates that local wage competitiveness compared to the state average is the strongest differentiator between working in MN vs in the region.</li>
-<li>Higher relative wages may be drawing individuals into regional employment or retaining them locally.</li>
+<li>Jumped from <strong>60.9% → 65.6%</strong> — that’s a +4.7 percentage point increase, which is substantial for a classification problem like this.</li>
+<li>This suggests the pre-pruning settings effectively cut out overfitting noise from the base model.</li>
 </ul></li>
-<li><strong>total.cte.courses.taken</strong>
+<li><strong>Tree size reduction:</strong>
 <ul>
-<li>Suggests that the number of career and technical education (CTE) courses taken in high school plays a major role in predicting where graduates end up employed.</li>
-<li>This might reflect how CTE programs link to local/regional job pipelines.</li>
+<li>Base model: 1,484 splits → Pre-pruned: only <strong>14 splits</strong>.</li>
+<li>That’s over a <strong>99% reduction in tree complexity</strong>.</li>
 </ul></li>
-<li><strong>avg.unemp.rate</strong>
+<li><strong>Predictor focus:</strong>
 <ul>
-<li>Regional unemployment levels are highly predictive, likely capturing labor market pull/push effects.</li>
+<li><p>Only 6 predictors remain:</p>
+<ul>
+<li><strong>ACTCompositeScore</strong></li>
+<li><strong>avg.wages.pct.state</strong></li>
+<li><strong>Dem_Desc</strong> (demographic descriptor)</li>
+<li><strong>highest.cred.level</strong></li>
+<li><strong>ps.grad.InstitutionSector</strong></li>
+<li><strong>ps.grad.location</strong></li>
+</ul>
+<p>This means that by 5 years after graduation, <strong>educational attainment and post-secondary characteristics</strong> are major drivers of meaningful employment location — along with ACT performance and economic context.</p></li>
 </ul></li>
-<li><strong>MCA Math &amp; Reading scores (MCA.M, MCA.R)</strong>
+<li><strong>Splitting structure (likely):</strong>
 <ul>
-<li>Higher academic performance may influence mobility and employability, indirectly affecting job location.</li>
+<li>Early splits probably separate graduates based on <strong>highest.cred.level</strong> and <strong>ps.grad.location</strong> — consistent with your earlier trees.</li>
+<li><strong>ACTCompositeScore</strong> and <strong>avg.wages.pct.state</strong> likely refine predictions within subgroups.</li>
 </ul></li>
-<li><strong>cte.achievement</strong>
+<li><strong>Practical implications:</strong>
 <ul>
-<li>Not just the number of CTE courses, but completing recognized CTE achievements is important.</li>
+<li>Post-secondary variables are now clearly relevant — as expected, they’re making early, influential splits.</li>
+<li>The reduced model is easier to explain to stakeholders while still capturing the main drivers of location-based employment outcomes.</li>
 </ul></li>
 </ol>
+<p>If we follow your workflow, the next step would be <strong>post-pruning using the 1-SE rule</strong> on this pre-pruned model to see if we can shave off a few more splits without losing accuracy — but here, the tree is already small, so the accuracy/complexity trade-off may not be worth it.</p>
+<p><br></p>
 </section>
-<section id="moderate-predictors" class="level3">
-<h3 class="anchored" data-anchor-id="moderate-predictors"><strong>Moderate Predictors</strong></h3>
+<section id="post-pruning-1" class="level3">
+<h3 class="anchored" data-anchor-id="post-pruning-1">Post-pruning</h3>
+<p>The idea here is to allow the decision tree to grow fully and observe the CP value. There are two methods for identifying the CP code;</p>
+<ol type="1">
+<li>Use the cp value with the lowest xerror from the base model.</li>
+<li>Use the cp value with the next lowest xerror that is within the standard error.</li>
+</ol>
+<p>We will use the 1-SE rule.</p>
+<p><br></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>cp_table <span class="ot">&lt;-</span> meaningful.emp.mn.grad.year.<span class="fl">5.</span>model.preprune<span class="sc">$</span>cptable</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>min_xerror <span class="ot">&lt;-</span> <span class="fu">min</span>(cp_table[, <span class="st">"xerror"</span>])</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>min_xerror_se <span class="ot">&lt;-</span> cp_table[<span class="fu">which.min</span>(cp_table[,<span class="st">"xerror"</span>]), <span class="st">"xstd"</span>]</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">&lt;-</span> min_xerror <span class="sc">+</span> min_xerror_se</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>one_se_index <span class="ot">&lt;-</span> <span class="fu">which</span>(cp_table[, <span class="st">"xerror"</span>] <span class="sc">&lt;=</span> threshold)[<span class="dv">1</span>] </span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>cp_1se <span class="ot">&lt;-</span> cp_table[one_se_index, <span class="st">"CP"</span>]</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>optimal_cp <span class="ot">&lt;-</span> meaningful.emp.mn.grad.year.<span class="fl">5.</span>model.preprune<span class="sc">$</span>cptable[<span class="fu">which.min</span>(meaningful.emp.mn.grad.year.<span class="fl">5.</span>model.preprune<span class="sc">$</span>cptable[, <span class="st">"xerror"</span>]), <span class="st">"CP"</span>]</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Prune the hr_base_model based on the optimal cp value</span></span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year.<span class="fl">5.</span>model.postprune <span class="ot">&lt;-</span> rpart<span class="sc">::</span><span class="fu">prune</span>(meaningful.emp.mn.grad.year.<span class="fl">5.</span>model.preprune, <span class="at">cp =</span> cp_1se)</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the accuracy of the pruned tree</span></span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(meaningful.emp.mn.grad.year.<span class="fl">5.</span>model.postprune, test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>accuracy_postprun <span class="ot">&lt;-</span> <span class="fu">mean</span>(test<span class="sc">$</span>pred <span class="sc">==</span> test<span class="sc">$</span>grad.year<span class="fl">.5</span>)</span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a><span class="fu">percent</span>(accuracy_postprun, <span class="at">accuracy =</span> .<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "65.4%"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Examine the complexity plot</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(meaningful.emp.mn.grad.year.<span class="fl">5.</span>model.postprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Classification tree:
+rpart(formula = grad.year.5 ~ ., data = train, method = "class", 
+    control = rpart.control(cp = 0, maxdepth = maxdepth, minsplit = minsplit, 
+        minbucket = minbucket))
+
+Variables actually used in tree construction:
+[1] avg.wages.pct.state Dem_Desc            ps.grad.location   
+
+Root node error: 14521/30634 = 0.47402
+
+n= 30634 
+
+         CP nsplit rel error  xerror      xstd
+1 0.1688589      0   1.00000 1.00000 0.0060185
+2 0.0561256      1   0.83114 0.83114 0.0058896
+3 0.0313339      2   0.77502 0.78156 0.0058209
+4 0.0018594      3   0.74368 0.74368 0.0057585</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(meaningful.emp.mn.grad.year.<span class="fl">5.</span>model.postprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_local_employment_CART_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>So, the accuracy of these are clear;</p>
 <ul>
-<li><strong>Demographic and background factors</strong>: <code>Dem_Desc</code>, <code>RaceEthnicity</code>, <code>economic.status</code>
+<li>Base model: 60.9%</li>
+<li>Pre-pruned model: 65.6%</li>
+<li>Post-pruned model: 65.4%</li>
+</ul>
+<p>The post-pruned model over simplifies the model and doesn’t make any gains in accuracy. So I’m going to use the pre-pruned model here.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Plot tree</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rpart.plot</span>(meaningful.emp.mn.grad.year.<span class="fl">5.</span>model.preprune, <span class="at">nn =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_local_employment_CART_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="main-takeaway-1" class="level3">
+<h3 class="anchored" data-anchor-id="main-takeaway-1"><strong>Main takeaway</strong></h3>
+<p><strong>Pathways to Leaving MN (Meaningful Employment outside MN)</strong></p>
+<ol type="1">
+<li><strong>Graduate outside MN →</strong>
 <ul>
-<li>These appear in the middle of the ranking, suggesting socioeconomic and demographic patterns in mobility or job placement.</li>
+<li><strong>Bachelor’s degree or higher</strong> →
+<ul>
+<li>Local wages ≥ 65% of state avg → <strong>Leave</strong> (especially if not entirely urban)</li>
+<li>Local wages &lt; 65% → sometimes <strong>Stay</strong>, but mixed outcomes</li>
 </ul></li>
-<li><strong>Postsecondary factors</strong>: <code>highest.cred.level</code>, <code>ps.grad.InstitutionSector</code>, <code>ps.grad.location</code>
+<li><strong>Less than bachelor’s</strong> → outcome varies, but more likely <strong>Leave</strong> than stay</li>
+</ul></li>
+<li><strong>Graduate in MN or didn’t finish PS →</strong>
 <ul>
-<li>These indicate that where someone graduates from and at what credential level can matter, but less than the core labor market and high school preparation variables.</li>
+<li>Local wages ≥ 65% →
+<ul>
+<li><strong>ACT ≥ 23</strong> + Non-entirely urban → <strong>Leave</strong></li>
+</ul></li>
+<li>Local wages &lt; 65% →
+<ul>
+<li><strong>Entirely urban</strong> + ACT ≥ 23 → <strong>Leave</strong></li>
+</ul></li>
+</ul></li>
+</ol>
+<p><strong>Pathways to Staying in MN (Meaningful Employment in MN)</strong></p>
+<ol type="1">
+<li><strong>Graduate in MN or didn’t finish PS →</strong>
+<ul>
+<li>Local wages ≥ 65% →
+<ul>
+<li>ACT &lt; 23 → <strong>Stay</strong> regardless of urbanicity</li>
+</ul></li>
+<li>Local wages &lt; 65% →
+<ul>
+<li>Non-entirely urban → <strong>Stay</strong></li>
+<li>Entirely urban + average/low ACT → <strong>Stay</strong></li>
+</ul></li>
+</ul></li>
+<li><strong>Graduate outside MN →</strong>
+<ul>
+<li>Local wages &lt; 65% →
+<ul>
+<li>Entirely urban + credential &lt; Bachelor’s → <strong>Stay</strong> in some cases</li>
+</ul></li>
+</ul></li>
+</ol>
+<p><strong>Key message:</strong></p>
+<ul>
+<li><strong>Graduating outside MN</strong> and/or <strong>living in lower-wage MN regions</strong> are the strongest “push” factors toward working elsewhere.</li>
+<li><strong>Higher wages in MN</strong> can retain grads unless academic and mobility factors (high ACT, high credentials, urban background) tip the balance.</li>
+</ul>
+</section>
+</section>
+<section id="ten-years-after-graduation" class="level2">
+<h2 class="anchored" data-anchor-id="ten-years-after-graduation">Ten years after graduation</h2>
+<p>I’m going to follow the same process as the one year after graduation process, but I’m going to add in the post-secondary variables now.</p>
+<p>The table below a much more balanced classifications with 47% of the individuals having meaningful employment in their high school region compared to 53% that have meaningful employment in Minnesota, but not their region.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year<span class="fl">.10</span> <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>grad.year<span class="fl">.1</span>, <span class="sc">-</span>grad.year<span class="fl">.5</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(grad.year<span class="fl">.10</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Meaningful emp region"</span>, <span class="st">"Meaningful emp MN"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">grad.year.10 =</span> <span class="fu">as.factor</span>(grad.year<span class="fl">.10</span>))</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a><span class="fu">comma</span>(<span class="fu">nrow</span>(meaningful.emp.mn.grad.year<span class="fl">.10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "27,619"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">datatable</span>(<span class="at">data =</span> meaningful.emp.mn.grad.year<span class="fl">.10</span> <span class="sc">%&gt;%</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>            <span class="fu">group_by</span>(grad.year<span class="fl">.10</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mutate</span>(<span class="at">pct =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n)) <span class="sc">%&gt;%</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>            <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>),</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">class =</span> <span class="st">"cell-border stripe"</span>, </span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">filter =</span> <span class="st">"top"</span>, </span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">rownames =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">options =</span> <span class="fu">list</span>(</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">columnDefs =</span> <span class="fu">list</span>(<span class="fu">list</span>(<span class="at">className =</span> <span class="st">"dt-center"</span>, <span class="at">targets =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)))) <span class="sc">%&gt;%</span></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">formatCurrency</span>(<span class="dv">2</span>, <span class="st">""</span>, <span class="at">digits =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">formatPercentage</span>(<span class="dv">3</span>, <span class="at">digits =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-03d05ae515d84accde7e" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-03d05ae515d84accde7e">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td data-type=\"factor\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"width: 100%; display: none;\">\n      <select multiple=\"multiple\" style=\"width: 100%;\" data-options=\"[&quot;Meaningful emp MN&quot;,&quot;Meaningful emp region&quot;]\"><\/select>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"11979\" data-max=\"15640\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.433723161591657\" data-max=\"0.566276838408343\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","data":[["Meaningful emp MN","Meaningful emp region"],[15640,11979],[0.5662768384083421,0.4337231615916579]],"container":"<table class=\"cell-border stripe\">\n  <thead>\n    <tr>\n      <th>grad.year.10<\/th>\n      <th>n<\/th>\n      <th>pct<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"targets":2,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatPercentage(data, 1, 3, \",\", \".\", null);\n  }"},{"targets":1,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatCurrency(data, \"\", 0, 3, \",\", \".\", true, null);\n  }"},{"className":"dt-center","targets":[1,2]},{"name":"grad.year.10","targets":0},{"name":"n","targets":1},{"name":"pct","targets":2}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render"],"jsHooks":[]}</script>
+</div>
+</div>
+<p><br></p>
+<section id="base-model-2" class="level3">
+<h3 class="anchored" data-anchor-id="base-model-2">Base Model</h3>
+<p>I know the base model is going to overfit and provide an overly complex tree due to having a cost penalty of 0. So I’m just going to print the complexity plot in order to see what the appropriate CP would be to minimize xerror.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>sample_ind <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">nrow</span>(meaningful.emp.mn.grad.year<span class="fl">.10</span>), <span class="fu">nrow</span>(meaningful.emp.mn.grad.year<span class="fl">.10</span>) <span class="sc">*</span>.<span class="dv">7</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>train <span class="ot">&lt;-</span> meaningful.emp.mn.grad.year<span class="fl">.10</span>[sample_ind,]</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> meaningful.emp.mn.grad.year<span class="fl">.10</span>[<span class="sc">-</span>sample_ind,]</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Base model</span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year.<span class="fl">10.</span>model <span class="ot">&lt;-</span> <span class="fu">rpart</span>(grad.year<span class="fl">.10</span> <span class="sc">~</span> ., <span class="at">data =</span> train, <span class="at">method =</span> <span class="st">"class"</span>, <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="dv">0</span>))</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Accuracy</span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(meaningful.emp.mn.grad.year.<span class="fl">10.</span>model, test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a>accuracy_base <span class="ot">&lt;-</span> <span class="fu">mean</span>(test<span class="sc">$</span>pred <span class="sc">==</span> test<span class="sc">$</span>grad.year<span class="fl">.10</span>)</span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a><span class="fu">percent</span>(accuracy_base, <span class="at">accuracy =</span> .<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "60.4%"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Examine the complexity plot</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(meaningful.emp.mn.grad.year.<span class="fl">10.</span>model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Classification tree:
+rpart(formula = grad.year.10 ~ ., data = train, method = "class", 
+    control = rpart.control(cp = 0))
+
+Variables actually used in tree construction:
+ [1] ACTCompositeScore         avg.unemp.rate           
+ [3] avg.wages.pct.state       cte.achievement          
+ [5] Dem_Desc                  economic.status          
+ [7] highest.cred.level        MCA.M                    
+ [9] MCA.R                     MCA.S                    
+[11] ps.grad                   ps.grad.InstitutionSector
+[13] ps.grad.location          pseo.participant         
+[15] RaceEthnicity             SpecialEdStatus          
+[17] total.cte.courses.taken  
+
+Root node error: 8374/19333 = 0.43315
+
+n= 19333 
+
+           CP nsplit rel error  xerror      xstd
+1  7.8278e-02      0   1.00000 1.00000 0.0082275
+2  6.9262e-03      2   0.84344 0.84356 0.0079955
+3  6.1500e-03      4   0.82959 0.83986 0.0079880
+4  3.5825e-03      6   0.81729 0.82123 0.0079489
+5  2.7466e-03      9   0.80523 0.82075 0.0079478
+6  2.1893e-03     11   0.79974 0.81741 0.0079406
+7  1.3733e-03     16   0.78624 0.80726 0.0079179
+8  1.3136e-03     18   0.78350 0.80535 0.0079136
+9  1.1942e-03     25   0.77430 0.80308 0.0079084
+10 1.0748e-03     27   0.77191 0.80368 0.0079097
+11 9.5534e-04     28   0.77084 0.80332 0.0079089
+12 8.9563e-04     32   0.76678 0.80571 0.0079144
+13 8.3592e-04     34   0.76499 0.80451 0.0079116
+14 7.7621e-04     35   0.76415 0.80416 0.0079108
+15 7.1650e-04     37   0.76260 0.80463 0.0079119
+16 5.6723e-04     38   0.76188 0.80451 0.0079116
+17 5.5728e-04     46   0.75711 0.80547 0.0079138
+18 5.3738e-04     55   0.75161 0.80571 0.0079144
+19 5.1747e-04     60   0.74887 0.80690 0.0079171
+20 4.7767e-04     63   0.74731 0.80654 0.0079163
+21 4.3786e-04     76   0.74110 0.80738 0.0079182
+22 4.1796e-04     85   0.73668 0.80917 0.0079222
+23 3.9806e-04     87   0.73585 0.80917 0.0079222
+24 3.5825e-04     95   0.73119 0.80822 0.0079201
+25 3.2840e-04    113   0.72474 0.81168 0.0079279
+26 3.1845e-04    119   0.72259 0.81192 0.0079284
+27 3.0707e-04    124   0.72056 0.81478 0.0079348
+28 2.9854e-04    136   0.71626 0.81753 0.0079408
+29 2.8660e-04    142   0.71435 0.81980 0.0079458
+30 2.7864e-04    149   0.71220 0.82111 0.0079486
+31 2.6272e-04    195   0.69644 0.82111 0.0079486
+32 2.5874e-04    212   0.69178 0.82302 0.0079528
+33 2.5589e-04    218   0.69023 0.82302 0.0079528
+34 2.3883e-04    226   0.68808 0.82326 0.0079533
+35 2.0898e-04    348   0.65154 0.83091 0.0079695
+36 1.9903e-04    358   0.64939 0.83592 0.0079800
+37 1.7913e-04    364   0.64820 0.84273 0.0079938
+38 1.7370e-04    441   0.63231 0.84941 0.0080072
+39 1.5922e-04    453   0.63005 0.84918 0.0080067
+40 1.5524e-04    477   0.62610 0.85097 0.0080102
+41 1.4927e-04    501   0.62097 0.85168 0.0080116
+42 1.4330e-04    517   0.61810 0.85276 0.0080137
+43 1.1942e-04    535   0.61512 0.86578 0.0080385
+44 1.0236e-04    653   0.59995 0.86745 0.0080416
+45 9.9514e-05    668   0.59816 0.87151 0.0080490
+46 9.5534e-05    682   0.59661 0.87533 0.0080559
+47 8.9563e-05    692   0.59565 0.87557 0.0080563
+48 8.5298e-05    720   0.59279 0.88118 0.0080663
+49 7.9611e-05    733   0.59123 0.88142 0.0080667
+50 7.1650e-05    774   0.58765 0.88321 0.0080698
+51 5.9709e-05    779   0.58729 0.89169 0.0080843
+52 5.1179e-05    855   0.58204 0.89205 0.0080849
+53 4.7767e-05    862   0.58168 0.89300 0.0080865
+54 3.9806e-05    867   0.58144 0.89814 0.0080950
+55 2.9854e-05    897   0.58025 0.89814 0.0080950
+56 2.3883e-05    913   0.57977 0.90279 0.0081026
+57 1.4927e-05    938   0.57917 0.90506 0.0081062
+58 0.0000e+00    946   0.57905 0.90554 0.0081069</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(meaningful.emp.mn.grad.year.<span class="fl">10.</span>model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_local_employment_CART_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Key takeaways from base tree results</strong></p>
+<p><strong>Accuracy:</strong></p>
+<p>Achieved <strong>60.4%</strong> accuracy — higher than the 1-year base model (59.4%), likely due to a more balanced outcome distribution and inclusion of post-secondary variables.</p>
+<p>Ten years out, meaningful employment location seems to be shaped by a <strong>combination</strong> of high school academic background, economic conditions, and postsecondary outcomes — no single category dominates.</p>
+<p>This is consistent with the idea that life pathways diversify with time, and different predictors matter for different subgroups.</p>
+<p><br></p>
+</section>
+<section id="pre-pruning-2" class="level3">
+<h3 class="anchored" data-anchor-id="pre-pruning-2">Pre-pruning</h3>
+<p>Next, we need to prune. We can either pre-prune or post-prune. We will start with pre-pruning and use each method - max depth, min depth, and min bucket. It’s recommended that I start with the following parameters;</p>
+<ul>
+<li>maxdepth: 5</li>
+<li>minsplit: round(2% of nrow(train)) which is 371.</li>
+<li>minbucket: round(minsplit / 3) which is 124</li>
+<li>cp = 0</li>
+</ul>
+<p><br></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>maxdepth <span class="ot">=</span> <span class="dv">5</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>minsplit <span class="ot">=</span> <span class="fu">round</span>(.<span class="dv">02</span><span class="sc">*</span><span class="fu">nrow</span>(train))</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>minbucket <span class="ot">=</span> <span class="fu">round</span>(minsplit <span class="sc">/</span> <span class="dv">3</span>)</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year.<span class="fl">10.</span>model.preprune <span class="ot">&lt;-</span> <span class="fu">rpart</span>(grad.year<span class="fl">.10</span> <span class="sc">~</span> ., <span class="at">data =</span> train, <span class="at">method =</span> <span class="st">"class"</span>, </span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>                   <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="dv">0</span>, <span class="at">maxdepth =</span> maxdepth, <span class="at">minsplit =</span> minsplit, <span class="at">minbucket =</span> minbucket))</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Accuracy</span></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(meaningful.emp.mn.grad.year.<span class="fl">10.</span>model.preprune, test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a>accuracy_preprun <span class="ot">&lt;-</span> <span class="fu">mean</span>(test<span class="sc">$</span>pred <span class="sc">==</span> test<span class="sc">$</span>grad.year<span class="fl">.10</span>)</span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a><span class="fu">percent</span>(accuracy_preprun, <span class="at">accuracy =</span> .<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "64.7%"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Examine the complexity plot</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(meaningful.emp.mn.grad.year.<span class="fl">10.</span>model.preprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Classification tree:
+rpart(formula = grad.year.10 ~ ., data = train, method = "class", 
+    control = rpart.control(cp = 0, maxdepth = maxdepth, minsplit = minsplit, 
+        minbucket = minbucket))
+
+Variables actually used in tree construction:
+[1] ACTCompositeScore   avg.unemp.rate      avg.wages.pct.state
+[4] Dem_Desc            highest.cred.level  ps.grad.location   
+
+Root node error: 8374/19333 = 0.43315
+
+n= 19333 
+
+         CP nsplit rel error  xerror      xstd
+1 0.0782780      0   1.00000 1.00000 0.0082275
+2 0.0069262      2   0.84344 0.84356 0.0079955
+3 0.0061500      4   0.82959 0.84332 0.0079951
+4 0.0014032      6   0.81729 0.81884 0.0079437
+5 0.0000000     10   0.81168 0.82207 0.0079507</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(meaningful.emp.mn.grad.year.<span class="fl">10.</span>model.preprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_local_employment_CART_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Takeaways</strong></p>
+<ol type="1">
+<li><strong>Accuracy boost</strong>
+<ul>
+<li>Accuracy jumps from 60.4% in the base model to 64.7% with pre-pruning — that’s a bigger relative improvement than you saw at 5 years, suggesting the pruning is doing a lot to remove noise.</li>
+</ul></li>
+<li><strong>Variables retained</strong>
+<ul>
+<li>Still draws from <strong>multiple predictor categories</strong>:
+<ul>
+<li><strong>Academics</strong>: ACTCompositeScore</li>
+<li><strong>Economic context</strong>: avg.unemp.rate, avg.wages.pct.state</li>
+<li><strong>Demographics</strong>: Dem_Desc</li>
+<li><strong>Postsecondary outcomes</strong>: highest.cred.level, ps.grad.location</li>
+</ul></li>
+<li>This is narrower than the base model’s wide net, but still hits the core themes that matter for long-term outcomes.</li>
+</ul></li>
+<li><strong>Structure &amp; interpretability</strong>
+<ul>
+<li>10 splits (vs.&nbsp;hundreds in the base model) means the tree will be much easier to explain.</li>
+<li>CP table shows steep early improvement, then very small gains — so the pruning cut off the diminishing returns zone.</li>
+</ul></li>
+<li><strong>Interpretation potential</strong>
+<ul>
+<li>The model now essentially says:
+<ul>
+<li>Long-term employment location is shaped first by <strong>educational attainment and location of postsecondary completion</strong>.</li>
+<li>Economic context (state-level wages &amp; unemployment rates) plays a secondary role.</li>
+<li>ACT scores and demographics fine-tune the splits within those broader categories.</li>
+</ul></li>
+</ul></li>
+</ol>
+<p><br></p>
+</section>
+<section id="post-pruning-2" class="level3">
+<h3 class="anchored" data-anchor-id="post-pruning-2">Post-pruning</h3>
+<p>The idea here is to allow the decision tree to grow fully and observe the CP value. There are two methods for identifying the CP code;</p>
+<ol type="1">
+<li>Use the cp value with the lowest xerror from the base model.</li>
+<li>Use the cp value with the next lowest xerror that is within the standard error.</li>
+</ol>
+<p>We will use the 1-SE rule.</p>
+<p><br></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>cp_table <span class="ot">&lt;-</span> meaningful.emp.mn.grad.year.<span class="fl">10.</span>model.preprune<span class="sc">$</span>cptable</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>min_xerror <span class="ot">&lt;-</span> <span class="fu">min</span>(cp_table[, <span class="st">"xerror"</span>])</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>min_xerror_se <span class="ot">&lt;-</span> cp_table[<span class="fu">which.min</span>(cp_table[,<span class="st">"xerror"</span>]), <span class="st">"xstd"</span>]</span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">&lt;-</span> min_xerror <span class="sc">+</span> min_xerror_se</span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>one_se_index <span class="ot">&lt;-</span> <span class="fu">which</span>(cp_table[, <span class="st">"xerror"</span>] <span class="sc">&lt;=</span> threshold)[<span class="dv">1</span>] </span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>cp_1se <span class="ot">&lt;-</span> cp_table[one_se_index, <span class="st">"CP"</span>]</span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>optimal_cp <span class="ot">&lt;-</span> meaningful.emp.mn.grad.year.<span class="fl">10.</span>model.preprune<span class="sc">$</span>cptable[<span class="fu">which.min</span>(meaningful.emp.mn.grad.year.<span class="fl">10.</span>model.preprune<span class="sc">$</span>cptable[, <span class="st">"xerror"</span>]), <span class="st">"CP"</span>]</span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Prune the hr_base_model based on the optimal cp value</span></span>
+<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a>meaningful.emp.mn.grad.year.<span class="fl">10.</span>model.postprune <span class="ot">&lt;-</span> rpart<span class="sc">::</span><span class="fu">prune</span>(meaningful.emp.mn.grad.year.<span class="fl">10.</span>model.preprune, <span class="at">cp =</span> cp_1se)</span>
+<span id="cb55-17"><a href="#cb55-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-18"><a href="#cb55-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the accuracy of the pruned tree</span></span>
+<span id="cb55-19"><a href="#cb55-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-20"><a href="#cb55-20" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(meaningful.emp.mn.grad.year.<span class="fl">10.</span>model.postprune, test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb55-21"><a href="#cb55-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-22"><a href="#cb55-22" aria-hidden="true" tabindex="-1"></a>accuracy_postprun <span class="ot">&lt;-</span> <span class="fu">mean</span>(test<span class="sc">$</span>pred <span class="sc">==</span> test<span class="sc">$</span>grad.year<span class="fl">.10</span>)</span>
+<span id="cb55-23"><a href="#cb55-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-24"><a href="#cb55-24" aria-hidden="true" tabindex="-1"></a><span class="fu">percent</span>(accuracy_postprun, <span class="at">accuracy =</span> .<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "64.7%"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Examine the complexity plot</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(meaningful.emp.mn.grad.year.<span class="fl">10.</span>model.postprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Classification tree:
+rpart(formula = grad.year.10 ~ ., data = train, method = "class", 
+    control = rpart.control(cp = 0, maxdepth = maxdepth, minsplit = minsplit, 
+        minbucket = minbucket))
+
+Variables actually used in tree construction:
+[1] ACTCompositeScore   avg.wages.pct.state Dem_Desc           
+[4] highest.cred.level  ps.grad.location   
+
+Root node error: 8374/19333 = 0.43315
+
+n= 19333 
+
+         CP nsplit rel error  xerror      xstd
+1 0.0782780      0   1.00000 1.00000 0.0082275
+2 0.0069262      2   0.84344 0.84356 0.0079955
+3 0.0061500      4   0.82959 0.84332 0.0079951
+4 0.0014032      6   0.81729 0.81884 0.0079437</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(meaningful.emp.mn.grad.year.<span class="fl">10.</span>model.postprune)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_local_employment_CART_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>So, the accuracy of these are clear;</p>
+<ul>
+<li>Base model: 60.4%</li>
+<li>Pre-pruned model: 64.7%</li>
+<li>Post-pruned model: 64.7%</li>
+</ul>
+<p>The post-pruned model does simplify the model and gets rid of one of the economic conditions which makes sense to me. I’m going to use the post-pruned model here.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Plot tree</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rpart.plot</span>(meaningful.emp.mn.grad.year.<span class="fl">10.</span>model.postprune, <span class="at">nn =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_local_employment_CART_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="main-takeaway-2" class="level3">
+<h3 class="anchored" data-anchor-id="main-takeaway-2"><strong>Main takeaway</strong></h3>
+<p><strong>Root Split – Postsecondary location</strong></p>
+<p>The first and most important division is <strong>ps.grad.location</strong>.</p>
+<ul>
+<li>If a person <strong>attended postsecondary, graduated in MN, or graduated outside MN</strong>, they are more likely to have <strong>Meaningful Employment in Minnesota</strong> 10 years later (root average 43%).
+<ul>
+<li>If they did <strong>not</strong> fall into those categories, we branch into the wage-based splits.</li>
 </ul></li>
 </ul>
 </section>
-<section id="notable-finding" class="level3">
-<h3 class="anchored" data-anchor-id="notable-finding"><strong>Notable Finding</strong></h3>
+<section id="left-branch-postsecondary-link" class="level3">
+<h3 class="anchored" data-anchor-id="left-branch-postsecondary-link"><strong>Left Branch – Postsecondary link</strong></h3>
+<p>Within the group who <strong>attended/graduated postsecondary</strong>, there’s a further split by <strong>Dem_Desc (Entirely urban)</strong>:</p>
 <ul>
-<li><p><strong>ACTCompositeScore</strong> has a <strong>negative importance</strong> in your model output.</p>
+<li><strong>Entirely urban</strong> individuals have slightly lower MN employment rates (32%) compared to non-entirely urban (40–44%).</li>
+<li>For non-urban, <strong>higher wages relative to state (≥ 0.85)</strong> are linked to a greater likelihood of working in the <strong>region</strong> rather than MN (61%).</li>
+<li>Lower relative wages keep outcomes more MN-focused (40%).</li>
+</ul>
+</section>
+<section id="right-branch-economic-context" class="level3">
+<h3 class="anchored" data-anchor-id="right-branch-economic-context"><strong>Right Branch – Economic context</strong></h3>
+<p>For those <strong>without the postsecondary location advantage</strong>, the next key driver is <strong>avg.wages.pct.state ≥ 0.82</strong>:</p>
 <ul>
-<li><p>This can happen if the variable adds noise when controlling for others, or if it is inversely correlated with the target after accounting for stronger predictors.</p></li>
-<li><p>In practice, this means ACT score is not helpful in distinguishing between MN vs regional meaningful employment here.</p></li>
+<li><strong>Higher wage areas</strong> (≥ 0.82) skew more toward <strong>regional</strong> employment (51%) than MN-based.</li>
+<li>Within this, <strong>highest.cred.level</strong> matters:
+<ul>
+<li>Bachelor’s or higher, no college, or some college are split further by <strong>ACTCompositeScore</strong>:
+<ul>
+<li><strong>High ACT scores (≥ 23)</strong> link strongly to regional employment (59–71%).</li>
+<li>Lower ACT scores show more mixed MN/regional patterns (46–56%).</li>
+</ul></li>
 </ul></li>
 </ul>
-<p><strong>Bottom line:</strong><br>
-</p>
-<p>Your model suggests that <strong>local labor market conditions</strong> (wages, unemployment), <strong>high school CTE engagement</strong>, and <strong>academic performance in MCA tests</strong> are the strongest drivers of whether someone has meaningful employment in the region vs Minnesota overall. Demographic and postsecondary factors still matter, but to a lesser extent.</p>
+<p><strong>Big Picture Insights</strong></p>
+<ol type="1">
+<li><p><strong>Postsecondary location</strong> is the single strongest long-term predictor. Staying/returning to MN for education is associated with higher odds of being employed in MN 10 years later.</p></li>
+<li><p><strong>Local wage competitiveness</strong> pushes outcomes toward regional employment, especially in higher-wage areas.</p></li>
+<li><p><strong>Urbanicity</strong> dampens MN retention slightly in postsecondary-connected individuals.</p></li>
+<li><p><strong>Academic ability (ACT)</strong> still has predictive value a decade later, interacting with wage context and education level.</p></li>
+</ol>
 
 
 </section>
