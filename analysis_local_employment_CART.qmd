@@ -140,7 +140,8 @@ master.original <- read_csv("Data/SLEDS/Masters/After analysis/Master-after-ct.c
   mutate(ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector == "1", "Public, 4-year", as.character(ps.grad.InstitutionSector)),
          ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector == "4", "Public, 2-year", as.character(ps.grad.InstitutionSector)),
          ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector == "11", "Other", as.character(ps.grad.InstitutionSector)),
-         ps.grad.location = ifelse(ps.grad.location == "PS grad EDR", "PS grad region", ps.grad.location))
+         ps.grad.location = ifelse(ps.grad.location == "PS grad EDR", "PS grad region", ps.grad.location),
+         highest.cred.level = as.factor(highest.cred.level))
 
 kable(names(master.original))
 
@@ -156,7 +157,7 @@ Our analysis of local employment using cross-tabs, Kramer v-test, and ANOVA tabl
 These variables **consistently show strong or moderate Cramer's V values** and **clear differences in meaningful employment in the region**, making them strong candidates for inclusion in modeling.
 
 | Variable | Type | Key Insights |
-|-------------------|-------------------|----------------------------------|
+|----|----|----|
 | ps.grad.location | Postsecondary | Strongest predictor of regional employment. Local grads more likely to stay. |
 | ps.grad | Postsecondary | Graduation itself reduces disconnection and improves employment outcomes. |
 | highest.cred.level | Postsecondary | Clear stepwise value: higher credential = better outcomes. |
@@ -172,7 +173,7 @@ These variables **consistently show strong or moderate Cramer's V values** and *
 These variables show **moderate associations** with outcomes. Their predictive value may depend on how they interact with other variables and could be useful in modeling, especially when looking for cumulative effects.
 
 | Variable | Type | Key Insights |
-|-------------------|-------------------|----------------------------------|
+|----|----|----|
 | SpecialEdStatus | Demographic | Somewhat lower employment, higher disconnection. |
 | Grad.year.covid | Demographic | Post-COVID grads slightly more disconnected early on. |
 | cte.achievement | Accomplishment | Boosts regional employment, especially early. |
@@ -186,7 +187,7 @@ These variables show **moderate associations** with outcomes. Their predictive v
 These variables showed **very weak associations** (low Cramer's V, minimal group differences) and could be considered for **dropping from modeling**, unless interaction effects suggest otherwise.
 
 | Variable | Type | Notes |
-|-------------------|-------------------|----------------------------------|
+|----|----|----|
 | english.learner | Demographic | Minimal differences, especially when controlling for other variables. |
 | non.english.home | Demographic | Weak signal, may overlap with other demographics. |
 | sat.taken | Accomplishment | Tiny population, not informative. |
@@ -1695,22 +1696,19 @@ Overall, the model suggests that a combination of postsecondary geographic reten
 
 ## Summary of analysis
 
-**Key Findings:**
-At **1 year after graduation**, the strongest split was **Special Education status**, followed by career/technical coursework, ACT score, and local labor market conditions. Students **without special education status** and with higher academic or career/technical engagement were more likely to have **meaningful in-region employment**.\
+**Key Findings:** At **1 year after graduation**, the strongest split was **Special Education status**, followed by career/technical coursework, ACT score, and local labor market conditions. Students **without special education status** and with higher academic or career/technical engagement were more likely to have **meaningful in-region employment**.\
 
 At **5 years**, the anchor variable shifted to **PS graduation location**. Graduating in the same region as high school strongly predicted remaining in the local workforce. Credential level and institution type moderated outcomes, as did **average wages** in the region and race/ethnicity.\
 
 At **10 years**, the **PS grad location** variable remained dominant. Graduating from a post-secondary institution in the HS region was associated with much higher odds of meaningful in-region employment, while **lower reading proficiency, lower credentials, and certain racial/ethnic groupings** substantially increased the risk of having **no MN employment record**.
 
-**Interpretation Over Time:**
-In the **short term** (1 year), local employment was strongly tied to pre-graduation academic performance, special education status, and CTE participation — factors more directly under K-12 control.\
+**Interpretation Over Time:** In the **short term** (1 year), local employment was strongly tied to pre-graduation academic performance, special education status, and CTE participation — factors more directly under K-12 control.\
 
 By **5 years**, post-secondary pathways had become the primary driver, with **where** and **whether** someone graduated PS exerting the largest influence. This reflects the transition from immediate labor market entry to post-secondary completion as the central determinant of local retention.\
 
 At **10 years**, PS location remained the top predictor, but **reading proficiency, highest credential level, and race/ethnicity** emerged as enduring stratifiers — suggesting long-term career stability hinges on both educational attainment and underlying academic preparation.
 
-**Conclusion:**
-Across all three time points, the model accuracy was modestly above the majority-class baseline, indicating predictive value but also the presence of many unmeasured factors. The evolution of splits shows a clear life-course progression: **early outcomes shaped by high school performance and programs → mid-term outcomes shaped by PS completion/location → long-term outcomes shaped by a blend of PS factors, academic skill levels, and structural demographics.**
+**Conclusion:** Across all three time points, the model accuracy was modestly above the majority-class baseline, indicating predictive value but also the presence of many unmeasured factors. The evolution of splits shows a clear life-course progression: **early outcomes shaped by high school performance and programs → mid-term outcomes shaped by PS completion/location → long-term outcomes shaped by a blend of PS factors, academic skill levels, and structural demographics.**
 
 <br>
 
@@ -2293,16 +2291,14 @@ rpart.plot(no.mn.emp.grad.year.10.model.postprune, nn = TRUE)
 
 ### **Main takeaway**
 
--   **Graduating from a post‑secondary institution in the same region as the high school is the strongest anchor to staying local.**
-    The root split is **ps.grad.location = PS grad region**. The **YES** branch goes straight to a **leaf predicting “Meaningful emp region.”** In your plot the number shown (≈0.34) is the node’s probability for the *other* class (“No MN emp record”); that implies about **66% meaningful-in‑region** at that leaf. So your interpretation is correct.
+-   **Graduating from a post‑secondary institution in the same region as the high school is the strongest anchor to staying local.** The root split is **ps.grad.location = PS grad region**. The **YES** branch goes straight to a **leaf predicting “Meaningful emp region.”** In your plot the number shown (≈0.34) is the node’s probability for the *other* class (“No MN emp record”); that implies about **66% meaningful-in‑region** at that leaf. So your interpretation is correct.
 
--   **If someone didn’t graduate PS, or graduated PS outside the HS region, risk of “No MN employment record” rises and other factors take over.**
-    On the **NO** branch, the tree predicts **No MN emp record** at the next node (\~0.60). From there:
+-   **If someone didn’t graduate PS, or graduated PS outside the HS region, risk of “No MN employment record” rises and other factors take over.** On the **NO** branch, the tree predicts **No MN emp record** at the next node (\~0.60). From there:
 
     -   **Lower reading proficiency (MCA.R \< 4)** pushes risk higher.
     -   Within that low‑reading group, **Race/Ethnicity** and **highest credential** matter:
-        -    **White + ≤ Associate degree** → node around **0.71 “No MN emp record.”**
-        -    **Higher credentials** reduce risk (e.g., \~0.54 “No MN emp record,” i.e., \~46% meaningful in‑region).
+        -   **White + ≤ Associate degree** → node around **0.71 “No MN emp record.”**
+        -   **Higher credentials** reduce risk (e.g., \~0.54 “No MN emp record,” i.e., \~46% meaningful in‑region).
         -   In some subgroups on the rightmost path, the tree reaches **very high risk** (e.g., **\~0.82 “No MN emp record”**).
 
     **Bottom line:**\
@@ -2311,23 +2307,18 @@ rpart.plot(no.mn.emp.grad.year.10.model.postprune, nn = TRUE)
 
 <br>
 
-# **Key Takeaways Across All Comparisons** 
+# **Key Takeaways Across All Comparisons**
 
-1.  **Postsecondary pathways are the strongest long-term differentiator.**
-    Across all three comparisons, whether and where an individual attended or graduated from postsecondary school was the most consistent and influential predictor — especially 5 and 10 years after graduation. Graduating from a Minnesota institution, in particular, was linked to a higher likelihood of meaningful employment in the region.
-2.  **Economic context shapes early outcomes, but fades over time.**
-    For the 1-year models, regional wage competitiveness and unemployment rates frequently appeared as early splits, indicating that local job markets play a large role in retaining talent right after high school. By 5 years, these factors were less prominent, with education and training pathways taking precedence.
-3.  **Academic performance and high school experiences refine predictions.**
-    ACT Composite Scores, MCA scores (especially Reading), CTE course participation, and PSEO participation showed consistent — though secondary — influence. Higher ACT scores were often associated with greater mobility, while higher CTE engagement was linked to staying in-region.
-4.  **Demographics contribute additional nuance.**
-    Race/ethnicity appeared in most trees, indicating distinct patterns across groups. Special education status also emerged in some models, generally associated with lower geographic mobility.
-5.  **Long-term mobility reflects both pull and push factors.**
-    At 10 years, remaining in the region was most common among those with in-state postsecondary credentials and competitive local wages, while out-of-state schooling or higher academic achievement was linked with greater likelihood of living and working elsewhere.
+1.  **Postsecondary pathways are the strongest long-term differentiator.** Across all three comparisons, whether and where an individual attended or graduated from postsecondary school was the most consistent and influential predictor — especially 5 and 10 years after graduation. Graduating from a Minnesota institution, in particular, was linked to a higher likelihood of meaningful employment in the region.
+2.  **Economic context shapes early outcomes, but fades over time.** For the 1-year models, regional wage competitiveness and unemployment rates frequently appeared as early splits, indicating that local job markets play a large role in retaining talent right after high school. By 5 years, these factors were less prominent, with education and training pathways taking precedence.
+3.  **Academic performance and high school experiences refine predictions.** ACT Composite Scores, MCA scores (especially Reading), CTE course participation, and PSEO participation showed consistent — though secondary — influence. Higher ACT scores were often associated with greater mobility, while higher CTE engagement was linked to staying in-region.
+4.  **Demographics contribute additional nuance.** Race/ethnicity appeared in most trees, indicating distinct patterns across groups. Special education status also emerged in some models, generally associated with lower geographic mobility.
+5.  **Long-term mobility reflects both pull and push factors.** At 10 years, remaining in the region was most common among those with in-state postsecondary credentials and competitive local wages, while out-of-state schooling or higher academic achievement was linked with greater likelihood of living and working elsewhere.
 
 ## Key Predictors by Comparison and Time Since Graduation
 
 | Comparison | 1 Year After Graduation | 5 Years After Graduation | 10 Years After Graduation |
-|----------------|------------------|-------------------|--------------------|
+|----|----|----|----|
 | **Meaningful emp region vs. meaningful emp MN** | **avg.wages.pct.state**, high school urbanicity, economic status, race/ethnicity, CTE achievement | **ps.grad.location**, highest.cred.level, avg.wages.pct.state, ACTCompositeScore, high school urbanicity | **ps.grad.location**, avg.wages.pct.state, highest.cred.level, ACTCompositeScore, high school urbanicity |
 | **Meaningful emp region vs. Not meaningful, not attending ps** | **avg.wages.pct.state**, avg.unemp.rate, high school urbanicity, race/ethnicity, ACTCompositeScore | **ps.grad.location**, highest.cred.level, avg.wages.pct.state, total.cte.courses.taken, race/ethnicity | **ps.grad.location**, highest.cred.level, avg.wages.pct.state, MCA.R, race/ethnicity |
 | **Meaningful emp region vs. No MN emp record, not attending ps** | **avg.wages.pct.state**, high school urbanicity, economic status, race/ethnicity, ACTCompositeScore | **highest.cred.level**, ps.grad.location, race/ethnicity, total.cte.courses.taken | **highest.cred.level**, MCA.R, ps.grad.location, race/ethnicity |
