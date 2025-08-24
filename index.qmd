@@ -24,3 +24,199 @@ The central region schools districts are located in the following EDRs and Count
     -   Morrison
     -   Todd
     -   Wadena
+
+<br>
+
+# Integrated Summary of Analyses
+
+## Key Findings
+
+Across all analytic approaches, the evidence is clear: **postsecondary completion and location of graduation are the most decisive factors shaping whether individuals achieve meaningful employment in Central Minnesota.**
+
+-   **Graduating from a regional institution** and/or earning an **associate degree or lower** strongly predicts remaining in the region’s workforce.
+-   **Bachelor’s and higher credentials** often correspond to leaving the region for opportunities elsewhere.
+-   **Non-completion** consistently predicts disconnection from meaningful employment.
+
+Demographics, high school characteristics, and high school accomplishments matter most as **early sorting mechanisms**: they shape who is likely to pursue CTE, who enrolls in regional institutions, and who continues toward bachelor’s or higher degrees (and thus away from regional employment). Among these, **economic status, race/ethnicity, special education, and CTE participation** are the most consistent predictors.
+
+## Interpretation Over Time and Across Analyses
+
+### Demographics
+
+Gender, race/ethnicity, economic status, and language background showed small but consistent associations with workforce outcomes. Students from economically disadvantaged backgrounds and students of color were less likely to attend or complete postsecondary, and more likely to stay tied to regional institutions when they did. These patterns reinforce structural disparities but also highlight where regional institutions serve as anchors for retention.
+
+### High School Characteristics
+
+Rural/urban school context and local labor conditions influenced pathways: rural graduates were more likely to attend regional institutions and remain in the local workforce, while urban/town graduates showed more geographic mobility. These factors shaped access points but were weaker long-term predictors once postsecondary outcomes were known.
+
+### High School Accomplishments
+
+CTE participation was the clearest high school predictor of regional workforce connection. CTE concentrators and completers were much more likely to pursue associate-level credentials at regional institutions, tying them to local labor markets. In contrast, ACT/AP exam takers and PSEO participants were more likely to pursue bachelor’s degrees outside the region. High school accomplishments therefore act as **gateways into different postsecondary tracks** with very different implications for regional employment.
+
+### Postsecondary Pathways
+
+Postsecondary outcomes were decisive.
+
+-   **Graduation from a regional institution** was the single strongest predictor of meaningful employment in Central Minnesota.
+-   **Credential type mattered**: associate and sub-baccalaureate degrees aligned closely with regional employment, while bachelor’s and higher degrees correlated with mobility out of the region.
+-   **Completion vs. non-completion** was a critical dividing line, with non-completers at the highest risk of disconnection.
+
+### CART Analyses
+
+Decision tree models reinforced these patterns. In the general CART analysis, postsecondary outcomes (location and credential) consistently dominated the trees, while demographics and high school factors faded in importance over time. The postsecondary-focused CART models clarified that **CTE engagement, economic background, and rural context** increased the likelihood of choosing regional institutions and associate-level credentials, while college-prep indicators (ACT, AP, PSEO) pushed students toward bachelor’s degrees and higher mobility.
+
+## Conclusion
+
+Taken together, the analyses show that **meaningful employment in Central Minnesota is driven less by who students are demographically, and more by which postsecondary pathway they pursue.** High school factors matter because they channel students toward either:
+
+1.  **Regional institutions and associate-level programs**, which anchor them in the regional workforce, or
+2.  **Bachelor’s and higher-degree pathways**, which often carry them away from the region.
+
+Policy and practice should therefore focus on:
+
+-   **Strengthening CTE pathways** that feed into regional institutions,
+-   **Expanding associate-level and applied programs** aligned with local industries,
+-   **Supporting persistence and completion** at all credential levels, and
+-   **Creating incentives for bachelor’s graduates** to return or connect to the regional workforce.
+
+The clear through-line across all analyses is that **regional institutions and associate-level completion are the strongest levers for sustaining the Central Minnesota workforce.**
+
+<br>
+
+# Summaries of each analysis
+
+## **Multiple Correspondence Analysis (MCA)**
+
+### **Key Findings:**
+
+The MCA was used to detect redundancy among categorical variables and determine which could be removed, collapsed, or retained for modeling. Most variables showed distinct contributions across dimensions, indicating low redundancy. However, a few categories had low frequencies or weak contributions, making them candidates for elimination or consolidation. Specifically, Limited English Proficiency, Homelessness, and SAT participation were eliminated due to extremely low representation. Post-secondary variables, particularly `ps.grad.InstitutionSector` and `highest.cred.level`, showed overlapping or fragmented categories and were collapsed to simplify interpretation.
+
+### **Interpretation Across Variable Groups:**
+
+Demographics: All core variables (gender, race/ethnicity, economic status, English learner, etc.) were retained. Dimensions captured variation around language barriers, COVID graduation year, special education needs, and racial identity. No elimination was recommended.
+
+High School Characteristics: Both RUCA descriptors and economic development region (EDR) captured complementary patterns of rural versus urban schooling context. Both were retained.
+
+High School Accomplishments: ACT/AP participation, PSEO, and CTE engagement represented distinct patterns of academic and vocational achievement. All were retained, though AP exam contributions were weaker.
+
+Post-secondary: Strongest differentiation came from whether students attended, persisted, or graduated from post-secondary institutions. Institutional sector categories and highest credential earned showed fragmentation. Categories for smaller institution types and higher-degree levels were collapsed for interpretability.
+
+### **Conclusion:**
+
+The MCA showed that most variables capture unique and meaningful dimensions of variation, but some simplification was needed to avoid overfitting or noise in predictive models. The cleaned dataset removed low-frequency categories, collapsed overlapping post-secondary categories, and retained the full breadth of demographic, high school, and accomplishment variables. This positions the dataset for streamlined, efficient modeling of pathways after high school without losing critical distinctions that drive workforce outcomes.
+
+<br>
+
+## Local Employment Cross-tabs
+
+### Key Findings
+
+Across all analytic sections, postsecondary experiences (graduation, location of graduation, and credential level) emerge as the strongest predictors of meaningful employment in the region. Demographics and high school characteristics show weaker associations, though economic disadvantage, race/ethnicity, and rural/urban school context play notable roles. High school accomplishments such as CTE engagement, ACT/AP exams, and PSEO participation are moderately related but less predictive than postsecondary outcomes.
+
+### Interpretation by Section
+
+#### Demographics
+
+Findings show that gender, economic status, race/ethnicity, and special education needs each have small but significant associations with regional employment outcomes. COVID-era graduates showed different patterns of employment, reflecting disruptions to labor markets and postsecondary pathways. Language-related indicators (non-English home language, English learner) captured additional variation tied to long-term employment challenges. Overall, demographic factors matter but do not dominate predictions.
+
+#### High School Characteristics
+
+The rural–urban context of the high school (RUCA description, EDR) and local labor conditions (unemployment rate, relative wages) influenced employment outcomes. Rural graduates were more likely to remain in-region but faced limited wage growth, while urban/town graduates showed more geographic mobility. These variables reinforced the importance of context but did not by themselves strongly predict disconnection.
+
+#### High School Accomplishments
+
+Participation in CTE pathways, PSEO, and standardized testing (ACT, AP) showed distinct though moderate contributions. CTE concentrators and completers were more tied to regional employment, while PSEO and AP takers leaned toward continued postsecondary education and higher mobility. ACT participation, nearly universal, provided less differentiation. These variables reflect educational engagement patterns but were weaker predictors than postsecondary outcomes.
+
+#### Postsecondary Experience
+
+Postsecondary outcomes provided the clearest distinctions. Graduating from a college in the same region or elsewhere in Minnesota was strongly linked to remaining employed in-state. Graduating outside Minnesota correlated with higher outmigration and disconnection. Credential level was critical: associate and bachelor’s degrees were associated with stable employment, while lack of postsecondary graduation carried a strong risk of disconnection. Institution sector mattered less after collapsing categories, but public 2-year and 4-year pathways aligned closely with regional employment retention.
+
+### Conclusion
+
+The cross-tab analysis demonstrates that while demographics and high school factors shape early opportunities, **postsecondary experiences—especially location of graduation and credential earned—are the decisive factors for meaningful employment in Central Minnesota**. This suggests that workforce engagement strategies should emphasize supporting students to persist through postsecondary programs, with particular attention to encouraging completion within the region. High school initiatives (CTE, PSEO, AP/ACT) serve as important on-ramps but their long-term impact is mediated by what happens in postsecondary education.
+
+<br>
+
+## Post-secondary Pathways
+
+### Key Findings
+
+Across all models, the most consistent predictors of postsecondary engagement and success were economic status, race/ethnicity, CTE engagement, and high school academic accomplishments. Postsecondary graduation and location of graduation emerged as critical determinants of meaningful employment in Central Minnesota. Early postsecondary attendance (within one year of high school) and eventual completion strongly correlated with stable workforce participation.
+
+### Interpretation by Postsecondary Pathway
+
+#### Attended Postsecondary Within One Year of High School Graduation
+
+Graduates who attended within one year showed stronger long-term labor market outcomes. Economic disadvantage and special education status reduced the likelihood of early attendance, while higher ACT scores, PSEO participation, and AP exams increased it. Race/ethnicity also influenced early attendance, with White and Asian students participating at higher rates than Black, Hispanic, or American Indian peers. CTE concentrators were somewhat less likely to enroll immediately but more tied to regional employment when they did.
+
+#### Attended Postsecondary (Ever)
+
+Broadly attending postsecondary, regardless of timing, was shaped by similar predictors: academic readiness (ACT, AP, PSEO) increased attendance; economic disadvantage, special education, and being from rural high schools decreased it. CTE engagement was more complex, with concentrators more tied to regional employment but less likely to pursue postsecondary broadly compared to peers who leaned toward academic pathways.
+
+#### Graduated Postsecondary (ps.grad)
+
+Completion was the strongest predictor of meaningful regional employment. Credential level mattered: associate and bachelor’s degrees were most associated with stable employment, while non-completion posed high risk of disconnection. Demographic disparities were stark: economically disadvantaged students, English learners, and students of color faced lower graduation rates. High school accomplishments again showed predictive value: ACT/AP participation, strong MCA scores, and PSEO were linked to higher completion. CTE concentrators connected more strongly to employment outcomes when paired with completion, especially at 2-year institutions.
+
+### Conclusion
+
+The analysis of postsecondary pathways confirms that **completion and location of graduation are the most powerful drivers of workforce outcomes** in Central Minnesota. Early enrollment and steady progress increase completion odds, but inequities by race, income, and educational background persist. High school accomplishments such as ACT, AP, PSEO, and CTE play meaningful roles, but their effects are mediated by whether students complete a credential. Policy and practice interventions should therefore prioritize **postsecondary persistence and completion supports**, particularly for disadvantaged and rural students, while leveraging CTE and local institutions to strengthen regional workforce retention.
+
+<br>
+
+## CART — Predictors of Regional Employment
+
+### Key Findings
+
+The CART analysis identified postsecondary outcomes as the strongest predictors of meaningful employment in Central Minnesota. Specifically, **credential level** and **location of postsecondary graduation** consistently appeared at the top of decision trees. Demographic and high school variables (economic status, race/ethnicity, special education, CTE engagement) provided secondary differentiation but were far less predictive. Model accuracy was stable across years (\~65–70%), with pruning improving interpretability without major loss of accuracy.
+
+### Interpretation Over Time
+
+#### One Year After Graduation
+
+The most decisive factors were whether an individual attended postsecondary and their immediate enrollment pathway. Early postsecondary participation often split outcomes, with non-attenders at higher risk of disconnection. Demographic characteristics (economic disadvantage, special education) played a role in refining predictions within these groups, but credential attainment had not yet fully separated outcomes.
+
+#### Five Years After Graduation
+
+Credential completion began to dominate predictions. Associate and bachelor’s degree earners were consistently linked with meaningful employment in the region, while non-completers were more often disconnected. Location of graduation also became more predictive: students completing degrees within the region or Minnesota were more likely to stay employed in-state, while those graduating elsewhere showed greater outmigration.
+
+#### Ten Years After Graduation
+
+Postsecondary variables fully overshadowed earlier predictors. Highest credential earned and location of postsecondary completion were decisive. Demographics and high school accomplishments played minimal roles, suggesting that long-term employment outcomes are overwhelmingly structured by postsecondary success and geography of graduation.
+
+### Conclusion
+
+CART modeling confirms that **meaningful employment in the region is most strongly driven by postsecondary pathways**, particularly credential completion and location of graduation. Demographics and high school accomplishments matter in shaping who reaches postsecondary, but they fade in predictive importance over time. For policy and practice, this underscores the need to:
+
+1.  Support postsecondary persistence and completion,
+2.  Strengthen regional institutions as anchors for retaining graduates locally, and
+3.  Address early barriers that limit access to these decisive pathways.
+
+<br>
+
+## CART — Postsecondary Paths
+
+### Key Findings
+
+The CART analysis was designed to identify **which high school characteristics, accomplishments, and demographics increase the likelihood that students will graduate from a regional institution or with an associate-level credential**, since those pathways are most strongly tied to meaningful employment in Central Minnesota.
+
+The models highlight that **CTE engagement, economic background, and certain demographic factors** were the most consistent predictors of these pathways. In contrast, students with strong academic signals such as ACT/AP/PSEO participation were more likely to pursue bachelor’s degrees outside the region, making them less likely to end up in meaningful regional employment.
+
+### Interpretation
+
+#### Postsecondary Graduation Location
+
+Graduating from a **regional institution** was more common among students who had participated in **career and technical education (CTE)** during high school. Economic disadvantage and rural school context also increased the probability of choosing a regional college. By contrast, academically advanced students (ACT/AP/PSEO) tended to cluster toward institutions outside the region, reducing their likelihood of local employment.
+
+#### Highest Credential Level
+
+Earning an **associate degree or lower** was strongly tied to high school **CTE concentration or completion**. These students had clear pathways into local industries and showed higher retention in the regional workforce. In contrast, students whose high school profiles emphasized college preparatory routes (ACT, AP exams, PSEO) were more likely to earn bachelor’s degrees, which often led them out of the region.
+
+### Conclusion
+
+The CART analysis shows that **high school CTE engagement and regional economic context are key drivers of pathways that lead to meaningful employment in Central Minnesota**. Students who take CTE courses and graduate from regional institutions with associate-level credentials are most likely to stay and contribute to the local workforce. Meanwhile, students prepared for bachelor’s or higher credentials often migrate out of the region.
+
+This suggests workforce strategies should:
+
+1.  **Strengthen and expand CTE pathways in high school** as feeders into regional colleges and local employment,
+2.  **Build stronger connections between regional colleges and local employers** to retain associate-level graduates, and
+3.  **Acknowledge the mobility of bachelor’s-bound students**, while still creating incentives for them to return or connect to regional labor markets.

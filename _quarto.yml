@@ -39,6 +39,8 @@ website:
             href: unemployment.qmd
           - text: Average wages
             href: avgwages.qmd
+          - text: EPIC schools
+            href: epic.qmd
       - text: Analysis
         icon: fa-gear
         menu:

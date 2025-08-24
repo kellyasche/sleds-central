@@ -426,11 +426,9 @@ The first and most influential split is **PSEO participation**. Individuals who 
 5.  **Special Education status** – Key split for non-PSEO students from certain racial/ethnic groups.
 6.  **Average wages (relative to state)** – Smaller role, only relevant in a limited branch.
 
-**Interpretation**
-Participation in PSEO strongly predicts likelihood of postsecondary graduation and whether it occurs within the high school region. Students without PSEO experience tend to have lower postsecondary graduation rates, especially those from underrepresented racial/ethnic groups, with special education needs, or from lower economic backgrounds. For students with PSEO experience, ACT score thresholds and economic status further refine the likelihood of regional versus non-regional graduation. Higher ACT scores are associated with greater odds of graduating outside the region, while economic disadvantages tilt toward non-completion. Wage levels relative to the state average only appear as a predictor in a narrow subgroup, suggesting it’s not a major factor overall.
+**Interpretation** Participation in PSEO strongly predicts likelihood of postsecondary graduation and whether it occurs within the high school region. Students without PSEO experience tend to have lower postsecondary graduation rates, especially those from underrepresented racial/ethnic groups, with special education needs, or from lower economic backgrounds. For students with PSEO experience, ACT score thresholds and economic status further refine the likelihood of regional versus non-regional graduation. Higher ACT scores are associated with greater odds of graduating outside the region, while economic disadvantages tilt toward non-completion. Wage levels relative to the state average only appear as a predictor in a narrow subgroup, suggesting it’s not a major factor overall.
 
-**Brief Conclusion**
-The model shows that PSEO participation is the most significant factor in predicting postsecondary graduation location, with race/ethnicity, economic status, and ACT performance providing additional differentiation. Non-PSEO participants—especially from underrepresented racial/ethnic groups and lower economic backgrounds—are much more likely not to graduate. Among PSEO participants, academic performance and economic status determine whether graduation is more likely to occur within or outside the high school region.
+**Brief Conclusion** The model shows that PSEO participation is the most significant factor in predicting postsecondary graduation location, with race/ethnicity, economic status, and ACT performance providing additional differentiation. Non-PSEO participants—especially from underrepresented racial/ethnic groups and lower economic backgrounds—are much more likely not to graduate. Among PSEO participants, academic performance and economic status determine whether graduation is more likely to occur within or outside the high school region.
 
 <br>
 
@@ -615,8 +613,7 @@ rpart.plot(highest.cred.level.model.postprune, nn = TRUE)
 
 ## **Main takeaway**
 
-**Main Splits**
-The most influential split is **PSEO participation**. Students without PSEO experience are more likely not to graduate from postsecondary education, while those with PSEO experience show higher rates of earning a bachelor’s degree or higher. For non-PSEO participants, the next split is **Race/Ethnicity** (Asian/PI/Black/Hispanic/White vs. others), followed by **ACT Composite Score** thresholds (≥ 21 and ≥ 26), with **economic status** and **CTE achievement** further refining outcomes. For PSEO participants, **ACT Composite Score** (≥ 20) is the initial determinant, followed by **Race/Ethnicity**, **economic status**, and **Special Education status**. In some branches, lower ACT scores (\< 24) and special education status predict much higher rates of non-completion.
+**Main Splits** The most influential split is **PSEO participation**. Students without PSEO experience are more likely not to graduate from postsecondary education, while those with PSEO experience show higher rates of earning a bachelor’s degree or higher. For non-PSEO participants, the next split is **Race/Ethnicity** (Asian/PI/Black/Hispanic/White vs. others), followed by **ACT Composite Score** thresholds (≥ 21 and ≥ 26), with **economic status** and **CTE achievement** further refining outcomes. For PSEO participants, **ACT Composite Score** (≥ 20) is the initial determinant, followed by **Race/Ethnicity**, **economic status**, and **Special Education status**. In some branches, lower ACT scores (\< 24) and special education status predict much higher rates of non-completion.
 
 **Variable Importance**
 
@@ -632,11 +629,9 @@ The most influential split is **PSEO participation**. Students without PSEO expe
 
 6.  **Special Education status** – Particularly important for lower ACT PSEO students.
 
-**Interpretation**
-PSEO participation sharply divides the likelihood of postsecondary credential attainment. Non-PSEO students—particularly from certain racial/ethnic groups and with lower ACT scores—are far more likely to not graduate, while higher ACT scores and favorable economic conditions increase the odds of earning bachelor’s degrees. For PSEO students, ACT performance remains a strong determinant, with high scorers more likely to reach bachelor’s or higher credentials, and low scorers—especially those from disadvantaged economic backgrounds or with special education status—more likely not to complete. CTE achievement provides a modest boost in certain high-performing, non-PSEO cases.
+**Interpretation** PSEO participation sharply divides the likelihood of postsecondary credential attainment. Non-PSEO students—particularly from certain racial/ethnic groups and with lower ACT scores—are far more likely to not graduate, while higher ACT scores and favorable economic conditions increase the odds of earning bachelor’s degrees. For PSEO students, ACT performance remains a strong determinant, with high scorers more likely to reach bachelor’s or higher credentials, and low scorers—especially those from disadvantaged economic backgrounds or with special education status—more likely not to complete. CTE achievement provides a modest boost in certain high-performing, non-PSEO cases.
 
-**Brief Conclusion**
-The model underscores PSEO participation and ACT performance as the two most critical predictors of highest credential earned, with race/ethnicity, economic status, and—more selectively—CTE achievement and special education status providing additional nuance. High ACT scores combined with PSEO participation strongly favor bachelor’s-level attainment, while low scores, economic disadvantage, and lack of PSEO participation correspond with non-completion.
+**Brief Conclusion** The model underscores PSEO participation and ACT performance as the two most critical predictors of highest credential earned, with race/ethnicity, economic status, and—more selectively—CTE achievement and special education status providing additional nuance. High ACT scores combined with PSEO participation strongly favor bachelor’s-level attainment, while low scores, economic disadvantage, and lack of PSEO participation correspond with non-completion.
 
 <br>
 
@@ -658,5 +653,4 @@ For **`highest.cred.level`**, the emphasis is on *how far* a student progresses 
 
 -   **Special Education Influence**: Appears earlier and more prominently in Credential model’s PSEO branch, but mostly in the non-PSEO branch for Location model.
 
-**Brief Conclusion**
-While both models agree that PSEO participation is the critical starting point, the determinants that follow diverge according to the outcome of interest. Geographic graduation patterns are more closely tied to demographic and economic factors, whereas credential level is more directly tied to academic performance and CTE involvement.
+**Brief Conclusion** While both models agree that PSEO participation is the critical starting point, the determinants that follow diverge according to the outcome of interest. Geographic graduation patterns are more closely tied to demographic and economic factors, whereas credential level is more directly tied to academic performance and CTE involvement.

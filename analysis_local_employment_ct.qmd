@@ -3685,7 +3685,7 @@ data <- meaningful.emp.central %>%
 These variables **consistently show strong or moderate Cramer's V values** and **clear differences in meaningful employment in the region**, making them strong candidates for inclusion in modeling.
 
 | Variable | Type | Key Insights |
-|-----------------|-----------------|--------------------------------------|
+|------------------|------------------|-------------------------------------|
 | ps.grad.location | Postsecondary | Strongest predictor of regional employment. Local grads more likely to stay. |
 | ps.grad | Postsecondary | Graduation itself reduces disconnection and improves employment outcomes. |
 | highest.cred.level | Postsecondary | Clear stepwise value: higher credential = better outcomes. |
@@ -3701,7 +3701,7 @@ These variables **consistently show strong or moderate Cramer's V values** and *
 These variables show **moderate associations** with outcomes. Their predictive value may depend on how they interact with other variables and could be useful in modeling, especially when looking for cumulative effects.
 
 | Variable | Type | Key Insights |
-|-----------------|-----------------|--------------------------------------|
+|------------------|------------------|-------------------------------------|
 | SpecialEdStatus | Demographic | Somewhat lower employment, higher disconnection. |
 | Grad.year.covid | Demographic | Post-COVID grads slightly more disconnected early on. |
 | cte.achievement | Accomplishment | Boosts regional employment, especially early. |
@@ -3715,7 +3715,7 @@ These variables show **moderate associations** with outcomes. Their predictive v
 These variables showed **very weak associations** (low Cramer's V, minimal group differences) and could be considered for **dropping from modeling**, unless interaction effects suggest otherwise.
 
 | Variable | Type | Notes |
-|-----------------|-----------------|--------------------------------------|
+|------------------|------------------|-------------------------------------|
 | english.learner | Demographic | Minimal differences, especially when controlling for other variables. |
 | non.english.home | Demographic | Weak signal, may overlap with other demographics. |
 | sat.taken | Accomplishment | Tiny population, not informative. |
