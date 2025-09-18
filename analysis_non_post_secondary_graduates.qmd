@@ -3091,7 +3091,7 @@ Across the three time horizons, the drivers of meaningful regional employment ev
 This progression shows that **CTE plays a consistent protective role from the start, but long-term success in regional employment depends increasingly on the strength of local economies.**
 
 | Predictor | Year 1 (1 yr) — Who Stays Local? | Year 5 (5 yrs) — Who Stays Local? | Year 10 (10 yrs) — Who Stays Local? |
-|----------------|-------------------|-------------------|-------------------|
+|------------------|------------------|------------------|------------------|
 | **CTE Achievement** | Concentrators much more likely in regional jobs | Still protective, especially with 8+ courses | Moderate CTE exposure (≥4 courses) improves regional outcomes |
 | **Total CTE Courses** | Heavy course loads anchor students in region | 8+ courses tip balance toward regional jobs | 4+ courses anchor graduates locally |
 | **Economic Status** | Lower-income more vulnerable to non-meaningful outcomes | Higher-income students more likely to sustain regional work | Not included in final model |
@@ -3820,3 +3820,823 @@ The long-term picture shows that, by Year 10, **regional employment is sustained
 <br>
 
 ## No Minnesota employment record and not attending post-secondary
+
+### Key takeaway
+
+[**Year 1 (One Year After Graduation)**]{.underline}
+
+Outcomes split nearly evenly: half of non-college graduates are in meaningful regional employment, while half have no MN record. The CART shows that **high school preparation is decisive**. Completing 3+ CTE courses is the strongest predictor of regional employment, especially for general education students. Those with special education backgrounds are much more likely to have no record. ACT scores add a counterintuitive layer: **lower scorers are more regionally anchored**, while higher scorers are more likely to have no record. Local unemployment also matters, with stronger labor markets keeping students tied to regional jobs.
+
+**Regional Employment Anchors:** CTE course-taking (≥3), general education status, lower ACT scores, strong local labor demand.
+
+[**Year 5 (Five Years After Graduation)**]{.underline}
+
+At five years, outcomes remain balanced, but the CART shows more interplay of factors. **CTE exposure (≥2 courses)** continues as the top predictor, with lower ACT scorers again more likely to remain regionally employed. Rural context emerges as an important anchor: rural students are more likely to hold regional jobs, while urban/town students are more likely to lack records. Economic status plays a role, with higher-income students more likely to sustain employment, and MCA Reading scores appear as a modest anchor for staying local.
+
+**Regional Employment Anchors:** CTE exposure, lower ACT scores, rural settings, higher income, stronger reading ability.
+
+[**Year 10 (Ten Years After Graduation)**]{.underline}
+
+By year ten, the balance shifts: a majority (57%) have no MN employment record. At this stage, **structural economic conditions and CTE dominate**. Students in counties with wages above 63% of the state average are more likely to remain in regional employment, while those in weaker-wage counties overwhelmingly disappear from records. Within stronger-wage counties, **CTE concentrators and heavy CTE course-takers** are the most likely to stay employed locally. Rural settings still provide a small anchoring effect, but the strongest drivers are **local wages and CTE preparation**.
+
+**Regional Employment Anchors:** Higher county wages, CTE achievement, heavy CTE course-taking (≥12), rural settings.
+
+[**Overall Story**]{.underline}
+
+Across the three time horizons, the drivers of sustaining meaningful regional employment evolve clearly:
+
+-   **Year 1:** Outcomes hinge on **student preparation (CTE, ACT, Special Ed)** and local unemployment.
+-   **Year 5:** Anchors expand to include **rural/urban context, income, and reading ability**, alongside CTE.
+-   **Year 10:** **Structural economic conditions and CTE dominate**, while academic and income measures fade.
+
+This progression shows that **CTE consistently protects against disconnection**, but over time, the strength of the local economy becomes the deciding factor in whether non-college graduates sustain meaningful regional employment or drop out of Minnesota’s labor market.
+
+| Predictor | Year 1 (1 yr) — Who Stays Local? | Year 5 (5 yrs) — Who Stays Local? | Year 10 (10 yrs) — Who Stays Local? |
+|-----------------|-----------------|------------------|---------------------|
+| **CTE Course-Taking** | 3+ courses → much more likely in region | 2+ courses anchor regional jobs | Heavy course load (≥12) anchors regional jobs |
+| **CTE Achievement** | Not used | Not used | Concentrators/completors more likely to remain local |
+| **Special Ed Status** | Special ed → more likely no record | Not included | Not included |
+| **ACT Composite Score** | Lower scorers anchored, higher scorers mobile | Lower scorers anchored, higher scorers more mobile | Not included |
+| **MCA Reading** | Not included | Higher readers more likely to remain local | Not included |
+| **Economic Status** | Lower-income more vulnerable to no record | Higher-income more likely to sustain regional jobs | Not included |
+| **Rural/Urban (Dem_Desc)** | Not included | Rural settings anchor regional jobs | Rural still modest anchor |
+| **County Wages** | Not included | Not included | Strongest split: higher wages anchor regional jobs |
+| **County Unemployment** | Lower unemployment supports regional employment | Not included | Not included |
+
+[**Summary**]{.underline}
+
+-   **Year 1:** Regional employment anchored by **CTE, lower ACT scores, general ed status, and stronger local labor markets**.
+-   **Year 5:** Anchors broaden to include **rural context, higher income, and reading ability**, alongside CTE.
+-   **Year 10:** Anchors narrow again to **structural economy (wages) and CTE**, with rural still modestly protective.
+
+Over time, the story is clear: **CTE consistently protects against no MN record**, but by Year 10, the **strength of local wages dominates** whether non-college graduates remain regionally employed.
+
+<br>
+
+### 1-year after graduation
+
+#### Distribution
+
+Let's check to see what the distribution is of non-college graduates and their meaningful employment one year after graduating high school. There is plenty of balance here since 51% of non-college grads has meaningful emp in the region compared to 49% with no MN employment record and are not attending post-secondary.
+
+```{r}
+no.mn.emp.grad.year.1 <- data.grad.year.1 %>%
+  filter(grad.year.1 %in% c("Meaningful emp region", "No MN emp record, not attending ps")) %>%
+  mutate(grad.year.1 = as.factor(grad.year.1))
+
+comma(nrow(no.mn.emp.grad.year.1))
+
+datatable(data = no.mn.emp.grad.year.1 %>%
+            group_by(grad.year.1) %>%
+            summarize(n = n()) %>%
+            ungroup() %>%
+            mutate(pct = n / sum(n)) %>%
+            ungroup() %>%
+            select(1:3),
+          class = "cell-border stripe", 
+          filter = "top", 
+          rownames = FALSE,
+          options = list(
+            columnDefs = list(list(className = "dt-center", targets = 1:2)))) %>%
+  formatCurrency(2, "", digits = 0) %>%
+  formatPercentage(3, digits = 1)
+```
+
+#### Base model
+
+```{r}
+set.seed(1234)
+
+sample_ind <- sample(nrow(no.mn.emp.grad.year.1), nrow(no.mn.emp.grad.year.1) *.7)
+
+train <- no.mn.emp.grad.year.1[sample_ind,]
+
+test <- no.mn.emp.grad.year.1[-sample_ind,]
+
+#Base model
+
+no.mn.emp.grad.year.1.model <- rpart(grad.year.1 ~ ., data = train, method = "class", control = rpart.control(cp = 0))
+
+# Accuracy
+
+test$pred <- predict(no.mn.emp.grad.year.1.model, test, type = "class")
+
+accuracy_base <- mean(test$pred == test$grad.year.1)
+
+percent(accuracy_base, accuracy = .1)
+
+printcp(no.mn.emp.grad.year.1.model)
+
+```
+
+**Key takeaways from base tree results**
+
+-   **Accuracy**: 56.0%
+-   **Variables used:** 9 total,
+    -   Demographics: 2/2
+    -   High school characteristics: 3/3
+    -   High school accomplishments: 4/4
+-   **Lowest cross-validation error:**
+    -   Step: 7
+    -   xerror: 0.81129
+    -   cp: 1.6749e-03
+    -   Splits: 11
+-   **Total splits**: 800
+
+<br>
+
+#### Pre-pruning
+
+Next, we need to prune. We can either pre-prune or post-prune. We will start with pre-pruning and use each method - max depth, min depth, and min bucket. It’s recommended that I start with the following parameters;
+
+-   maxdepth: 5
+-   minsplit: round(2% of nrow(train)) which is 478.
+-   minbucket: round(minsplit / 3) which is 159.
+-   cp = 0
+
+Unfortunately, this gave us a decision tree with 0 splits. So we will rework the parameters.
+
+```{r}
+maxdepth = 5
+
+minsplit = round(.02*nrow(train))
+
+minbucket = round(minsplit / 3)
+
+no.mn.emp.grad.year.1.model.preprun <- rpart(grad.year.1 ~ ., data = train, method = "class", 
+                   control = rpart.control(cp = 0, maxdepth = maxdepth, minsplit = minsplit, minbucket = minbucket))
+
+# Accuracy
+
+test$pred <- predict(no.mn.emp.grad.year.1.model.preprun, test, type = "class")
+
+accuracy_preprun <- mean(test$pred == test$grad.year.1)
+
+percent(accuracy_preprun, accuracy = .1)
+
+printcp(no.mn.emp.grad.year.1.model.preprun)
+
+```
+
+**Key takeaways from base tree results**
+
+-   **Accuracy**: 56.0% -\> 57.9%
+-   **Variables used:** 8 total
+    -   Demographics: 2/2 - economic status, special ed
+    -   High school characteristics: 3/3
+    -   High school accomplishments: 3/4 - ACT, MCA reading, CTE
+-   **Lowest cross-validation error:**
+    -   Step: 8
+    -   xerror: 0.81129
+    -   cp: 0.00099256
+    -   Splits: 12
+-   **Total splits**: 14
+
+<br>
+
+#### Post-pruned
+
+The idea here is to allow the decision tree to grow fully and observe the CP value. There are two methods for identifying the CP code;
+
+1.  Use the cp value with the lowest xerror from the base model.
+
+2.  Use the cp value with the next lowest xerror that is within the standard error.
+
+```{r}
+cp_table <- no.mn.emp.grad.year.1.model.preprun$cptable
+
+min_xerror <- min(cp_table[, "xerror"])
+min_xerror_se <- cp_table[which.min(cp_table[,"xerror"]), "xstd"]
+
+threshold <- min_xerror + min_xerror_se
+
+one_se_index <- which(cp_table[, "xerror"] <= threshold)[1] 
+
+cp_1se <- cp_table[one_se_index, "CP"]
+
+optimal_cp <- no.mn.emp.grad.year.1.model.preprun$cptable[which.min(no.mn.emp.grad.year.1.model.preprun$cptable[, "xerror"]), "CP"]
+
+
+# Prune the hr_base_model based on the optimal cp value
+no.mn.emp.grad.year.1.model.postprune <- rpart::prune(no.mn.emp.grad.year.1.model.preprun, cp = cp_1se)
+
+# Compute the accuracy of the pruned tree
+
+test$pred <- predict(no.mn.emp.grad.year.1.model.postprune, test, type = "class")
+
+accuracy_postprun <- mean(test$pred == test$grad.year.1)
+
+percent(accuracy_postprun, accuracy = .1)
+
+printcp(no.mn.emp.grad.year.1.model.postprune)
+
+```
+
+**Key takeaways from base tree results**
+
+-   **Accuracy**: 57.9% -\> 57.9%
+-   **Variables used:** 4 total,
+    -   Demographics: 1/2 - special education
+    -   High school characteristics: 1/3 - unemployment
+    -   High school accomplishments: 2/4 - CTE and ACT
+-   **Lowest cross-validation error:**
+    -   Step: 6
+    -   xerror: 0.81799
+    -   cp: 0.0024194
+    -   Splits: 8
+-   **Total splits**: 8
+
+So, the accuracy of these are;
+
+-   Base: `r percent(accuracy_base, accuracy = .1)`
+-   Pre-pruned: `r percent(accuracy_preprun, accuracy = .1)`
+-   Post-pruned: `r percent(accuracy_postprun, accuracy = .1)`
+
+The post-pruned model provides a simpler model - 8 splits while also giving the same accuracy. I will use the post-pruned model.
+
+```{r}
+#Plot tree
+rpart.plot(no.mn.emp.grad.year.1.model.postprune, nn = TRUE)
+```
+
+<br>
+
+#### Main takeaway
+
+[**Model Performance**]{.underline}
+
+-   **Accuracy:** 57.9% (baseline was 50.7% in the majority “meaningful regional” group, so the model provides a moderate improvement).
+-   **Root node error:** 49.8% (matches the proportion with no MN employment record).
+-   **Pruning:** Post-pruned tree with 8 splits selected for balance and interpretability.
+
+[**Variable Importance**]{.underline}
+
+The tree uses **four predictors**:
+
+-   total.cte.courses.taken (continuous measure of CTE exposure)
+-   SpecialEdStatus (special education status)
+-   ACTCompositeScore (continuous ACT composite score)
+-   avg.unemp.rate (county unemployment rate)
+
+This mix highlights both **student-level preparation (CTE, ACT, Special Ed)** and **local economic demand (unemployment)** as key factors distinguishing early regional employment from having no record.
+
+[**Interpretation of Splits**]{.underline}
+
+1.  **CTE Course Load (Top Split)**
+    -   The most decisive early factor is whether a student completed **3 or more CTE courses**.
+    -   Students with heavier CTE exposure are much more likely to show up in meaningful regional employment.
+    -   Those with little or no CTE coursework are at high risk of having no MN employment record.
+2.  **Special Education Status (Second Split)**
+    -   Among students with CTE exposure, **special education status** is the next divide:
+        -   **General education students** are more likely to be in meaningful regional jobs.
+        -   **Special ed students** are more often in the no-record group, regardless of CTE.
+3.  **ACT Composite Score (Deeper Splits)**
+    -   For general education students, **ACT scores further shape outcomes**:
+        -   **Lower ACT scorers (\<26 or \<25 depending on branch)** are more likely to remain regionally employed.
+        -   **Higher scorers** are more often in the no-record group, likely reflecting greater mobility out of Minnesota or delayed workforce entry.
+4.  **County Unemployment (Deepest Splits)**
+    -   In both CTE-exposed and non-CTE groups, **local unemployment rates** play a role:
+        -   **Lower unemployment** strengthens the chance of meaningful regional employment.
+        -   **Higher unemployment** increases the likelihood of no MN record.
+
+[**Overall Narrative**]{.underline}
+
+At **1 year after graduation**, non-college graduates are split evenly between meaningful regional employment and no MN record. The CART shows that **high school preparation is the decisive factor at this early stage**. Completing 3+ CTE courses substantially increases the likelihood of regional work, especially for general education students. By contrast, students with minimal CTE coursework or with special education needs are much more likely to lack an MN employment record.
+
+ACT performance also matters, but in a counterintuitive way: **lower scorers are more regionally anchored, while higher scorers are more mobile or absent from MN records**. Finally, local unemployment conditions shape opportunities — strong local economies anchor graduates in regional jobs, while weak ones increase disconnection.
+
+**Bottom line:** At Year 1, **CTE course-taking is the single most important anchor into meaningful regional employment**, but its benefits are limited for special education students, and local labor demand still determines whether these early attachments stick.
+
+<br>
+
+### 5-years after graduation
+
+#### Distribution
+
+Let's check to see what the distribution is of non-college graduates and their meaningful employment five years after graduating high school. We are getting a bit more balance now - 51% have meaningful employment in the region while 49% have no Minnesota employment record.
+
+```{r}
+no.mn.emp.grad.year.5 <- data.grad.year.5 %>%
+  filter(grad.year.5 %in% c("Meaningful emp region", "No MN emp record, not attending ps")) %>%
+  mutate(grad.year.5 = as.factor(grad.year.5))
+
+comma(nrow(no.mn.emp.grad.year.5))
+
+datatable(data = no.mn.emp.grad.year.5 %>%
+            group_by(grad.year.5) %>%
+            summarize(n = n()) %>%
+            ungroup() %>%
+            mutate(pct = n / sum(n)) %>%
+            ungroup() %>%
+            select(1:3),
+          class = "cell-border stripe", 
+          filter = "top", 
+          rownames = FALSE,
+          options = list(
+            columnDefs = list(list(className = "dt-center", targets = 1:2)))) %>%
+  formatCurrency(2, "", digits = 0) %>%
+  formatPercentage(3, digits = 1)
+```
+
+#### Base model
+
+```{r}
+set.seed(1234)
+
+sample_ind <- sample(nrow(no.mn.emp.grad.year.5), nrow(no.mn.emp.grad.year.5) *.7)
+
+train <- no.mn.emp.grad.year.5[sample_ind,]
+
+test <- no.mn.emp.grad.year.5[-sample_ind,]
+
+#Base model
+
+no.mn.emp.grad.year.5.model <- rpart(grad.year.5 ~ ., data = train, method = "class", control = rpart.control(cp = 0))
+
+# Accuracy
+
+test$pred <- predict(no.mn.emp.grad.year.5.model, test, type = "class")
+
+accuracy_base <- mean(test$pred == test$grad.year.5)
+
+percent(accuracy_base, accuracy = .1)
+
+printcp(no.mn.emp.grad.year.5.model)
+
+```
+
+**Key takeaways from base tree results**
+
+-   **Accuracy**: 56.0%
+-   **Variables used:** 9 total,
+    -   Demographics: 2/2
+    -   High school characteristics: 3/3
+    -   High school accomplishments: 4/4
+-   **Lowest cross-validation error:**
+    -   Step: 15
+    -   xerror: 0.87114
+    -   cp: 1.1932e-03
+    -   Splits: 33
+-   **Total splits**: 883
+
+<br>
+
+#### Pre-pruning
+
+Next, we need to prune. We can either pre-prune or post-prune. We will start with pre-pruning and use each method - max depth, min depth, and min bucket. It’s recommended that I start with the following parameters;
+
+-   maxdepth: 5
+-   minsplit: round(2% of nrow(train)).
+-   minbucket: round(minsplit / 3).
+-   cp = 0
+
+```{r}
+maxdepth = 5
+
+minsplit = round(.02*nrow(train))
+
+minbucket = round(minsplit / 3)
+
+no.mn.emp.grad.year.5.model.preprun <- rpart(grad.year.5 ~ ., data = train, method = "class", 
+                   control = rpart.control(cp = 0, maxdepth = maxdepth, minsplit = minsplit, minbucket = minbucket))
+
+# Accuracy
+
+test$pred <- predict(no.mn.emp.grad.year.5.model.preprun, test, type = "class")
+
+accuracy_preprun <- mean(test$pred == test$grad.year.5)
+
+percent(accuracy_preprun, accuracy = .1)
+
+printcp(no.mn.emp.grad.year.5.model.preprun)
+
+```
+
+**Key takeaways from base tree results**
+
+-   **Accuracy**: 56.0% -\> 56.5%
+-   **Variables used:** 7 total,
+    -   Demographics: 2/2 - economic status and special ed
+    -   High school characteristics: 2/3 - wages, rural-ness
+    -   High school accomplishments: 3/4 - CTE, ACT MCA - reading
+-   **Lowest cross-validation error:**
+    -   Step: 8
+    -   xerror: 0.88194
+    -   cp: 0
+    -   Splits: 14
+-   **Total splits**: 14
+
+<br>
+
+#### Post-pruned
+
+The idea here is to allow the decision tree to grow fully and observe the CP value. There are two methods for identifying the CP code;
+
+1.  Use the cp value with the lowest xerror from the base model.
+2.  Use the cp value with the next lowest xerror that is within the standard error.
+
+```{r}
+cp_table <- no.mn.emp.grad.year.5.model.preprun$cptable
+
+min_xerror <- min(cp_table[, "xerror"])
+min_xerror_se <- cp_table[which.min(cp_table[,"xerror"]), "xstd"]
+
+threshold <- min_xerror + min_xerror_se
+
+one_se_index <- which(cp_table[, "xerror"] <= threshold)[1] 
+
+cp_1se <- cp_table[one_se_index, "CP"]
+
+optimal_cp <- no.mn.emp.grad.year.5.model.preprun$cptable[which.min(no.mn.emp.grad.year.5.model.preprun$cptable[, "xerror"]), "CP"]
+
+
+# Prune the hr_base_model based on the optimal cp value
+no.mn.emp.grad.year.5.model.postprune <- rpart::prune(no.mn.emp.grad.year.5.model.preprun, cp = cp_1se)
+
+# Compute the accuracy of the pruned tree
+
+test$pred <- predict(no.mn.emp.grad.year.5.model.postprune, test, type = "class")
+
+accuracy_postprun <- mean(test$pred == test$grad.year.5)
+
+percent(accuracy_postprun, accuracy = .1)
+
+printcp(no.mn.emp.grad.year.5.model.postprune)
+
+```
+
+**Key takeaways from base tree results**
+
+-   **Accuracy**: 56.5% -\> 56.9%
+-   **Variables used:** 5 total,
+    -   Demographics: 1/2 - economic status
+    -   High school characteristics: 1/3 - rural-ness
+    -   High school accomplishments: 3/4 - ACT, MCA- reading, cte
+-   **Lowest cross-validation error:**
+    -   Step: 5
+    -   xerror: 0.88721
+    -   cp: 0.0022189
+    -   Splits: 5
+-   **Total splits**: 5
+
+So, the accuracy of these are;
+
+-   Base: `r percent(accuracy_base, accuracy = .1)`
+-   Pre-pruned: `r percent(accuracy_preprun, accuracy = .1)`
+-   Post-pruned: `r percent(accuracy_postprun, accuracy = .1)`
+
+The post-pruned model provides a much simpler model - 5 splits instead of pre-pruned’s 14 splits - while also giving better accuracy. I will use the post-pruned model.
+
+```{r}
+#Plot tree
+rpart.plot(no.mn.emp.grad.year.5.model.postprune, nn = TRUE)
+```
+
+<br>
+
+#### Key takeaway
+
+[**Model Performance**]{.underline}
+
+-   **Accuracy:** 56.9% (baseline was 50.9% in the majority “meaningful regional” group, so the tree improves modestly).
+-   **Root node error:** 48.9% (matches the proportion of no MN employment record in the sample).
+-   **Pruning:** Post-pruned tree with 5 splits selected for interpretability and stability.
+
+[**Variable Importance**]{.underline}
+
+The tree uses **five predictors**:
+
+-   total.cte.courses.taken (continuous measure of CTE exposure)
+-   ACTCompositeScore (continuous ACT composite score)
+-   Dem_Desc (Rural/Urban classification)
+-   economic.status (low vs. higher income)
+-   MCA.R (reading score)
+
+This mix shows that by Year 5, **both student accomplishments (CTE, ACT, MCA), demographics (income, rural/urban), and academic ability** matter for whether non-college graduates remain in regional employment or drop out of the MN employment system.
+
+[**Interpretation of Splits**]{.underline}
+
+1.  **CTE Course Load (Top Split)**
+    -   The first and strongest split is whether students completed **2 or more CTE courses**.
+    -   Those with heavier CTE exposure are much more likely to be in meaningful regional employment.
+    -   Those with little or no CTE coursework are more likely to lack MN employment records.
+2.  **ACT Composite Score (Second Split)**
+    -   Among students with 2+ CTE courses, **ACT performance matters**:
+        -   **Lower ACT scorers (\<23)** are much more likely to remain regionally employed.
+        -   **Higher scorers** are more likely to lack an MN employment record, reflecting greater out-migration or educational/labor market mobility.
+3.  **Rural/Urban Context (Third Split)**
+    -   For lower ACT scorers, **rural/urban context** shapes outcomes:
+        -   **More rural students** are anchored in regional jobs.
+        -   **Urban/town students** are more likely to have no MN record.
+4.  **Economic Status and Reading Scores (Deeper Splits)**
+    -   Within the rural/town group, **economic status** further differentiates outcomes:
+        -   **Higher-income students** have stronger attachment to regional employment.
+        -   **Lower-income students** are more vulnerable to no MN record.
+    -   **MCA Reading scores** also provide a final split: higher readers are slightly more likely to remain in the region.
+
+[**Overall Narrative**]{.underline}
+
+At **5 years after graduation**, non-college graduates remain evenly split between meaningful regional employment and no MN record. The CART shows that **CTE exposure continues to be the strongest anchor into regional work**, but now interacts with **academic performance and demographics**.
+
+Students with heavier CTE coursework and lower ACT scores are the most likely to stay regionally employed. Rural settings and stronger family economic resources further reinforce regional attachment. In contrast, students with minimal CTE coursework, higher ACT scores, or lower-income backgrounds are more likely to disappear from the MN employment system.
+
+This demonstrates a shift from Year 1: while **CTE alone was the strongest early anchor**, by Year 5, **academic ability, rural context, and income combine with CTE to explain who sustains meaningful regional employment versus who disconnects from the state labor force.**
+
+<br>
+
+### 10-years after graduation
+
+#### Distribution
+
+Let's check to see what the distribution is of non-college graduates and their meaningful employment ten years after graduating high school. We are balanced now - 43% have meaningful employment in the region while 57% have meaningful employment in MN.
+
+```{r}
+no.mn.emp.grad.year.10 <- data.grad.year.10 %>%
+  filter(grad.year.10 %in% c("Meaningful emp region", "No MN emp record, not attending ps")) %>%
+  mutate(grad.year.10 = as.factor(grad.year.10))
+
+comma(nrow(no.mn.emp.grad.year.10))
+
+datatable(data = no.mn.emp.grad.year.10 %>%
+            group_by(grad.year.10) %>%
+            summarize(n = n()) %>%
+            ungroup() %>%
+            mutate(pct = n / sum(n)) %>%
+            ungroup() %>%
+            select(1:3),
+          class = "cell-border stripe", 
+          filter = "top", 
+          rownames = FALSE,
+          options = list(
+            columnDefs = list(list(className = "dt-center", targets = 1:2)))) %>%
+  formatCurrency(2, "", digits = 0) %>%
+  formatPercentage(3, digits = 1)
+```
+
+#### Base model
+
+```{r}
+set.seed(1234)
+
+sample_ind <- sample(nrow(no.mn.emp.grad.year.10), nrow(no.mn.emp.grad.year.10) *.7)
+
+train <- no.mn.emp.grad.year.10[sample_ind,]
+
+test <- no.mn.emp.grad.year.10[-sample_ind,]
+
+#Base model
+
+no.mn.emp.grad.year.10.model <- rpart(grad.year.10 ~ ., data = train, method = "class", control = rpart.control(cp = 0))
+
+# Accuracy
+
+test$pred <- predict(no.mn.emp.grad.year.10.model, test, type = "class")
+
+accuracy_base <- mean(test$pred == test$grad.year.10)
+
+percent(accuracy_base, accuracy = .1)
+
+printcp(no.mn.emp.grad.year.10.model)
+
+```
+
+**Key takeaways from base tree results**
+
+-   **Accuracy**: 57.1%
+-   **Variables used:** 9 total,
+    -   Demographics: 2/2
+    -   High school characteristics: 3/3
+    -   High school accomplishments: 4/4
+-   **Lowest cross-validation error:**
+    -   Step: 7
+    -   xerror: 0.95982
+    -   cp: 1.9345e-03
+    -   Splits: 15
+-   **Total splits**: 523
+
+<br>
+
+#### Pre-pruning
+
+Next, we need to prune. We can either pre-prune or post-prune. We will start with pre-pruning and use each method - max depth, min depth, and min bucket. It’s recommended that I start with the following parameters;
+
+-   maxdepth: 5
+-   minsplit: round(2% of nrow(train)).
+-   minbucket: round(minsplit / 3).
+-   cp = 0
+
+```{r}
+maxdepth = 5
+
+minsplit = round(.02*nrow(train))
+
+minbucket = round(minsplit / 3)
+
+no.mn.emp.grad.year.10.model.preprun <- rpart(grad.year.10 ~ ., data = train, method = "class", 
+                   control = rpart.control(cp = 0, maxdepth = maxdepth, minsplit = minsplit, minbucket = minbucket))
+
+# Accuracy
+
+test$pred <- predict(no.mn.emp.grad.year.10.model.preprun, test, type = "class")
+
+accuracy_preprun <- mean(test$pred == test$grad.year.10)
+
+percent(accuracy_preprun, accuracy = .1)
+
+printcp(no.mn.emp.grad.year.10.model.preprun)
+
+```
+
+**Key takeaways from base tree results**
+
+-   **Accuracy**: 57.1% -\> 58.2%
+-   **Variables used:** 7 total,
+    -   Demographics: 1/2 - economic status
+    -   High school characteristics: 2/3 - wages, rural-ness
+    -   High school accomplishments: 4/4 - CTE, ACT, MCA reading
+-   **Lowest cross-validation error:**
+    -   Step: 3
+    -   xerror: 0.97835
+    -   cp: 0.00022321
+    -   Splits: 5
+-   **Total splits**: 9
+
+<br>
+
+#### Post-pruned
+
+The idea here is to allow the decision tree to grow fully and observe the CP value. There are two methods for identifying the CP code;
+
+1.  Use the cp value with the lowest xerror from the base model.
+
+2.  Use the cp value with the next lowest xerror that is within the standard error.
+
+```{r}
+cp_table <- no.mn.emp.grad.year.10.model.preprun$cptable
+
+min_xerror <- min(cp_table[, "xerror"])
+min_xerror_se <- cp_table[which.min(cp_table[,"xerror"]), "xstd"]
+
+threshold <- min_xerror + min_xerror_se
+
+one_se_index <- which(cp_table[, "xerror"] <= threshold)[1] 
+
+cp_1se <- cp_table[one_se_index, "CP"]
+
+optimal_cp <- no.mn.emp.grad.year.10.model.preprun$cptable[which.min(no.mn.emp.grad.year.10.model.preprun$cptable[, "xerror"]), "CP"]
+
+
+# Prune the hr_base_model based on the optimal cp value
+no.mn.emp.grad.year.10.model.postprune <- rpart::prune(no.mn.emp.grad.year.10.model.preprun, cp = cp_1se)
+
+# Compute the accuracy of the pruned tree
+
+test$pred <- predict(no.mn.emp.grad.year.10.model.postprune, test, type = "class")
+
+accuracy_postprun <- mean(test$pred == test$grad.year.10)
+
+percent(accuracy_postprun, accuracy = .1)
+
+printcp(no.mn.emp.grad.year.10.model.postprune)
+
+```
+
+**Key takeaways from base tree results**
+
+-   **Accuracy**: 58.2% -\> 58.1%
+-   **Variables used:** 4 total,
+    -   Demographics: 0/2
+    -   High school characteristics: 2/3 - wages, rural-ness
+    -   High school accomplishments: 2/4 - CTE
+-   **Lowest cross-validation error:**
+    -   Step: 3
+    -   xerror: 0.97835
+    -   cp: 0.00022321
+    -   Splits: 5
+-   **Total splits**: 5
+
+So, the accuracy of these are;
+
+-   Base: `r percent(accuracy_base, accuracy = .1)`
+-   Pre-pruned: `r percent(accuracy_preprun, accuracy = .1)`
+-   Post-pruned: `r percent(accuracy_postprun, accuracy = .1)`
+
+The post-pruned model provides a much simpler model - 5 splits instead of pre-pruned’s 9 splits - while also giving the same accuracy. I will use the post-pruned model.
+
+```{r}
+#Plot tree
+rpart.plot(no.mn.emp.grad.year.10.model.postprune, nn = TRUE)
+```
+
+<br>
+
+#### Key takeaway
+
+[**Model Performance**]{.underline}
+
+-   **Accuracy:** 58.1% (baseline was 57.0% in the majority “no MN employment record” group, so the model is only slightly better than baseline).
+-   **Root node error:** 42.7% (matches the proportion in regional meaningful employment).
+-   **Pruning:** Post-pruned tree with 5 splits selected for clarity and interpretability.
+
+[**Variable Importance**]{.underline}
+
+The tree uses **four predictors**:
+
+-   avg.wages.pct.state (county wages vs. state average)
+-   cte.achievement (categorical CTE status)
+-   Dem_Desc (Rural/Urban classification)
+-   total.cte.courses.taken (continuous measure of CTE exposure)
+
+Unlike Year 5, academic measures (ACT, MCA) and income do not appear. By Year 10, the model leans more on **structural economic conditions (wages)** and **career/technical preparation (CTE)**, with rural/urban context providing nuance.
+
+[**Interpretation of Splits**]{.underline}
+
+1.  **County Wages (Top Split)**
+    -   The first split separates students by **county wages at 63% of the state average**.
+    -   Students in very low-wage counties are disproportionately in the “no MN record” group.
+    -   Those in higher-wage counties are more likely to sustain regional employment.
+2.  **CTE Achievement (Second Split, Higher-Wage Counties)**
+    -   Among students in stronger-wage counties, **CTE concentrators/completors** are much more likely to stay regionally employed.
+    -   Students with weaker or no CTE background are more likely to have no MN record.
+3.  **Rural/Urban Context (Third Split, Higher-Wage Counties, CTE Students)**
+    -   Within CTE-exposed students, **rural/urban context** matters:
+        -   Students from mixed or urban/town settings are more vulnerable to disconnection.
+        -   Rural settings remain somewhat more anchoring for regional employment.
+4.  **Additional CTE Coursework (Fourth Split)**
+    -   For CTE students in weaker wage contexts, **12 or more CTE courses** helps preserve attachment to regional work.
+    -   Without this level of coursework, students are more likely to disappear from MN employment records.
+
+[**Overall Narrative**]{.underline}
+
+At **10 years after graduation**, more than half of non-college graduates lack a Minnesota employment record, reflecting long-term disconnection or mobility. The CART shows that **structural economic conditions and CTE preparation dominate outcomes at this stage**.
+
+Students in stronger-wage counties, especially those with concentrated CTE preparation and heavier CTE course loads, are the most likely to sustain meaningful regional employment. In contrast, students in very low-wage counties or with limited CTE backgrounds are far more likely to disappear from the Minnesota workforce. Rural settings still offer some anchoring effect, but the strongest predictors are **economic conditions and CTE exposure**.
+
+This marks a shift from earlier years: while ACT scores, income, and unemployment mattered at Year 5, by Year 10 the story is clear — **long-term regional employment depends on healthy local economies and sustained technical preparation in high school**.
+
+<br>
+
+## Overall summary
+
+[**Regional vs. MN (Mobility vs. Staying Local)**]{.underline}
+
+When comparing meaningful regional employment to meaningful employment elsewhere in Minnesota, the CART models show that:
+
+-   **Early (Year 1):** Outcomes are shaped by **rural/urban context, local wages, economic status, and CTE achievement**. Rural grads and CTE concentrators are anchored in regional work, while urban, higher-income, and non-CTE students are more mobile.
+-   **Mid-term (Year 5):** **ACT scores** emerge as a driver of statewide mobility. Higher scorers are more likely to leave the region, while lower scorers remain. Structural anchors like wages and rural roots continue to matter.
+-   **Long-term (Year 10):** **Local economic conditions dominate**. Low wages and low unemployment tie students to regional jobs, while higher wages and unemployment drive mobility. Individual student characteristics fade.
+
+**Core Story:** Regional vs. MN employment is primarily about **mobility and opportunity-seeking**. Early on, CTE and rural roots anchor students locally, but by 10 years, **local labor markets alone decide whether students stay or leave.**
+
+------------------------------------------------------------------------
+
+[**Regional vs. Not Meaningful (Success vs. Disconnection)**]{.underline}
+
+When comparing meaningful regional employment to non-meaningful work (not attending postsecondary), the CART models show that:
+
+-   **Early (Year 1):** **CTE achievement is the strongest determinant**. Concentrators with more courses are far more likely to be employed regionally, while others fall into non-meaningful work. Economic status and local conditions reinforce these divides.
+-   **Mid-term (Year 5):** The picture broadens to include **special education status, rural/urban context, and income**. CTE remains protective, but special education is a critical barrier.
+-   **Long-term (Year 10):** **Structural conditions (wages, unemployment)** dominate. CTE continues to provide some protection, but special education remains a barrier even a decade later.
+
+**Core Story:** Regional vs. not meaningful employment is about **who is prepared and supported to succeed**. CTE provides consistent protection, but **special education and weak economies increase risk of long-term disconnection.**
+
+------------------------------------------------------------------------
+
+[**Regional vs. No MN Record (Presence vs. Absence)**]{.underline}
+
+When comparing meaningful regional employment to having no Minnesota employment record, the CART models show that:
+
+-   **Early (Year 1):** **CTE course-taking (≥3)** is the main anchor into regional employment. Special education status and ACT scores also matter: lower ACT scorers are more likely to stay, while higher scorers are more mobile or missing from records.
+-   **Mid-term (Year 5):** Anchors broaden. **CTE remains protective**, but rural context, income, and MCA Reading scores now also help explain who sustains regional employment. Lower ACT scorers continue to be more regionally anchored.
+-   **Long-term (Year 10):** The balance flips, with most students having no MN record. By this stage, **county wages dominate**, and CTE achievement/heavy course-taking remain the key educational anchor. Rural settings still offer modest protection.
+
+**Core Story:** Regional vs. no MN record is about **labor market attachment vs. disconnection from Minnesota altogether**. Early on, preparation (CTE) and mobility (ACT) explain outcomes, but by 10 years, **economic strength and CTE determine who remains visible in the state workforce.**
+
+------------------------------------------------------------------------
+
+## Cross-Outcome Comparison Table
+
+| Predictor | Regional vs. MN (Mobility) | Regional vs. Not Meaningful (Success vs. Disconnection) | Regional vs. No MN Record (Presence vs. Absence) |
+|-----------------|-----------------|---------------------|------------------|
+| **CTE Achievement** | Anchors local early, fades by Year 10 | Strongest determinant early, protective throughout | Protective at Year 10 (concentrators stay) |
+| **Total CTE Courses** | Matters early (more → local) | Heavy loads protective, esp. Year 1 & 5 | Protective across all years (≥3 early, ≥12 later) |
+| **Economic Status** | Higher-income → more mobile (leave region) | Lower-income more vulnerable to disconnection | Higher-income more likely to sustain regional work (Year 5) |
+| **Special Ed Status** | Not significant | Major barrier at Year 5 & 10 | Barrier at Year 1, then fades |
+| **ACT Scores** | Higher scorers → statewide mobility | Not significant | Lower scorers anchored locally, higher scorers missing |
+| **MCA Scores** | Not used | Reading matters slightly at Year 5 | Reading matters slightly at Year 5 |
+| **Rural/Urban (Dem_Desc)** | Rural anchors students locally | Rural protective at Year 5 | Rural protective at Year 5 & modest at Year 10 |
+| **County Wages** | Higher wages → more mobility (leave region) | Competitive wages support local employment | Strongest predictor by Year 10 |
+| **County Unemployment** | Lower unemployment anchors local employment | Strong early, fades later | Strong early, fades later |
+
+------------------------------------------------------------------------
+
+## Big Picture Takeaways
+
+-   **CTE is the most consistent protective factor** across all comparisons. Heavy CTE exposure anchors students into regional work, reducing both disconnection and mobility.
+-   **Special education status** is a persistent barrier for avoiding non-meaningful outcomes, but less central for mobility (vs. MN) or long-term presence (vs. no record).
+-   **ACT scores work differently across contexts**: high scorers are more mobile (regional vs. MN) and more likely missing from records (regional vs. no record).
+-   **Rural context is a consistent anchor** for staying local, while **urban/town settings increase risk** of both mobility and disconnection.
+-   **Economic structure dominates by Year 10**. Wages and unemployment are the strongest determinants of whether non-college graduates sustain regional employment, outcompeting most student-level factors.
+
+**Final Synthesis:**\
+Across all outcomes, the story is consistent: **early regional employment is shaped by individual preparation (especially CTE), but long-term sustainability is determined by local economic strength.** Policymakers should view CTE as an early protective tool and local labor market investment as the long-term solution for retaining non-college graduates in meaningful regional work.
