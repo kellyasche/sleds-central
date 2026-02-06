@@ -56,8 +56,19 @@ website:
             href: analysis_local_employment_CART.qmd
           - text: Post-secondary Paths CART Analysis
             href: analysis_post_secondary_paths_CART.qmd
-          - text: Non-post-secondary graduates
+          - text: Non-college graduates
             href: analysis_non_post_secondary_graduates.qmd
+          - text: Further analysis on non-college grads
+            href: analysis_non_college_deeper.qmd
+      - text: One-page summaries of pathways
+        icon: fa-gear
+        menu:
+          - text: Pathway - Anchored
+            href: pathway_anchored.qmd
+          - text: Pathway - Mobility
+            href: pathway_mobility.qmd
+          - text: Pathway - Unanchared / At-Risk
+            href: pathway_unanchored.qmd
 
         
 
