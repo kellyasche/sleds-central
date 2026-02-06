@@ -1,0 +1,118 @@
+---
+title: "Pathway Descriptions"
+editor: visual
+---
+
+## Methodological Justification
+
+This project adopts a pathways-based framework to summarize patterns of workforce participation observed among Central Minnesota high school graduates. These pathways were not defined a priori, but instead emerged through repeated and consistent patterns observed across multiple analytic approaches, including descriptive distributions of workforce states over time, cross-tabulation analyses of individual characteristics, predictive CART models, and focused subgroup and persistence analyses. Across these methods, individuals clustered into three analytically distinct groups based on employment intensity, geographic location of employment, and stability over time. The pathways framework is used here as an organizing device to synthesize these findings and to describe patterned relationships between educational experiences and workforce outcomes. The pathways do not represent deterministic life courses, nor do they imply individual intent or preference; rather, they summarize observed regularities in administrative data and provide a structured way to discuss how characteristics and institutional pathways are associated with different workforce participation outcomes.
+
+<br>
+
+## Anchored Pathway
+
+### Definition
+
+The Anchored Pathway consists of individuals who achieve Sustained WF – Region, defined as working 1,000 or more hours for a single employer within the Central Minnesota region in a calendar year at observed points after high school. This pathway is defined strictly by employment intensity and geographic location and does not imply long-term residence, preference, or immobility.
+
+### Characteristics
+
+#### Demographic
+
+Individuals in the Anchored Pathway are more likely to be male than female. Demographic characteristics alone do not determine pathway membership, but gender differences become more pronounced in analyses that focus on non-postsecondary graduates.
+
+#### High School Characteristics
+
+Participation in career-aligned or CTE coursework is strongly associated with the Anchored Pathway. This association appears consistently across cross-tabulation analyses and emerges as a protective routing factor in CART models, particularly for individuals without four-year postsecondary credentials.
+
+#### High School Accomplishments / Academic
+
+Higher academic preparation, particularly higher GPA, is associated with increased representation in Sustained WF – Region. Among non-college graduates, higher GPA is associated with both earlier entry into sustained regional employment and greater persistence once achieved. The Anchored Pathway is not associated with the lowest academic performance, but rather with moderate to strong preparation that does not route individuals into four-year postsecondary pathways.
+
+#### Post-Secondary
+
+The Anchored Pathway includes two primary postsecondary profiles: individuals with no postsecondary attendance and individuals who complete a two-year credential, particularly when earned from a postsecondary institution located within the region. Completion of four-year credentials, especially outside the region, is consistently associated with movement away from this pathway.
+
+#### Strength of Associations
+
+The strongest associations with the Anchored Pathway are postsecondary pathway type (no postsecondary or two-year credential) and location of postsecondary institution (in-region). Career-aligned high school coursework is the next strongest factor, appearing repeatedly in both associative and predictive analyses. Academic preparation acts as a conditioning factor that influences entry and persistence but is secondary to postsecondary pathway structure.
+
+### Narrative
+
+The Anchored Pathway reflects a pattern of stable, region-based employment that is strongly associated with locally oriented educational trajectories. Individuals in this pathway either enter the workforce directly after high school or complete two-year, regionally located postsecondary credentials. Career-aligned high school experiences and solid academic preparation increase both access to and durability within this pathway. Among non-college graduates, sustained regional employment is not fragile when supported by appropriate high school preparation.
+
+<br>
+
+## Mobility Pathway
+
+### Definition
+
+The Mobility Pathway consists of individuals who achieve Sustained WF – MN outside the Central Minnesota region or who have no Minnesota employment record during the observation period. This pathway captures sustained employment occurring outside the region and does not indicate weak labor force attachment.
+
+### Characteristics
+
+#### Demographic
+
+Demographic variables play a limited role in predicting membership in the Mobility Pathway once educational characteristics are accounted for. Differences by gender narrow substantially after postsecondary pathways are introduced.
+
+#### High School Characteristics
+
+High school characteristics matter primarily insofar as they support academic signaling that enables postsecondary enrollment. These characteristics do not independently predict mobility without postsecondary mediation.
+
+#### High School Accomplishments / Academic
+
+High academic achievement is a defining upstream characteristic of the Mobility Pathway. Higher GPA, standardized test participation, and advanced coursework consistently route individuals into four-year postsecondary pathways.
+
+#### Post-Secondary
+
+Four-year postsecondary pathways are the strongest and most consistent predictor of the Mobility Pathway. Completion of four-year credentials, particularly from institutions located outside the region, sharply reduces the likelihood of Sustained WF – Region and increases the likelihood of Sustained WF – MN or absence from Minnesota employment records.
+
+#### Strength of Associations
+
+Four-year postsecondary participation is the dominant association underlying the Mobility Pathway and appears as the first and most decisive split in predictive models. Academic preparation is a strong upstream factor, operating primarily through postsecondary routing rather than directly influencing employment geography.
+
+### Narrative
+
+The Mobility Pathway reflects a structured sequence in which strong academic preparation routes individuals into four-year postsecondary education, followed by sustained employment outside the Central Minnesota region or outside Minnesota altogether. Mobility outcomes are therefore not residual or weakly connected outcomes, but the predictable result of educational sorting that begins in high school and is crystallized through four-year postsecondary participation.
+
+<br>
+
+## Weakly Connected to Pathways
+
+### Definition
+
+The Weakly Connected group consists of individuals who have a Minnesota employment record but do not meet the threshold for Sustained WF, defined as fewer than 1,000 hours with a single employer in a calendar year. This group reflects lower-intensity or unstable workforce participation rather than non-participation.
+
+### Characteristics
+
+#### Demographic
+
+Female individuals are more likely than male individuals to appear in this group, particularly among non-college graduates. These differences persist over time rather than converging.
+
+#### High School Characteristics
+
+Lack of career-aligned or CTE coursework is a strong risk factor for remaining in Non-sustained WF. Individuals with minimal exposure to career-aligned pathways are more likely to both enter and persist in this group.
+
+#### High School Accomplishments / Academic
+
+Lower academic preparation, including lower GPA and limited participation in standardized testing or advanced coursework, is strongly associated with Non-sustained WF. Among non-college graduates, these academic differences are associated with persistent weak connection rather than temporary instability.
+
+#### Post-Secondary
+
+The Weakly Connected group is more common among individuals with no postsecondary attendance or with postsecondary attempts that do not result in credential completion. Attempted postsecondary education without completion does not appear to mitigate risk and, in some cases, is associated with greater employment churn.
+
+#### Strength of Associations
+
+The strongest associations with the Weakly Connected group are lack of postsecondary credential completion and weak academic preparation. Career-aligned coursework functions as a key protective factor, while demographic characteristics primarily condition outcomes rather than drive them.
+
+### Narrative
+
+The Weakly Connected group represents a persistent pattern of lower-intensity workforce participation within Minnesota. This group is not defined by a single transition period, but by continued difficulty achieving sustained employment over time. Without strong academic preparation or access to career-aligned pathways, individuals are more likely to remain weakly connected to the workforce.
+
+<br>
+
+## Key Takeaways and Implications
+
+Workforce participation outcomes among Central Minnesota graduates reflect structured educational and employment pathways rather than isolated individual choices. The Anchored Pathway is supported by locally oriented educational routes, particularly career-aligned high school experiences and two-year, in-region postsecondary credentials. The Mobility Pathway is driven by four-year postsecondary education and reflects educationally mediated geographic employment patterns. The Weakly Connected group is characterized by persistent non-sustained employment associated with weaker academic preparation and limited access to career-aligned pathways.
+
+From a policy perspective, these findings suggest that no single intervention will influence all outcomes. High school–level levers, particularly career-aligned coursework and academic preparation, are critical for individuals who do not pursue four-year postsecondary education. Postsecondary system alignment, especially the role of two-year and in-region institutions, is central to sustaining regional workforce participation. Mobility outcomes should not be interpreted solely as regional loss, but as part of a broader educational and labor market system in which different pathways respond to different institutional signals and opportunities.

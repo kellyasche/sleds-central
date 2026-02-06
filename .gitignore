@@ -49,3 +49,5 @@ rsconnect/
 Data/
 
 /.quarto/
+
+**/*.quarto_ipynb

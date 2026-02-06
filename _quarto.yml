@@ -63,12 +63,8 @@ website:
       - text: One-page summaries of pathways
         icon: fa-gear
         menu:
-          - text: Pathway - Anchored
-            href: pathway_anchored.qmd
-          - text: Pathway - Mobility
-            href: pathway_mobility.qmd
-          - text: Pathway - Unanchared / At-Risk
-            href: pathway_unanchored.qmd
+          - text: Pathways
+            href: pathway_descriptions.qmd
 
         
 
