@@ -29,7 +29,7 @@ The central region schools districts are located in the following EDRs and Count
 
 # Integrated Summary of Analyses (Final with Non-College Graduates)
 
-## Key Findings  {.unnumbered .unlisted}
+## Key Findings {.unnumbered .unlisted}
 
 Across all analyses, the evidence is clear: **postsecondary completion and location of graduation are the strongest predictors of meaningful employment in Central Minnesota.**
 
@@ -39,16 +39,16 @@ Across all analyses, the evidence is clear: **postsecondary completion and locat
 
 The new analysis of **non-college graduates** highlights that while many struggle to secure stable employment, a subset find meaningful work in the region. Their outcomes are shaped by **demographics, local labor market context, and especially CTE participation**. This shows that even without postsecondary completion, meaningful regional employment is possible under certain conditions.
 
-## Interpretation Over Time and Across Analyses  {.unnumbered .unlisted}
+## Interpretation Over Time and Across Analyses {.unnumbered .unlisted}
 
-### Demographics  {.unnumbered .unlisted}
+### Demographics {.unnumbered .unlisted}
 
 -   **Economic disadvantage** lowered the likelihood of non-graduates securing meaningful employment, with effects growing stronger 5 and 10 years out.
 -   **Race/ethnicity** disparities persisted, with American Indian and Black non-graduates at higher risk of disconnection.
 -   **Special education students** were less likely to achieve long-term workforce stability.
 -   **Gender** played a smaller role, though male non-graduates had somewhat stronger ties to regional employment in certain industries.
 
-### High School Characteristics  {unnumbered="" .unlisted=""}
+### High School Characteristics {unnumbered="" .unlisted=""}
 
 -   **Rural non-graduates** were more likely to stay employed in the region, benefiting from proximity to local industries.
 -   **Urban/town non-graduates** showed more mobility and faced higher risks of disconnection when they did not complete college.
@@ -145,7 +145,7 @@ The cross-tab analysis demonstrates that while demographics and high school fact
 
 <br>
 
-## Post-secondary Pathways
+## Post-secondary Pathways Cross-tabs
 
 ### Key Findings
 
@@ -171,63 +171,114 @@ The analysis of postsecondary pathways confirms that **completion and location o
 
 <br>
 
-## CART — Predictors of Regional Employment
+## Multivariate Confirmation Analysis - Logistic Regression
 
-### Key Findings
+Across multiple logistic regression models—progressively specifying high school preparation, credential level, postsecondary geography, sector × location, and finally regional postsecondary graduation—a clear and layered mechanism emerges. Sustained regional employment is driven overwhelmingly by postsecondary geographic embeddedness, reinforced modestly by CTE participation, and shaped throughout by persistent structural disparities.
 
-The CART analysis identified postsecondary outcomes as the strongest predictors of meaningful employment in Central Minnesota. Specifically, **credential level** and **location of postsecondary graduation** consistently appeared at the top of decision trees. Demographic and high school variables (economic status, race/ethnicity, special education, CTE engagement) provided secondary differentiation but were far less predictive. Model accuracy was stable across years (\~65–70%), with pruning improving interpretability without major loss of accuracy.
-
-### Interpretation Over Time
-
-#### One Year After Graduation
-
-The most decisive factors were whether an individual attended postsecondary and their immediate enrollment pathway. Early postsecondary participation often split outcomes, with non-attenders at higher risk of disconnection. Demographic characteristics (economic disadvantage, special education) played a role in refining predictions within these groups, but credential attainment had not yet fully separated outcomes.
-
-#### Five Years After Graduation
-
-Credential completion began to dominate predictions. Associate and bachelor’s degree earners were consistently linked with meaningful employment in the region, while non-completers were more often disconnected. Location of graduation also became more predictive: students completing degrees within the region or Minnesota were more likely to stay employed in-state, while those graduating elsewhere showed greater outmigration.
-
-#### Ten Years After Graduation
-
-Postsecondary variables fully overshadowed earlier predictors. Highest credential earned and location of postsecondary completion were decisive. Demographics and high school accomplishments played minimal roles, suggesting that long-term employment outcomes are overwhelmingly structured by postsecondary success and geography of graduation.
-
-### Conclusion
-
-CART modeling confirms that **meaningful employment in the region is most strongly driven by postsecondary pathways**, particularly credential completion and location of graduation. Demographics and high school accomplishments matter in shaping who reaches postsecondary, but they fade in predictive importance over time. For policy and practice, this underscores the need to:
-
-1.  Support postsecondary persistence and completion,
-2.  Strengthen regional institutions as anchors for retaining graduates locally, and
-3.  Address early barriers that limit access to these decisive pathways.
+Academic readiness alone does not anchor students to the region. Geography does.
 
 <br>
 
-## CART — Postsecondary Paths
+### Big Takeaways
 
-### Key Findings
+**1. Regional postsecondary embeddedness is the dominant workforce retention mechanism.**\
+Graduating from a postsecondary institution within the region is the single strongest predictor of sustained regional employment.
 
-The CART analysis was designed to identify **which high school characteristics, accomplishments, and demographics increase the likelihood that students will graduate from a regional institution or with an associate-level credential**, since those pathways are most strongly tied to meaningful employment in Central Minnesota.
+-   **2-year public × regional graduation:** \~207% higher odds (OR ≈ 3.07).\
+-   **4-year public × regional graduation:** \~142% higher odds (OR ≈ 2.42).\
+-   **Other institutional types × regional graduation:** \~70% higher odds (OR ≈ 1.70).
 
-The models highlight that **CTE engagement, economic background, and certain demographic factors** were the most consistent predictors of these pathways. In contrast, students with strong academic signals such as ACT/AP/PSEO participation were more likely to pursue bachelor’s degrees outside the region, making them less likely to end up in meaningful regional employment.
+These are large, stable, and substantively decisive effects. Once sector × geography is specified, credential level alone no longer explains retention—where the degree is earned matters far more than what degree is earned.
 
-### Interpretation
+<br>
 
-#### Postsecondary Graduation Location
+**2. CTE operates as a modest but consistent independent pathway.**\
+Across all workforce models—including those controlling for credential level and sector × location—CTE remains positively associated with sustained regional employment:
 
-Graduating from a **regional institution** was more common among students who had participated in **career and technical education (CTE)** during high school. Economic disadvantage and rural school context also increased the probability of choosing a regional college. By contrast, academically advanced students (ACT/AP/PSEO) tended to cluster toward institutions outside the region, reducing their likelihood of local employment.
+-   **CTE concentrators/completers:** \~12% higher odds.\
+-   **CTE participants:** \~11% higher odds.
 
-#### Highest Credential Level
+However, when modeling regional postsecondary graduation, CTE shows little association with in-region completion. This indicates that CTE’s workforce effect does **not** operate primarily through regional college graduation. Instead, it appears to function as a more direct workforce-alignment mechanism.
 
-Earning an **associate degree or lower** was strongly tied to high school **CTE concentration or completion**. These students had clear pathways into local industries and showed higher retention in the regional workforce. In contrast, students whose high school profiles emphasized college preparatory routes (ACT, AP exams, PSEO) were more likely to earn bachelor’s degrees, which often led them out of the region.
+In Central, CTE matters—but it is not the dominant driver. Geography is.
 
-### Conclusion
+<br>
 
-The CART analysis shows that **high school CTE engagement and regional economic context are key drivers of pathways that lead to meaningful employment in Central Minnesota**. Students who take CTE courses and graduate from regional institutions with associate-level credentials are most likely to stay and contribute to the local workforce. Meanwhile, students prepared for bachelor’s or higher credentials often migrate out of the region.
+**3. Four-year and non-regional pathways align with outward mobility.**\
+Graduating outside the region is consistently associated with lower odds of sustained regional employment:
 
-This suggests workforce strategies should:
+-   **4-year public outside MN:** \~61% lower odds.\
+-   **Other institutional types outside MN:** \~62% lower odds.\
+-   **2-year public outside MN:** \~41% lower odds.
 
-1.  **Strengthen and expand CTE pathways in high school** as feeders into regional colleges and local employment,
-2.  **Build stronger connections between regional colleges and local employers** to retain associate-level graduates, and
-3.  **Acknowledge the mobility of bachelor’s-bound students**, while still creating incentives for them to return or connect to regional labor markets.
+Bachelor’s degree attainment is associated with lower regional retention once geography is considered. This indicates that higher-degree pathways—especially when completed outside the region—function as mobility channels rather than regional anchors.
+
+<br>
+
+**4. Academic readiness aligns more with mobility than retention.**\
+Higher MCA Math scores and AP participation are associated with lower odds of sustained regional employment in workforce models. In the regional graduation model, MCA shows minimal association, and PSEO is strongly associated with regional graduation (\~56% higher odds).
+
+This pattern suggests:
+
+-   Academic readiness facilitates postsecondary progression.
+-   But it does not anchor students regionally.
+-   Higher academic pathways likely expand geographic opportunity rather than reinforcing local retention.
+
+<br>
+
+**5. Structural disparities emerge at graduation and persist into workforce outcomes.**\
+Racial and structural inequalities are evident in both regional graduation and regional employment models.
+
+In workforce models:
+
+-   **Black students:** \~49% lower odds.
+-   **Asian/PI students:** \~36% lower odds.
+-   **American Indian students:** \~30% lower odds.
+-   **Hispanic students:** \~21% lower odds.
+
+In regional graduation models:
+
+-   **Hispanic students:** \~53% lower odds of regional graduation.
+-   **American Indian students:** \~43% lower odds.
+-   **Asian/PI students:** \~25% lower odds.
+-   **Black students:** not statistically distinct once controls are included.
+
+Economic disadvantage, Special Education status, and entirely urban school context are also strongly associated with lower odds of regional graduation and lower odds of sustained regional employment.
+
+These disparities are not eliminated by controlling for credential level, institutional sector, or graduation location. Structural inequality remains embedded throughout the pipeline.
+
+<br>
+
+### Relative Strength of Predictors (Final Sector × Location Model)
+
+| Rank | Predictor | Direction | Approximate Effect on Sustained Regional Employment |
+|---------------|---------------|---------------|---------------------------|
+| 1 | 2-year public × Regional graduation | Strong positive | \~207% higher odds |
+| 2 | 4-year public × Regional graduation | Strong positive | \~142% higher odds |
+| 3 | Other sector × Regional graduation | Positive | \~70% higher odds |
+| 4 | 4-year public × Outside MN | Strong negative | \~61% lower odds |
+| 5 | Other sector × Outside MN | Strong negative | \~62% lower odds |
+| 6 | 2-year public × Outside MN | Negative | \~41% lower odds |
+| 7 | Race (Black, Asian/PI) | Negative | \~36–49% lower odds |
+| 8 | CTE Concentrator/Completor | Positive | \~12% higher odds |
+| 9 | CTE Participant | Positive | \~11% higher odds |
+| 10 | Entirely urban schools | Negative | \~47% lower odds |
+| 11 | Economic disadvantage | Negative | \~9–10% lower odds |
+| 12 | MCA Math | Small negative | \~3% lower odds per unit |
+
+<br>
+
+### Overall Conclusion
+
+Sustained regional employment in Central Minnesota is shaped primarily by **locally embedded postsecondary institutions—especially 2-year public colleges—combined with modest but consistent contributions from CTE pathways**.
+
+Credential attainment alone does not drive retention. Geography does.
+
+Academic readiness expands opportunity but does not anchor students regionally. Four-year and non-regional pathways align with outward mobility. CTE contributes independently but at a smaller magnitude than in some other regions.
+
+Most importantly, structural disparities appear early in regional postsecondary graduation and persist into workforce outcomes. Educational pathway differences explain part of regional retention, but they do not fully account for persistent racial and socioeconomic gaps.
+
+In short, Central Minnesota’s workforce retention pipeline is geographically anchored, institutionally embedded, modestly reinforced by career-aligned high school preparation, and constrained by enduring structural inequality.
 
 <br>
 
@@ -260,67 +311,34 @@ Taken together, the story is clear: **for non-college graduates, CTE engagement 
 
 👉 The **headline story** becomes: *Among non-college graduates, the most dependable route into meaningful employment in the region is deep engagement with CTE. Regional jobs are also more common for lower scorers, rural students, and men, while higher scorers, PSEO participants, and higher-income students are more likely to move into statewide opportunities instead. Local economic conditions either anchor graduates in meaningful regional work or push them toward disconnection.*
 
-### CART
+<br>
 
-[**Regional vs. MN (Mobility vs. Staying Local)**]{.underline}
+## Multivariate Confirmation Analysis - Non-college grads
 
-When comparing meaningful regional employment to meaningful employment elsewhere in Minnesota, the CART models show that:
+Across 1-, 5-, and 10-year models for non-college graduates, a clear and consistent pattern emerges: structural and geographic factors are far more powerful predictors of sustained regional employment than academic acceleration measures.
 
--   **Early (Year 1):** Outcomes are shaped by **rural/urban context, local wages, economic status, and CTE achievement**. Rural grads and CTE concentrators are anchored in regional work, while urban, higher-income, and non-CTE students are more mobile.
--   **Mid-term (Year 5):** **ACT scores** emerge as a driver of statewide mobility. Higher scorers are more likely to leave the region, while lower scorers remain. Structural anchors like wages and rural roots continue to matter.
--   **Long-term (Year 10):** **Local economic conditions dominate**. Low wages and low unemployment tie students to regional jobs, while higher wages and unemployment drive mobility. Individual student characteristics fade.
+The strongest and most persistent negative associations are racial and spatial. Black, Asian/PI, and American Indian individuals consistently exhibit substantially lower odds of sustained regional employment relative to White peers. Graduating from entirely urban schools is also strongly and consistently associated with lower regional attachment. These patterns remain stable across time horizons, suggesting that structural sorting mechanisms operate early and persist.
 
-**Core Story:** Regional vs. MN employment is primarily about **mobility and opportunity-seeking**. Early on, CTE and rural roots anchor students locally, but by 10 years, **local labor markets alone decide whether students stay or leave.**
+In contrast, Career and Technical Education (CTE) stands out as the strongest positive predictor within this population. Both CTE concentrators/completers and participants show meaningfully higher odds of sustained regional employment at all three time points, with effects that remain stable and even strengthen slightly over time. This indicates that for students who do not complete postsecondary credentials, CTE functions as a direct labor market alignment mechanism rather than merely a transitional pathway.
 
-------------------------------------------------------------------------
+Academic acceleration indicators—AP participation and PSEO—either reduce or do not meaningfully increase the likelihood of sustained regional employment among non-college graduates. AP participation is consistently associated with lower regional attachment, suggesting alignment with mobility-oriented trajectories even among those who ultimately do not complete college. PSEO shows minimal independent association once other variables are included.
 
-[**Regional vs. Not Meaningful (Success vs. Disconnection)**]{.underline}
+Economic disadvantage and Special Education status are associated with modestly lower odds of sustained regional employment, particularly in the early years, though these effects attenuate over time. Local wage context contributes only marginal explanatory value and does not substantially alter other coefficients.
 
-When comparing meaningful regional employment to non-meaningful work (not attending postsecondary), the CART models show that:
+Taken together, the findings indicate that among non-college graduates, sustained regional employment is shaped most strongly by structural position and high school career alignment rather than academic readiness. CTE emerges as the primary positive lever within this group, while racial disparities and urban–regional divides represent the most persistent and consequential barriers to long-term regional workforce attachment.
 
--   **Early (Year 1):** **CTE achievement is the strongest determinant**. Concentrators with more courses are far more likely to be employed regionally, while others fall into non-meaningful work. Economic status and local conditions reinforce these divides.
--   **Mid-term (Year 5):** The picture broadens to include **special education status, rural/urban context, and income**. CTE remains protective, but special education is a critical barrier.
--   **Long-term (Year 10):** **Structural conditions (wages, unemployment)** dominate. CTE continues to provide some protection, but special education remains a barrier even a decade later.
-
-**Core Story:** Regional vs. not meaningful employment is about **who is prepared and supported to succeed**. CTE provides consistent protection, but **special education and weak economies increase risk of long-term disconnection.**
-
-------------------------------------------------------------------------
-
-[**Regional vs. No MN Record (Presence vs. Absence)**]{.underline}
-
-When comparing meaningful regional employment to having no Minnesota employment record, the CART models show that:
-
--   **Early (Year 1):** **CTE course-taking (≥3)** is the main anchor into regional employment. Special education status and ACT scores also matter: lower ACT scorers are more likely to stay, while higher scorers are more mobile or missing from records.
--   **Mid-term (Year 5):** Anchors broaden. **CTE remains protective**, but rural context, income, and MCA Reading scores now also help explain who sustains regional employment. Lower ACT scorers continue to be more regionally anchored.
--   **Long-term (Year 10):** The balance flips, with most students having no MN record. By this stage, **county wages dominate**, and CTE achievement/heavy course-taking remain the key educational anchor. Rural settings still offer modest protection.
-
-**Core Story:** Regional vs. no MN record is about **labor market attachment vs. disconnection from Minnesota altogether**. Early on, preparation (CTE) and mobility (ACT) explain outcomes, but by 10 years, **economic strength and CTE determine who remains visible in the state workforce.**
-
-------------------------------------------------------------------------
-
-#### Cross-Outcome Comparison Table
-
-| Predictor | Regional vs. MN (Mobility) | Regional vs. Not Meaningful (Success vs. Disconnection) | Regional vs. No MN Record (Presence vs. Absence) |
-|------------------|------------------|-------------------|------------------|
-| **CTE Achievement** | Anchors local early, fades by Year 10 | Strongest determinant early, protective throughout | Protective at Year 10 (concentrators stay) |
-| **Total CTE Courses** | Matters early (more → local) | Heavy loads protective, esp. Year 1 & 5 | Protective across all years (≥3 early, ≥12 later) |
-| **Economic Status** | Higher-income → more mobile (leave region) | Lower-income more vulnerable to disconnection | Higher-income more likely to sustain regional work (Year 5) |
-| **Special Ed Status** | Not significant | Major barrier at Year 5 & 10 | Barrier at Year 1, then fades |
-| **ACT Scores** | Higher scorers → statewide mobility | Not significant | Lower scorers anchored locally, higher scorers missing |
-| **MCA Scores** | Not used | Reading matters slightly at Year 5 | Reading matters slightly at Year 5 |
-| **Rural/Urban (Dem_Desc)** | Rural anchors students locally | Rural protective at Year 5 | Rural protective at Year 5 & modest at Year 10 |
-| **County Wages** | Higher wages → more mobility (leave region) | Competitive wages support local employment | Strongest predictor by Year 10 |
-| **County Unemployment** | Lower unemployment anchors local employment | Strong early, fades later | Strong early, fades later |
-
-------------------------------------------------------------------------
-
-#### Big Picture Takeaways
-
--   **CTE is the most consistent protective factor** across all comparisons. Heavy CTE exposure anchors students into regional work, reducing both disconnection and mobility.
--   **Special education status** is a persistent barrier for avoiding non-meaningful outcomes, but less central for mobility (vs. MN) or long-term presence (vs. no record).
--   **ACT scores work differently across contexts**: high scorers are more mobile (regional vs. MN) and more likely missing from records (regional vs. no record).
--   **Rural context is a consistent anchor** for staying local, while **urban/town settings increase risk** of both mobility and disconnection.
--   **Economic structure dominates by Year 10**. Wages and unemployment are the strongest determinants of whether non-college graduates sustain regional employment, outcompeting most student-level factors.
-
-**Final Synthesis:**\
-Across all outcomes, the story is consistent: **early regional employment is shaped by individual preparation (especially CTE), but long-term sustainability is determined by local economic strength.** Policymakers should view CTE as an early protective tool and local labor market investment as the long-term solution for retaining non-college graduates in meaningful regional work.
+| Rank | Predictor | Direction Toward Sustained Regional Employment | Approximate Magnitude (Across 1-, 5-, 10-Year Models) |
+|---------------|---------------|-------------------|-----------------------|
+| 1 | Race: Black | Strong negative | \~40–50% lower odds |
+| 2 | Race: Asian/PI | Strong negative | \~40–50% lower odds |
+| 3 | Race: AI | Strong negative | \~35–45% lower odds |
+| 4 | Dem_Desc: Entirely urban | Strong negative | \~40–55% lower odds |
+| 5 | Race: Hispanic | Moderate negative | \~20–30% lower odds |
+| 6 | CTE: Concentrator/Completor | Strong positive | \~20–42% higher odds |
+| 7 | CTE: Participant | Moderate positive | \~17–26% higher odds |
+| 8 | ap.exam (AP participation) | Moderate negative | \~20–30% lower odds |
+| 9 | Dem_Desc: Urban/town/rural mix | Small negative | \~10–15% lower odds |
+| 10 | SpecialEdStatus | Small-to-moderate negative (attenuates over time) | \~5–29% lower odds (stronger at 1-year) |
+| 11 | economic.status (disadvantage) | Small negative | \~5–10% lower odds |
+| 12 | pseo.participant | Minimal / near-null | \~0–5% change in odds |
+| 13 | avg.wages.pct.state | Minimal / unstable | Small positive at 1- and 5-year; negligible at 10-year |

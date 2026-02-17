@@ -52,12 +52,12 @@ website:
             href: analysis_local_employment_ct.qmd
           - text: Post-secondary pathways
             href: analysis_post_secondary_pathways.qmd
-          - text: Local Employment CART Analysis
-            href: analysis_local_employment_CART.qmd
-          - text: Post-secondary Paths CART Analysis
-            href: analysis_post_secondary_paths_CART.qmd
+          - text: Multivariate Confirmation Analysis - Logistic Regression
+            href: analysis_multivariate_confirmation_analysis.qmd
           - text: Non-college graduates
             href: analysis_non_post_secondary_graduates.qmd
+          - text: Multivariate Confirmation Analysis on non-college grads - Logistic Regression
+            href: analysis_multivariate_confirmation_non_college_grads.qmd
           - text: Further analysis on non-college grads
             href: analysis_non_college_deeper.qmd
       - text: One-page summaries of pathways

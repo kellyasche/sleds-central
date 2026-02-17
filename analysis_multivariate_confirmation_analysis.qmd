@@ -1,0 +1,1124 @@
+---
+title: "Multivariate Confirmation Analysis - Logistic Regression"
+editor: visual
+---
+
+```{r include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(fastDummies)
+library(car)
+library(glmnet)
+library(glmnetUtils)
+library(pscl)
+library(sjPlot)
+library(ggforce)
+```
+
+```{r themes and shapefiles, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+    select(5,6) %>%
+    unique() %>%
+    mutate(edr = str_replace(edr, "  ", " "),
+           planning.region = str_replace(planning.region, " Minnesota", ""),
+           planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+           edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+
+```
+
+```{r master dataset}
+master.original <- read_csv("Data/SLEDS/Masters/After analysis/Master-final-after-mca.csv")
+
+master.states <- read_csv("Data/SLEDS/Masters/States/annual-seven-states.csv") %>%
+  filter(grad.year %in% c("grad.year.1", "grad.year.5", "grad.year.10")) %>%
+  select(PersonID, grad.year, states) %>%
+  pivot_wider(names_from = grad.year, values_from = states)
+
+master <- master.original %>%
+  left_join(master.states, by = "PersonID")
+
+kable(head(master))
+
+kable(names(master))
+```
+
+# Multivariate Confirmation Analysis: Logistic Regression
+
+The primary purpose of this project is to explain who and what characteristics of individuals enter the various workforce participation pathways - Meaningful workforce participation in the region, Meaningful workforce participation outside the region but in Minnesota, Not meaningful workforce participation, and having No Minnesota employment record (either working in another state or simply not participating in the labor force). The policy of most concern is what relationships exist with an individual that has meaningful workforce participation in the region. Earlier sections used bivariate analyses (cross-tabulations, Cramér’s V, and ANOVA) to identify patterns of stratification across workforce participation. One large takeaway is that postsecondary outcomes are significantly related to workforce participation outcomes - especially whether they completed college, where they completed college, type of postsecondary institution, and highest earned credential. These analyses consistently showed that academic readiness, early college exposure (PSEO), and structural demographic factors were strongly associated with pathway entry.
+
+To strengthen confidence in these findings, a limited multivariate analysis is conducted using logistic regression. The purpose of this modeling is not to establish causality or create a forecasting tool, but to examine whether the strongest bivariate relationships remain directionally consistent when key variables are considered simultaneously. This step helps address questions such as whether PSEO remains associated with sustained regional employment after accounting for academic readiness, or whether CTE participation retains influence when controlling for socioeconomic status.
+
+Logistic regression is used here as a confirmatory tool rather than the central analytic framework.
+
+<br>
+
+# Methodology
+
+### Outcome Variable
+
+The primary model predicts:
+
+-   **Sustained employment – region** (binary outcome)
+
+The dependent variable is coded as:
+
+-   1 = Sustained employment – region
+-   0 = All other workforce outcomes (including sustained employment – MN outside the region, non-sustained employment, and no MN employment record)
+
+This specification focuses directly on stable regional workforce attachment.
+
+## Independent Variables
+
+To maintain interpretability and avoid overfitting, analysis will include a limited set of theoretically and empirically important predictors identified in earlier analyses:
+
+-   Strongest predictors
+    -   Postsecondary
+        -   `ps.grad`
+        -   `highest.cred.level`
+        -   `ps.grad.InstitutionSector`
+        -   `ps.grad.location`
+    -   high school accomplishments
+        -   `pseo.participant`
+        -   `ACTCompositeScore`
+        -   `MCA composite`
+        -   `cte.achievement`
+        -   `ap.exam`
+    -   Demographic
+        -   `RaceEthnicity`
+        -   `economic.status`
+        -   `SpecialEdStatus`
+    -   High school characteristics
+        -   `Dem_Desc`
+        -   `avg.wages.pct.state`
+
+Variables were selected based on:
+
+1.  Strength of association in prior bivariate analyses
+2.  Policy relevance
+3.  Conceptual clarity
+4.  Avoidance of redundant or highly collinear measures
+
+These variables represent the full set of predictors examined across a series of structured logistic regression models. They are not entered simultaneously; rather, postsecondary variables are evaluated in separate specifications to avoid redundancy and to isolate distinct mechanisms (attainment depth, institutional sector, and geographic completion location).
+
+High school contextual variables (EDR, rural classification, county unemployment, county wages) are excluded due to consistently weak relationships in earlier analyses.
+
+<br>
+
+# Analysis Approach
+
+This multivariate analysis is structured as a series of theoretically guided logistic regression models designed to examine mechanisms associated with sustained regional employment. The goal is not prediction or causal estimation, but confirmatory testing of patterns identified in earlier bivariate analyses.
+
+The dependent variable is a binary indicator of **Sustained employment – region** (1 = sustained employment in the region; 0 = all other workforce outcomes). This specification focuses specifically on long-term regional workforce attachment rather than employment more broadly.
+
+## Modeling Strategy
+
+Rather than estimating a single fully saturated model, predictors are introduced in a structured sequence to evaluate distinct mechanisms and to assess coefficient attenuation across specifications. This staged approach strengthens interpretability and reduces redundancy among highly related postsecondary variables.
+
+### Model 1: Structural and Preparation Baseline
+
+The first model includes demographic and high school preparation variables:
+
+-   `RaceEthnicity`
+-   `economic.status`
+-   `SpecialEdStatus`
+-   `pseo.participant`
+-   `ACTCompositeScore`
+-   `ap.exam`
+-   `MCA.comp` score (single strongest or composite measure)
+-   `cte.achievement`
+-   `Dem_Desc`
+-   `avg.wages.pct.state`
+
+This baseline model evaluates whether structural background and academic readiness are independently associated with sustained regional employment.
+
+### Model 2: Educational Attainment Mechanism
+
+The second model introduces:
+
+-   highest.cred.level
+
+This model tests whether credential depth explains regional attachment beyond preparation and demographic factors. Changes in coefficients from Model 1 to Model 2 are examined to assess attenuation and potential shared pathway mechanisms.
+
+### Model 3: Institutional Pathway Mechanism
+
+In a separate specification, credential level may be replaced with:
+
+-   ps.grad.InstitutionSector
+
+This model evaluates whether type of postsecondary institution (e.g., 2-year public, 4-year public, other) is associated with regional workforce retention, independent of preparation factors.
+
+### Model 4: Geographic Completion Mechanism
+
+A final specification introduces:
+
+-   ps.grad.location
+
+This model tests whether completing postsecondary education within the region is associated with sustained regional employment, holding other factors constant. Given prior findings, graduation location is expected to be one of the strongest predictors.
+
+## Evaluation Criteria
+
+Results will be reported using:
+
+-   Odds ratios
+-   95% confidence intervals
+-   Statistical significance levels
+-   Directional interpretation
+
+Model comparison metrics (AIC and pseudo R²) will be used to assess relative improvement across specifications, but emphasis will remain on coefficient stability and magnitude rather than overall model fit.
+
+## Interpretation Framework
+
+Interpretation will focus on:
+
+-   Direction and relative magnitude of associations
+-   Changes in coefficients across models
+-   Evidence of attenuation when postsecondary variables are introduced
+
+Findings will be described as associations holding other included variables constant. No causal claims will be made.
+
+This structured approach allows for evaluation of three central mechanisms underlying sustained regional employment:
+
+1.  Preparation (academic readiness and early college exposure)
+2.  Attainment depth (credential level)
+3.  Geographic and institutional pathway (where and how postsecondary education was completed)
+
+Together, these models provide multivariate confirmation of patterns identified in earlier descriptive analyses while preserving conceptual clarity and interpretability.
+
+<br>
+
+# Prep data
+
+The first thing I need to do is setup my dataset for modeling. I'm going to create the workforce participation into a binary and will use grad.year.5 as my modeling year.
+
+```{r}
+
+master.model <- master %>%
+  select(PersonID, ps.grad, highest.cred.level, ps.grad.InstitutionSector, ps.grad.location, pseo.participant, MCA.M, cte.achievement, RaceEthnicity, economic.status, SpecialEdStatus, ap.exam, Dem_Desc, avg.wages.pct.state, grad.year.5) %>%
+  filter(grad.year.5 != "After 2023",
+         grad.year.5 != "Attending ps",
+         ps.grad != "Attending ps",
+         !is.na(ps.grad.location)) %>%
+  mutate(grad.year.5 = ifelse(grad.year.5 %in% c("Meaningful emp region", "Meaningful emp County", "Meaningful emp EDR"), "Meaningful emp region", grad.year.5),
+         grad.year.5 = str_replace(grad.year.5, ", not attending ps", ""),
+         grad.year.5 = ifelse(grad.year.5 == "Meaningful emp region", 1, 0),
+         RaceEthnicity = fct_relevel(RaceEthnicity, "White"),
+         cte.achievement = fct_relevel(cte.achievement, "No CTE"),
+         pseo.participant = ifelse(is.na(pseo.participant), 0, pseo.participant),
+         pseo.participant = as.character(pseo.participant),
+         pseo.participant = fct_relevel(pseo.participant, "0"),
+         economic.status = as.character(economic.status),
+         economic.status = fct_relevel(economic.status, "0"),
+         SpecialEdStatus = as.character(SpecialEdStatus),
+         SpecialEdStatus = fct_relevel(SpecialEdStatus, "0"),
+         ps.grad = fct_relevel(ps.grad, "No"),
+         highest.cred.level = fct_relevel(highest.cred.level, "Did not graduate ps"),
+         ps.grad.InstitutionSector = ifelse(ps.grad.InstitutionSector == "1", "4-year public",
+                                            ifelse(ps.grad.InstitutionSector == "4", "2-year public",
+                                                   ifelse(ps.grad.InstitutionSector == "11", "Other type of college", "Did not graduate ps"))),
+         ps.grad.InstitutionSector = fct_relevel(ps.grad.InstitutionSector, "Did not graduate ps"),
+         ps.grad.location = ifelse(ps.grad.location %in% c("PS grad region", "PS grad EDR"), "PS grad region", ps.grad.location),
+         ps.grad.location = fct_relevel(ps.grad.location, "Did not graduate ps"),
+         Dem_Desc = fct_relevel(Dem_Desc, "Town/rural mix"),
+         ap.exam = as_factor(ap.exam),
+         ap.exam = fct_relevel(ap.exam, "0"),
+         ps.grad = as_factor(ps.grad),
+         ps.grad = fct_relevel(ps.grad, "0"))
+
+
+kable(head(master.model))
+
+kable(names(master.model))
+
+```
+
+We now have `r comma(nrow(master.model))` individuals to model with `r ncol(master.model) - 2` variables not including `grad.year.5`.
+
+<br>
+
+# Modeling - Sustained WF - Region
+
+## Model 1 - Demographics, HS Characteristics, HS Accomplishments
+
+Model 1 serves as the baseline structural and preparation model, estimating the association between demographic background, high school academic preparation, and sustained regional employment five years after graduation. This specification excludes postsecondary attainment variables in order to isolate whether early academic readiness and structural characteristics independently differentiate workforce pathway outcomes. By modeling these predictors first, the analysis establishes whether observed disparities in regional workforce attachment emerge prior to postsecondary completion.
+
+This baseline model tests the preparation mechanism: whether differences in academic proficiency and early college or career exposure are associated with sustained regional employment, holding structural background constant. Subsequent models will introduce postsecondary variables to assess whether these preparation effects persist, attenuate, or are mediated through educational attainment and geographic completion pathways.
+
+Model 1 estimates the association between demographic characteristics and high school academic preparation with sustained regional employment five years after graduation, prior to the inclusion of postsecondary attainment variables. This baseline specification isolates whether early readiness and exposure pathways independently differentiate regional workforce attachment.
+
+The model retains nearly the full analytic sample, with only 2,990 observations removed due to MCA Math missingness.
+
+Racial and ethnic disparities remain substantial:
+
+-   **Black students:** approximately 48–50% lower odds of sustained regional employment relative to White students.
+-   **Asian/PI students:** roughly 36% lower odds.
+-   **American Indian students:** about 31% lower odds.
+-   **Hispanic students:** approximately 23% lower odds.
+
+These disparities persist even after accounting for academic preparation and structural context.
+
+Academic mobility indicators show a consistent outward orientation pattern:
+
+-   **Higher MCA Math scores:** associated with lower odds of sustained regional employment (\~6% lower odds per unit increase), suggesting that academically stronger students are more likely to pursue opportunities outside the region.
+-   **AP participation:** strongly associated with lower regional attachment (\~39% lower odds).
+-   **PSEO participation:** small negative association (\~5% lower odds), modest in magnitude.
+
+Career-aligned coursework shows clearer positive associations than in prior specifications:
+
+-   **CTE concentrators/completers:** approximately 16% higher odds of sustained regional employment.
+-   **CTE participants:** roughly 14% higher odds.
+
+These effects are stronger than in earlier ACT-based models, suggesting that CTE operates independently of standardized academic proficiency.
+
+Structural place factors remain meaningful:
+
+-   **Entirely urban high schools:** roughly 50% lower odds of sustained regional employment relative to town/rural mix schools.
+-   **Urban/town/rural mix schools:** modestly lower odds relative to the reference category.
+-   **Higher local wages (avg.wages.pct.state):** associated with lower regional attachment, though more modestly than urbanicity.
+
+Economic disadvantage and Special Education status show relatively small independent associations once preparation and place are included.
+
+Overall, Model 1 indicates that sustained regional employment in Central Minnesota reflects a combination of structural place context, persistent racial disparities, modest academic mobility patterns, and a clearer positive role for CTE participation. The mobility gradient associated with academic proficiency and advanced coursework remains evident, while CTE shows a distinct association with regional workforce attachment.
+
+```{r}
+model1 <- glm(
+  grad.year.5 ~
+    RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    pseo.participant +
+    MCA.M +
+    ap.exam +
+    cte.achievement +
+    Dem_Desc +
+    avg.wages.pct.state,
+  family = binomial,
+  data = master.model
+)
+
+model1
+
+library(broom)
+library(forcats)
+library(stringr)
+
+or_plot <- tidy(model1, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    # Make labels nicer (edit these replacements to match your exact factor labels)
+    term = str_replace_all(term, c(
+      "RaceEthnicity" = "Race: ",
+      "economic.status" = "Economic status: ",
+      "SpecialEdStatus" = "Special Ed: ",
+      "pseo.participant" = "PSEO: ",
+      "cte.achievement" = "CTE: ",
+      "MCA.M" = "MCA Math"
+    )),
+    # Put most important effects near the top (optional: tweak ordering later)
+    term = fct_reorder(term, estimate)
+  )
+
+ggplot(or_plot, aes(x = estimate, y = term)) +
+  geom_vline(xintercept = 1, linetype = "dashed") +
+  geom_vline(xintercept = c(0.5, 0.75, 1.25, 1.5, 2),
+             color = "grey85") +
+  geom_point() +
+  geom_errorbar(
+    aes(xmin = conf.low, xmax = conf.high),
+    orientation = "y",
+    width = 0.2
+  ) +
+  scale_x_log10(
+    breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2),
+    labels = c("0.5", "0.75", "1.0", "1.25", "1.5", "2.0")
+  ) +
+  theme_line +
+  labs(
+    x = "Odds ratio (log scale)",
+    y = NULL
+  )
+
+
+
+```
+
+<br>
+
+## Model 2: Adding Postsecondary Attainment
+
+Model 2 extends the baseline specification by introducing postsecondary credential attainment (highest.cred.level) to assess whether high school preparation effects persist once educational completion is held constant. This model tests the attainment mechanism: whether differences in sustained regional employment reflect variation in credential level rather than solely high school readiness or demographic background.
+
+By adding credential level, the analysis evaluates whether previously observed associations—particularly those related to CTE participation, math proficiency, PSEO participation, and race/ethnicity—attenuate when postsecondary attainment is accounted for. If coefficients for preparation variables shrink substantially, this would suggest that their influence operates indirectly through educational attainment. Conversely, if effects remain stable, this would indicate that preparation and attainment independently shape regional workforce retention. Model 2 therefore clarifies whether credential depth mediates, partially explains, or leaves unchanged the structural and preparation patterns observed in Model 1.
+
+Model 2 introduces postsecondary credential level and substantially improves model fit (AIC decreases from 85,890.63 to 85,148.30), indicating that credential attainment explains meaningful additional variation in sustained regional employment beyond demographics, preparation, and place context.
+
+Credential level emerges as a central differentiator:
+
+-   **Associate degree:** approximately 62% higher odds of sustained regional employment relative to non-graduates.
+-   **Less than Associate degree:** roughly 57% higher odds.
+-   **Bachelor’s degree or higher:** about 23% lower odds relative to non-graduates.
+
+This pattern reinforces a clear regional workforce pipeline tied to sub-baccalaureate credentials, while four-year completion is associated with outward mobility.
+
+CTE effects remain positive and slightly stronger than in Model 1:
+
+-   **CTE concentrators/completers:** \~11% higher odds.
+-   **CTE participants:** \~11% higher odds.
+
+Importantly, CTE maintains an independent association even after controlling for credential level, indicating that its relationship with regional employment is not fully mediated through postsecondary attainment.
+
+Academic mobility indicators continue to show outward orientation:
+
+-   **Higher MCA Math scores:** associated with lower odds (\~5% lower odds per unit increase).
+-   **AP participation:** strongly negative (\~33% lower odds).
+-   **PSEO participation:** no longer statistically meaningful once credential level is included.
+
+Racial and ethnic disparities persist:
+
+-   **Black students:** \~48% lower odds.
+-   **Asian/PI students:** \~36% lower odds.
+-   **American Indian students:** \~30% lower odds.
+-   **Hispanic students:** \~23% lower odds.
+
+Structural place context remains influential:
+
+-   **Entirely urban schools:** \~50% lower odds relative to the reference category.
+-   **Urban/town/rural mix schools:** modestly lower odds (\~11%).
+-   **Local wage context:** no longer statistically distinct once credentials are included.
+
+Overall, Model 2 clarifies that sustained regional employment in Central Minnesota is strongly shaped by sub-baccalaureate credential attainment, while four-year pathways align with outward mobility. CTE continues to function as a modest but independent workforce-alignment mechanism, and academic proficiency remains associated with geographic mobility rather than regional retention. Persistent racial disparities remain evident even after accounting for credential level and preparation.
+
+```{r}
+model2 <- glm(
+  grad.year.5 ~
+    RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    pseo.participant +
+    MCA.M +
+    ap.exam +
+    cte.achievement +
+    Dem_Desc +
+    avg.wages.pct.state +
+    highest.cred.level,
+  family = binomial,
+  data = master.model
+)
+
+nobs(model1)
+nobs(model2)
+
+
+AIC(model1)
+AIC(model2)
+
+exp(cbind(OR = coef(model2), confint(model2)))
+
+or_plot <- tidy(model2, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    # Make labels nicer (edit these replacements to match your exact factor labels)
+    term = str_replace_all(term, c(
+      "RaceEthnicity" = "Race: ",
+      "economic.status" = "Economic status: ",
+      "SpecialEdStatus" = "Special Ed: ",
+      "pseo.participant" = "PSEO: ",
+      "cte.achievement" = "CTE: ",
+      "MCA.M" = "MCA Math",
+      "highest.cred.level" = "Highest credential"
+    )),
+    # Put most important effects near the top (optional: tweak ordering later)
+    term = fct_reorder(term, estimate)
+  )
+
+ggplot(or_plot, aes(x = estimate, y = term)) +
+  geom_vline(xintercept = 1, linetype = "dashed") +
+  geom_vline(xintercept = c(0.5, 0.75, 1.25, 1.5, 2),
+             color = "grey85") +
+  geom_point() +
+  geom_errorbar(
+    aes(xmin = conf.low, xmax = conf.high),
+    orientation = "y",
+    width = 0.2
+  ) +
+  scale_x_log10(
+    breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2),
+    labels = c("0.5", "0.75", "1.0", "1.25", "1.5", "2.0")
+  ) +
+  theme_line +
+  labs(
+    x = "Odds ratio (log scale)",
+    y = NULL
+  )
+
+```
+
+<br>
+
+## Model 3: Geographic Completion Mechanism
+
+Model 3 extends the prior specification by incorporating the location of postsecondary completion (ps.grad.location) alongside credential level. This model tests the geographic completion mechanism: whether sustained regional employment is associated not only with the depth of educational attainment, but also with where that education was completed.
+
+By including graduation location, the analysis distinguishes between two related but conceptually distinct pathways. Credential level captures human capital depth, while graduation location captures regional attachment and institutional embeddedness. This specification evaluates whether the strong retention effects observed for associate-level credentials in Model 2 reflect the nature of the credential itself or the geographic proximity of the institution attended.
+
+Model 3 therefore assesses whether regional graduation exerts an independent association with sustained regional employment, and whether the inclusion of geographic completion attenuates previously observed effects for credential level, CTE participation, and demographic characteristics. If coefficients for credential level shrink meaningfully, this would suggest that geographic embeddedness plays a central role in shaping long-term regional workforce retention.
+
+Model 3 introduces postsecondary graduation location and substantially improves model fit (AIC decreases from 85,148.30 to 82,938.66), indicating that geographic completion explains a large additional share of variation in sustained regional employment beyond credential level and preparation factors.
+
+Graduating from a postsecondary institution within the region emerges as the dominant predictor:
+
+-   **PS grad region:** approximately 235% higher odds of sustained regional employment relative to non-graduates (OR ≈ 3.35).
+-   **PS grad outside MN:** about 35% lower odds.
+-   **PS grad MN (non-regional):** not statistically distinct from non-graduates.
+
+This sharply reinforces the central importance of regional institutional embeddedness rather than degree attainment alone.
+
+Once location is included, credential-level effects largely attenuate:
+
+-   **Associate degree** and **less than Associate degree:** no longer statistically distinct from non-graduates.
+-   **Bachelor’s degree or higher:** associated with \~44% lower odds of sustained regional employment.
+
+This shift indicates that prior positive effects of sub-baccalaureate credentials were largely operating through where the credential was earned.
+
+CTE remains independently associated with regional retention:
+
+-   **CTE concentrators/completers:** \~12% higher odds.
+-   **CTE participants:** \~11% higher odds.
+
+These effects persist even after accounting for both credential level and graduation location, suggesting that CTE functions as a direct workforce-alignment mechanism rather than solely through postsecondary geography.
+
+Academic mobility indicators continue to align with outward pathways:
+
+-   **Higher MCA Math scores:** modestly lower odds (\~3% per unit increase).
+-   **AP participation:** \~30% lower odds.
+-   **PSEO participation:** not statistically distinct.
+
+Structural and demographic disparities remain substantial:
+
+-   **Black students:** \~49% lower odds.
+-   **Asian/PI students:** \~36% lower odds.
+-   **American Indian students:** \~30% lower odds.
+-   **Hispanic students:** \~21% lower odds.
+-   **Entirely urban schools:** \~46% lower odds.
+-   **Urban/town/rural mix schools:** \~10% lower odds.
+-   **Economic disadvantage:** \~10% lower odds.
+
+Overall, Model 3 makes the mechanism clear: sustained regional employment in Central Minnesota is primarily driven by graduating from a postsecondary institution within the region. Credential level alone does not drive retention once geography is accounted for. CTE remains a consistent, modest independent contributor, while higher academic achievement and four-year pathways are associated with outward mobility. Persistent racial disparities remain evident even after controlling for educational pathway and geographic completion.
+
+```{r}
+model3 <- glm(
+  grad.year.5 ~
+    RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    pseo.participant +
+    MCA.M +
+    ap.exam +
+    cte.achievement +
+    Dem_Desc +
+    avg.wages.pct.state +
+    highest.cred.level +
+    ps.grad.location,
+  family = binomial,
+  data = master.model
+)
+
+nobs(model3)
+AIC(model3)
+
+exp(cbind(OR = coef(model3), confint(model3)))
+
+or_plot <- tidy(model3, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    # Make labels nicer (edit these replacements to match your exact factor labels)
+    term = str_replace_all(term, c(
+      "RaceEthnicity" = "Race: ",
+      "economic.status" = "Economic status: ",
+      "SpecialEdStatus" = "Special Ed: ",
+      "pseo.participant" = "PSEO: ",
+      "cte.achievement" = "CTE: ",
+      "MCA.M" = "MCA Math",
+      "highest.cred.level" = "Highest credential"
+    )),
+    # Put most important effects near the top (optional: tweak ordering later)
+    term = fct_reorder(term, estimate)
+  )
+
+ggplot(or_plot, aes(x = estimate, y = term)) +
+  geom_vline(xintercept = 1, linetype = "dashed") +
+  geom_vline(xintercept = c(0.5, 0.75, 1.25, 1.5, 2),
+             color = "grey85") +
+  geom_point() +
+  geom_errorbar(
+    aes(xmin = conf.low, xmax = conf.high),
+    orientation = "y",
+    width = 0.2
+  ) +
+  scale_x_log10(
+    breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2),
+    labels = c("0.5", "0.75", "1.0", "1.25", "1.5", "2.0")
+  ) +
+  theme_line +
+  labs(
+    x = "Odds ratio (log scale)",
+    y = NULL
+  )
+
+
+```
+
+<br>
+
+## Model 4: Institutional Sector × Geographic Completion
+
+Model 4 replaces credential level with a combined institutional sector × graduation location specification in order to disentangle sector effects from geographic embeddedness. This model provides the strongest overall fit and clarifies that sustained regional employment is driven by the interaction between institutional type and where the credential was earned.
+
+Model 4 replaces credential level with the combined institutional sector × graduation location specification and provides the strongest overall fit (AIC decreases from 82,938.66 to 82,823.96), indicating that sector-specific geographic embeddedness explains additional variation beyond location alone.
+
+Graduating from a postsecondary institution within the region remains the dominant predictor, now differentiated by sector:
+
+-   **2-year public, PS grad region:** approximately 207% higher odds of sustained regional employment (OR ≈ 3.07).
+-   **4-year public, PS grad region:** approximately 142% higher odds (OR ≈ 2.42).
+-   **Other institutional type, PS grad region:** approximately 70% higher odds (OR ≈ 1.70).
+
+This confirms that regional embeddedness matters across sectors, but most strongly for 2-year public institutions.
+
+Graduating outside the region is consistently associated with outward mobility:
+
+-   **4-year public, PS grad outside MN:** approximately 61% lower odds (OR ≈ 0.39).
+-   **Other institutional type, PS grad outside MN:** approximately 62% lower odds (OR ≈ 0.38).
+-   **2-year public, PS grad outside MN:** approximately 41% lower odds (OR ≈ 0.59).
+
+Within Minnesota but outside the region, patterns vary:
+
+-   **2-year public, PS grad MN (non-regional):** modest positive association (\~15% higher odds).
+-   **4-year public and other institutional types, PS grad MN:** substantially lower odds (roughly 40–50% lower).
+
+These patterns clarify that the strongest retention pathway is local completion at 2-year public institutions, while four-year and non-regional pathways align with mobility.
+
+CTE remains independently associated with regional retention:
+
+-   **CTE concentrators/completers:** \~12% higher odds.
+-   **CTE participants:** \~11% higher odds.
+
+These effects persist even after accounting for detailed sector and location categories, reinforcing CTE as a direct workforce-alignment mechanism rather than solely a pipeline into regional colleges.
+
+Academic mobility indicators continue to align with outward pathways:
+
+-   **Higher MCA Math scores:** modestly lower odds (\~3% per unit increase).
+-   **AP participation:** \~30% lower odds.
+-   **PSEO participation:** not statistically distinct.
+
+Structural and demographic disparities remain pronounced:
+
+-   **Black students:** \~49% lower odds.
+-   **Asian/PI students:** \~36% lower odds.
+-   **American Indian students:** \~30% lower odds.
+-   **Hispanic students:** \~21% lower odds.
+-   **Entirely urban schools:** \~47% lower odds.
+-   **Urban/town/rural mix schools:** \~11% lower odds.
+-   **Economic disadvantage:** \~9% lower odds.
+
+Overall, Model 4 makes the mechanism even clearer than Model 3: sustained regional employment in Central Minnesota is primarily driven by completing a credential within the region, especially at 2-year public institutions. Sector matters, but geography matters more. CTE remains a consistent, modest independent contributor, while higher academic achievement and four-year pathways—particularly outside the region—are associated with outward mobility. Persistent racial and structural disparities remain evident even after controlling for detailed educational pathways and geographic completion.
+
+```{r}
+data <- master.model %>%
+  mutate(
+    sector_location = interaction(
+      ps.grad.InstitutionSector,
+      ps.grad.location,
+      drop = TRUE
+    )
+  )
+
+model4 <- glm(
+  grad.year.5 ~
+    RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    pseo.participant +
+    MCA.M +
+    ap.exam +
+    cte.achievement +
+    Dem_Desc +
+    avg.wages.pct.state +
+    sector_location,
+  family = binomial,
+  data = data
+)
+
+nobs(model4)
+AIC(model4)
+
+exp(cbind(OR = coef(model4), confint(model4)))
+
+or_plot <- tidy(model4, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    # Make labels nicer (edit these replacements to match your exact factor labels)
+    term = str_replace_all(term, c(
+      "RaceEthnicity" = "Race: ",
+      "economic.status" = "Economic status: ",
+      "SpecialEdStatus" = "Special Ed: ",
+      "pseo.participant" = "PSEO: ",
+      "cte.achievement" = "CTE: ",
+      "MCA.M" = "MCA Math",
+      "highest.cred.level" = "Highest credential"
+    )),
+    # Put most important effects near the top (optional: tweak ordering later)
+    term = fct_reorder(term, estimate)
+  )
+
+
+ggplot(or_plot, aes(x = estimate, y = term)) +
+  geom_vline(xintercept = 1, linetype = "dashed") +
+  geom_vline(xintercept = c(0.5, 0.75, 1.25, 1.5, 2),
+             color = "grey85") +
+  geom_point() +
+  geom_errorbar(
+    aes(xmin = conf.low, xmax = conf.high),
+    orientation = "y",
+    width = 0.2
+  ) +
+  scale_x_log10(
+    breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2),
+    labels = c("0.5", "0.75", "1.0", "1.25", "1.5", "2.0")
+  ) +
+  theme_line +
+  labs(
+    x = "Odds ratio (log scale)",
+    y = NULL
+  )
+
+
+```
+
+<br>
+
+## Multivariate Confirmation Summary
+
+Across progressively specified logistic regression models, sustained regional employment in Central Minnesota is driven primarily by postsecondary geography and institutional embeddedness, with high school CTE participation operating as a consistent but secondary pathway. Academic preparation variables play a more modest and often mobility-aligned role once postsecondary pathways are accounted for.
+
+[**Key Findings**]{.underline}
+
+-   Graduating from a **2-year public institution within the region** is associated with approximately **207% higher odds of sustained regional employment** (OR ≈ 3.07). This is the single strongest predictor in the final model.
+
+-   Graduating from a **4-year public institution within the region** is associated with approximately **142% higher odds** (OR ≈ 2.42).
+
+-   Graduating from **other institutional types within the region** is associated with roughly **70% higher odds** (OR ≈ 1.70).
+
+-   In contrast, graduating from institutions **outside the region** is strongly associated with outward mobility:
+
+    -   4-year public outside MN: \~61% lower odds.
+    -   Other institutional types outside MN: \~62% lower odds.
+    -   2-year public outside MN: \~41% lower odds.
+
+-   Graduating from a **2-year public institution elsewhere in Minnesota (non-regional)** shows a modest positive association (\~15% higher odds), while 4-year and other non-regional MN completions are associated with substantially lower odds.
+
+-   **CTE participation remains independently associated with regional retention** across all specifications:
+
+    -   CTE concentrators/completers: \~12% higher odds.
+    -   CTE participants: \~11% higher odds.
+
+These effects persist even after accounting for detailed sector × location pathways, indicating that CTE functions as a direct workforce-alignment mechanism rather than merely channeling students into regional colleges.
+
+-   Academic mobility indicators align with outward pathways:
+    -   Higher MCA Math scores: modestly lower odds (\~3% per unit increase).
+    -   AP participation: \~30% lower odds.
+    -   PSEO participation: not statistically distinct in final models.
+-   Structural disparities remain substantial:
+    -   Black students: \~49% lower odds.
+    -   Asian/PI students: \~36% lower odds.
+    -   American Indian students: \~30% lower odds.
+    -   Hispanic students: \~21% lower odds.
+    -   Entirely urban schools: \~47% lower odds.
+    -   Urban/town/rural mix schools: \~11% lower odds.
+    -   Economic disadvantage: \~9% lower odds.
+
+[**Overall Interpretation**]{.underline}
+
+Two mechanisms shape sustained regional employment in Central Minnesota.
+
+First, **regional postsecondary embeddedness is the dominant driver**. Completing a credential within the region—especially at a 2-year public institution—dramatically increases the likelihood of long-term regional workforce attachment. Geography explains far more variation than credential level alone. Once sector × location is modeled jointly, it becomes clear that retention is not simply about earning a degree; it is about where that degree is earned.
+
+Second, **CTE participation operates as a consistent, independent alignment pathway**. Although its magnitude is modest relative to postsecondary geography, it remains statistically robust across all models. This suggests that structured career pathways in high school contribute directly to regional workforce attachment rather than functioning solely through postsecondary completion.
+
+In contrast, **higher academic achievement and four-year pathways—particularly outside the region—are associated with mobility rather than retention**. Academic readiness appears to facilitate broader opportunity structures that extend beyond the region.
+
+Even after accounting for preparation, credential attainment, institutional sector, and geographic completion, **racial and structural disparities remain pronounced**, indicating that educational pathways alone do not fully explain differences in sustained regional workforce attachment.
+
+Overall, the Central Minnesota results point to a clear pipeline: high school career alignment (CTE) and, most decisively, regional postsecondary completion—particularly through 2-year public institutions—anchor individuals to the regional labor market. Mobility-oriented academic pathways and non-regional completion, by contrast, align with outward workforce trajectories.
+
+<br>
+
+# Modeling - ps grad region
+
+The prior models identified two dominant predictors of sustained regional employment: graduating from a postsecondary institution within the region and participation in CTE pathways during high school. To further clarify the mechanism linking education to workforce retention, this supplemental analysis examines which demographic and high school characteristics are associated with graduating from a postsecondary institution within the region.
+
+This model does not shift the primary focus away from workforce participation outcomes. Rather, it evaluates whether the same preparation and structural factors that differentiate workforce pathways also predict regional postsecondary completion. If variables such as CTE participation strongly predict in-region graduation, this would suggest that their influence on sustained regional employment operates, at least in part, through geographic educational pathways. Conversely, if certain predictors do not differentiate regional graduation, this would indicate a more direct association with workforce outcomes independent of postsecondary geography.
+
+By modeling regional postsecondary graduation as the outcome, this analysis clarifies whether regional workforce retention reflects a two-step pipeline—high school pathway to regional postsecondary completion to regional employment—or whether these mechanisms operate independently.
+
+First we are going to prep the data by creating a binary outcome:
+
+-   1 = Graduates from a post-secondary institution within the region
+-   0 = Everyone else (including non-graduates and graduates elsewhere).
+
+We are not restricting to gradautes only, we want the full pipeline.
+
+```{r}
+master.model.ps <- master.model %>%
+  mutate(
+    ps_grad_region_binary =
+      ifelse(ps.grad.location == "PS grad region", 1, 0)
+  )
+
+table(master.model.ps$ps_grad_region_binary)
+prop.table(table(master.model.ps$ps_grad_region_binary))
+
+colSums(is.na(master.model.ps[, c(
+  "RaceEthnicity",
+  "economic.status",
+  "SpecialEdStatus",
+  "pseo.participant",
+  "MCA.M",
+  "ap.exam",
+  "cte.achievement",
+  "Dem_Desc",
+  "avg.wages.pct.state"
+)]))
+
+levels(master.model.ps$RaceEthnicity)
+levels(master.model.ps$cte.achievement)
+levels(master.model.ps$pseo.participant)
+levels(master.model.ps$economic.status)
+levels(master.model.ps$SpecialEdStatus)
+
+prop.table(table(master.model.ps$ps_grad_region_binary,
+                 master.model.ps$cte.achievement), 2)
+
+prop.table(table(master.model.ps$ps_grad_region_binary,
+                 master.model.ps$RaceEthnicity), 2)
+
+```
+
+Everything looks sound so let's begin modeling.
+
+This supplemental model examines which demographic and high school characteristics are associated with graduating from a postsecondary institution within the region, holding other factors constant. The results clarify whether sustained regional employment reflects a two-step pipeline—high school pathway to regional postsecondary completion to regional employment—or whether certain predictors operate independently of educational geography.
+
+Modeling regional postsecondary graduation clarifies which upstream factors sort students into in-region completion pathways. The model includes 75,523 individuals and provides stable estimates (AIC = 55,234.31).
+
+Regional graduation is most strongly associated with structural and academic mobility factors rather than CTE participation.
+
+PSEO participation emerges as the strongest positive predictor:
+
+-   **PSEO participants:** approximately 56% higher odds of graduating from a postsecondary institution within the region (OR ≈ 1.56).
+
+Local economic context is also strongly associated:
+
+-   **Higher average wages (percent of state):** associated with substantially higher odds of regional graduation (OR ≈ 1.87), suggesting that stronger local labor markets and institutional ecosystems are linked to in-region completion.
+
+In contrast, CTE shows minimal association with regional graduation:
+
+-   **CTE concentrators/completers:** not statistically distinct from non-CTE students.
+-   **CTE participants:** very small positive association (\~6% higher odds), marginal in magnitude.
+
+This indicates that CTE’s previously observed effect on sustained regional employment is not operating primarily through increased regional postsecondary graduation.
+
+Academic proficiency shows limited influence:
+
+-   **MCA Math:** not statistically distinct from zero in practical terms.
+
+Structural disadvantages are strongly associated with lower odds of regional graduation:
+
+-   **Economic disadvantage:** \~30% lower odds.
+-   **Special Education status:** \~47% lower odds.
+-   **Entirely urban schools:** \~53% lower odds.
+-   **Urban/town/rural mix schools:** \~8% lower odds.
+
+Racial disparities are evident:
+
+-   **American Indian students:** \~43% lower odds.
+-   **Hispanic students:** \~53% lower odds.
+-   **Asian/PI students:** \~25% lower odds.
+-   **Black students:** not statistically distinct from White students once controls are included.
+
+Overall, the results indicate that regional postsecondary graduation is shaped primarily by PSEO participation, local economic context, and structural background factors rather than CTE participation or academic proficiency. This suggests that the strong association between CTE and sustained regional employment observed in prior models does not operate primarily through increased regional postsecondary completion. Instead, CTE likely functions more directly as a workforce alignment pathway independent of the regional graduation mechanism.
+
+```{r}
+model_region_grad <- glm(
+  ps_grad_region_binary ~
+    RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    pseo.participant +
+    MCA.M +
+    cte.achievement +
+    Dem_Desc +
+    avg.wages.pct.state,
+  family = binomial,
+  data = master.model.ps
+)
+
+nobs(model_region_grad)
+AIC(model_region_grad)
+
+exp(cbind(
+  OR = coef(model_region_grad),
+  confint(model_region_grad)
+))
+
+or_plot <- tidy(model_region_grad, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    # Make labels nicer (edit these replacements to match your exact factor labels)
+    term = str_replace_all(term, c(
+      "RaceEthnicity" = "Race: ",
+      "economic.status" = "Economic status: ",
+      "SpecialEdStatus" = "Special Ed: ",
+      "pseo.participant" = "PSEO: ",
+      "cte.achievement" = "CTE: ",
+      "MCA.M" = "MCA Math",
+      "highest.cred.level" = "Highest credential"
+    )),
+    # Put most important effects near the top (optional: tweak ordering later)
+    term = fct_reorder(term, estimate)
+  )
+
+
+ggplot(or_plot, aes(x = estimate, y = term)) +
+  geom_vline(xintercept = 1, linetype = "dashed") +
+  geom_vline(xintercept = c(0.5, 0.75, 1.25, 1.5, 2),
+             color = "grey85") +
+  geom_point() +
+  geom_errorbar(
+    aes(xmin = conf.low, xmax = conf.high),
+    orientation = "y",
+    width = 0.2
+  ) +
+  scale_x_log10(
+    breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2),
+    labels = c("0.5", "0.75", "1.0", "1.25", "1.5", "2.0")
+  ) +
+  theme_line +
+  labs(
+    x = "Odds ratio (log scale)",
+    y = NULL
+  )
+
+```
+
+<br>
+
+# Synthesis of Analysis – Central Minnesota
+
+Across multiple logistic regression models—progressively specifying high school preparation, credential level, postsecondary geography, sector × location, and finally regional postsecondary graduation—a clear and layered mechanism emerges. Sustained regional employment is driven overwhelmingly by postsecondary geographic embeddedness, reinforced modestly by CTE participation, and shaped throughout by persistent structural disparities.
+
+Academic readiness alone does not anchor students to the region. Geography does.
+
+<br>
+
+## Big Takeaways
+
+**1. Regional postsecondary embeddedness is the dominant workforce retention mechanism.**\
+Graduating from a postsecondary institution within the region is the single strongest predictor of sustained regional employment.
+
+-   **2-year public × regional graduation:** \~207% higher odds (OR ≈ 3.07).\
+-   **4-year public × regional graduation:** \~142% higher odds (OR ≈ 2.42).\
+-   **Other institutional types × regional graduation:** \~70% higher odds (OR ≈ 1.70).
+
+These are large, stable, and substantively decisive effects. Once sector × geography is specified, credential level alone no longer explains retention—where the degree is earned matters far more than what degree is earned.
+
+<br>
+
+**2. CTE operates as a modest but consistent independent pathway.**\
+Across all workforce models—including those controlling for credential level and sector × location—CTE remains positively associated with sustained regional employment:
+
+-   **CTE concentrators/completers:** \~12% higher odds.\
+-   **CTE participants:** \~11% higher odds.
+
+However, when modeling regional postsecondary graduation, CTE shows little association with in-region completion. This indicates that CTE’s workforce effect does **not** operate primarily through regional college graduation. Instead, it appears to function as a more direct workforce-alignment mechanism.
+
+In Central, CTE matters—but it is not the dominant driver. Geography is.
+
+<br>
+
+**3. Four-year and non-regional pathways align with outward mobility.**\
+Graduating outside the region is consistently associated with lower odds of sustained regional employment:
+
+-   **4-year public outside MN:** \~61% lower odds.\
+-   **Other institutional types outside MN:** \~62% lower odds.\
+-   **2-year public outside MN:** \~41% lower odds.
+
+Bachelor’s degree attainment is associated with lower regional retention once geography is considered. This indicates that higher-degree pathways—especially when completed outside the region—function as mobility channels rather than regional anchors.
+
+<br>
+
+**4. Academic readiness aligns more with mobility than retention.**\
+Higher MCA Math scores and AP participation are associated with lower odds of sustained regional employment in workforce models. In the regional graduation model, MCA shows minimal association, and PSEO is strongly associated with regional graduation (\~56% higher odds).
+
+This pattern suggests:
+
+-   Academic readiness facilitates postsecondary progression.
+-   But it does not anchor students regionally.
+-   Higher academic pathways likely expand geographic opportunity rather than reinforcing local retention.
+
+<br>
+
+**5. Structural disparities emerge at graduation and persist into workforce outcomes.**\
+Racial and structural inequalities are evident in both regional graduation and regional employment models.
+
+In workforce models:
+
+-   **Black students:** \~49% lower odds.\
+-   **Asian/PI students:** \~36% lower odds.\
+-   **American Indian students:** \~30% lower odds.\
+-   **Hispanic students:** \~21% lower odds.
+
+In regional graduation models:
+
+-   **Hispanic students:** \~53% lower odds of regional graduation.\
+-   **American Indian students:** \~43% lower odds.\
+-   **Asian/PI students:** \~25% lower odds.\
+-   **Black students:** not statistically distinct once controls are included.
+
+Economic disadvantage, Special Education status, and entirely urban school context are also strongly associated with lower odds of regional graduation and lower odds of sustained regional employment.
+
+These disparities are not eliminated by controlling for credential level, institutional sector, or graduation location. Structural inequality remains embedded throughout the pipeline.
+
+<br>
+
+## Relative Strength of Predictors (Final Sector × Location Model)
+
+| Rank | Predictor | Direction | Approximate Effect on Sustained Regional Employment |
+|----|----|----|----|
+| 1 | 2-year public × Regional graduation | Strong positive | \~207% higher odds |
+| 2 | 4-year public × Regional graduation | Strong positive | \~142% higher odds |
+| 3 | Other sector × Regional graduation | Positive | \~70% higher odds |
+| 4 | 4-year public × Outside MN | Strong negative | \~61% lower odds |
+| 5 | Other sector × Outside MN | Strong negative | \~62% lower odds |
+| 6 | 2-year public × Outside MN | Negative | \~41% lower odds |
+| 7 | Race (Black, Asian/PI) | Negative | \~36–49% lower odds |
+| 8 | CTE Concentrator/Completor | Positive | \~12% higher odds |
+| 9 | CTE Participant | Positive | \~11% higher odds |
+| 10 | Entirely urban schools | Negative | \~47% lower odds |
+| 11 | Economic disadvantage | Negative | \~9–10% lower odds |
+| 12 | MCA Math | Small negative | \~3% lower odds per unit |
+
+<br>
+
+## Overall Conclusion
+
+Sustained regional employment in Central Minnesota is shaped primarily by **locally embedded postsecondary institutions—especially 2-year public colleges—combined with modest but consistent contributions from CTE pathways**.
+
+Credential attainment alone does not drive retention. Geography does.
+
+Academic readiness expands opportunity but does not anchor students regionally. Four-year and non-regional pathways align with outward mobility. CTE contributes independently but at a smaller magnitude than in some other regions.
+
+Most importantly, structural disparities appear early in regional postsecondary graduation and persist into workforce outcomes. Educational pathway differences explain part of regional retention, but they do not fully account for persistent racial and socioeconomic gaps.
+
+In short, Central Minnesota’s workforce retention pipeline is geographically anchored, institutionally embedded, modestly reinforced by career-aligned high school preparation, and constrained by enduring structural inequality.
