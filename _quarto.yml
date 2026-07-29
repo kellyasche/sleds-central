@@ -1,6 +1,10 @@
 project:
   type: website
   output-dir: docs
+  
+execute:
+  freeze: auto
+
 
 website:
   title: "Pathways taken after high school - Central"
@@ -39,8 +43,6 @@ website:
             href: unemployment.qmd
           - text: Average wages
             href: avgwages.qmd
-          - text: EPIC schools
-            href: epic.qmd
       - text: Analysis
         icon: fa-gear
         menu:
@@ -50,21 +52,20 @@ website:
             href: analysis_dep_var_states.qmd
           - text: Local Employment Cross-tabs
             href: analysis_local_employment_ct.qmd
-          - text: Post-secondary pathways
-            href: analysis_post_secondary_pathways.qmd
+          - text: Post-secondary pathways cross-tabs
+            href: analysis_post_secondary_pathways_ct.qmd
           - text: Multivariate Confirmation Analysis - Logistic Regression
             href: analysis_multivariate_confirmation_analysis.qmd
           - text: Non-college graduates
             href: analysis_non_post_secondary_graduates.qmd
-          - text: Multivariate Confirmation Analysis on non-college grads - Logistic Regression
-            href: analysis_multivariate_confirmation_non_college_grads.qmd
           - text: Further analysis on non-college grads
             href: analysis_non_college_deeper.qmd
-      - text: One-page summaries of pathways
-        icon: fa-gear
-        menu:
-          - text: Pathways
-            href: pathway_descriptions.qmd
+          - text: Multivariate Confirmation Analysis on non-college grads - Logistic Regression
+            href: analysis_multivariate_confirmation_non_college_grads.qmd
+          - text: Multivariate Confirmation Analysis on Persistent Disconnection
+            href: analysis_multivariate_confirmation_disconnection_persistence.qmd
+      - text: Summary of the three pathways
+        href: summary_pathways.qmd
 
         
 

@@ -1022,6 +1022,198 @@ ggplot(or_plot, aes(x = estimate, y = term)) +
 
 <br>
 
+# Does CTE cut through?
+
+I want to see if CTE can eliminate some of these barriers highlighted in the previous models. We will first run the
+
+```{r}
+cte.master.model <- master %>%
+  filter(ps.grad == "No") %>%
+  select(PersonID, pseo.participant, cte.achievement, RaceEthnicity, economic.status, SpecialEdStatus, ap.exam, Dem_Desc, avg.wages.pct.state, MCA.M, MCA.R, MCA.S, ACTCompositeScore, grad.year.5) %>%
+  filter(grad.year.5 != "After 2023",
+         grad.year.5 != "Attending ps") %>%
+  mutate(grad.year.5 = ifelse(grad.year.5 %in% c("Meaningful emp region", "Meaningful emp County", "Meaningful emp EDR"), "Meaningful emp region", grad.year.5),
+         grad.year.5 = str_replace(grad.year.5, ", not attending ps", ""),
+         grad.year.5 = ifelse(grad.year.5 == "Meaningful emp region", 1, 0),
+         RaceEthnicity = fct_relevel(RaceEthnicity, "White"),
+         cte.achievement = fct_relevel(cte.achievement, "No CTE"),
+         pseo.participant = ifelse(is.na(pseo.participant), 0, pseo.participant),
+         pseo.participant = as.character(pseo.participant),
+         pseo.participant = fct_relevel(pseo.participant, "0"),
+         economic.status = as.character(economic.status),
+         economic.status = fct_relevel(economic.status, "0"),
+         SpecialEdStatus = as.character(SpecialEdStatus),
+         SpecialEdStatus = fct_relevel(SpecialEdStatus, "0"),
+         Dem_Desc = fct_relevel(Dem_Desc, "Town/rural mix"),
+         ap.exam = as_factor(ap.exam),
+         ap.exam = fct_relevel(ap.exam, "0"))
+
+model_cte_econ <- glm(
+  grad.year.5 ~
+    cte.achievement * economic.status +
+    SpecialEdStatus +
+    RaceEthnicity +
+    Dem_Desc +
+    ACTCompositeScore +
+    ap.exam +
+    MCA.M + MCA.R + MCA.S,
+  family = binomial,
+  data = cte.master.model
+)
+
+model_cte_econ
+
+or_plot <- tidy(model_cte_econ, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    # Make labels nicer (edit these replacements to match your exact factor labels)
+    term = str_replace_all(term, c(
+      "RaceEthnicity" = "Race: ",
+      "economic.status" = "Economic status: ",
+      "SpecialEdStatus" = "Special Ed: ",
+      "pseo.participant" = "PSEO: ",
+      "cte.achievement" = "CTE: ",
+      "MCA.M" = "MCA Math"
+    )),
+    # Put most important effects near the top (optional: tweak ordering later)
+    term = fct_reorder(term, estimate)
+  )
+
+ggplot(or_plot, aes(x = estimate, y = term)) +
+  geom_vline(xintercept = 1, linetype = "dashed") +
+  geom_vline(xintercept = c(0.5, 0.75, 1.25, 1.5, 2),
+             color = "grey85") +
+  geom_point() +
+  geom_errorbar(
+    aes(xmin = conf.low, xmax = conf.high),
+    orientation = "y",
+    width = 0.2
+  ) +
+  scale_x_log10(
+    breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2),
+    labels = c("0.5", "0.75", "1.0", "1.25", "1.5", "2.0")
+  ) +
+  theme_line +
+  labs(
+    x = "Odds ratio (log scale)",
+    y = NULL
+  )
+
+
+```
+
+<br>
+
+```{r}
+model_cte_sped <- glm(
+  grad.year.5 ~
+    cte.achievement * SpecialEdStatus +
+    economic.status +
+    RaceEthnicity +
+    Dem_Desc +
+    ACTCompositeScore +
+    ap.exam +
+    MCA.M + MCA.R + MCA.S,
+  family = binomial,
+  data = cte.master.model
+)
+
+model_cte_sped
+
+or_plot <- tidy(model_cte_sped, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    # Make labels nicer (edit these replacements to match your exact factor labels)
+    term = str_replace_all(term, c(
+      "RaceEthnicity" = "Race: ",
+      "economic.status" = "Economic status: ",
+      "SpecialEdStatus" = "Special Ed: ",
+      "pseo.participant" = "PSEO: ",
+      "cte.achievement" = "CTE: ",
+      "MCA.M" = "MCA Math"
+    )),
+    # Put most important effects near the top (optional: tweak ordering later)
+    term = fct_reorder(term, estimate)
+  )
+
+ggplot(or_plot, aes(x = estimate, y = term)) +
+  geom_vline(xintercept = 1, linetype = "dashed") +
+  geom_vline(xintercept = c(0.5, 0.75, 1.25, 1.5, 2),
+             color = "grey85") +
+  geom_point() +
+  geom_errorbar(
+    aes(xmin = conf.low, xmax = conf.high),
+    orientation = "y",
+    width = 0.2
+  ) +
+  scale_x_log10(
+    breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2),
+    labels = c("0.5", "0.75", "1.0", "1.25", "1.5", "2.0")
+  ) +
+  theme_line +
+  labs(
+    x = "Odds ratio (log scale)",
+    y = NULL
+  )
+
+```
+
+```{r}
+model_cte_race <- glm(
+  grad.year.5 ~
+    cte.achievement * RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    Dem_Desc +
+    ACTCompositeScore +
+    ap.exam +
+    MCA.M + MCA.R + MCA.S,
+  family = binomial,
+  data = cte.master.model
+)
+
+model_cte_race
+
+or_plot <- tidy(model_cte_race, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    # Make labels nicer (edit these replacements to match your exact factor labels)
+    term = str_replace_all(term, c(
+      "RaceEthnicity" = "Race: ",
+      "economic.status" = "Economic status: ",
+      "SpecialEdStatus" = "Special Ed: ",
+      "pseo.participant" = "PSEO: ",
+      "cte.achievement" = "CTE: ",
+      "MCA.M" = "MCA Math"
+    )),
+    # Put most important effects near the top (optional: tweak ordering later)
+    term = fct_reorder(term, estimate)
+  )
+
+ggplot(or_plot, aes(x = estimate, y = term)) +
+  geom_vline(xintercept = 1, linetype = "dashed") +
+  geom_vline(xintercept = c(0.5, 0.75, 1.25, 1.5, 2),
+             color = "grey85") +
+  geom_point() +
+  geom_errorbar(
+    aes(xmin = conf.low, xmax = conf.high),
+    orientation = "y",
+    width = 0.2
+  ) +
+  scale_x_log10(
+    breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2),
+    labels = c("0.5", "0.75", "1.0", "1.25", "1.5", "2.0")
+  ) +
+  theme_line +
+  labs(
+    x = "Odds ratio (log scale)",
+    y = NULL
+  )
+
+```
+
+<br>
+
 # Synthesis of analysis
 
 Across three time horizons (1-, 5-, and 10-years after high school) and two model specifications (baseline and local labor market context), a remarkably stable and coherent pattern emerges for non–college graduates. Sustained regional employment is shaped primarily by career alignment and structural context, not academic acceleration or short-term economic conditions.
@@ -1059,7 +1251,7 @@ Economic disadvantage and Special Education status are associated with modestly 
 Taken together, the findings indicate that among non-college graduates, sustained regional employment is shaped most strongly by structural position and high school career alignment rather than academic readiness. CTE emerges as the primary positive lever within this group, while racial disparities and urban–regional divides represent the most persistent and consequential barriers to long-term regional workforce attachment.
 
 | Rank | Predictor | Direction Toward Sustained Regional Employment | Approximate Magnitude (Across 1-, 5-, 10-Year Models) |
-|---------------|---------------|-------------------|-----------------------|
+|-----------------|-----------------|------------------|----------------------|
 | 1 | Race: Black | Strong negative | \~40–50% lower odds |
 | 2 | Race: Asian/PI | Strong negative | \~40–50% lower odds |
 | 3 | Race: AI | Strong negative | \~35–45% lower odds |
