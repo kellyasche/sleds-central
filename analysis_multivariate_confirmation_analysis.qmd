@@ -149,7 +149,7 @@ kable(names(master))
 
 # Multivariate Confirmation Analysis: Logistic Regression
 
-The purpose of this project is to explain which characteristics are associated with entry into distinct workforce participation pathways following high school graduation in Northwest Minnesota (EDR 1, 2, 4). These pathways include sustained employment in the region, sustained employment elsewhere in Minnesota, non-sustained employment, and having no Minnesota employment record.
+The purpose of this project is to explain which characteristics are associated with entry into distinct workforce participation pathways following high school graduation in Central Minnesota (EDR 7E, 7W, 5). These pathways include sustained employment in the region, sustained employment elsewhere in Minnesota, non-sustained employment, and having no Minnesota employment record.
 
 The policy question of greatest interest is what factors are associated with **sustained employment in the region**. Earlier analysis relied on bivariate analyses (cross-tabulations, Cramér’s V, and ANOVA) to identify patterns of stratification across workforce participation outcomes. A consistent finding was that postsecondary experiences—particularly credential attainment and where education was completed—are strongly associated with long-term workforce attachment. Academic preparation, early college exposure (PSEO), career and technical education (CTE), and structural demographic factors also demonstrated meaningful relationships.
 
@@ -181,192 +181,71 @@ This analysis models five distinct outcomes, each restricted to the appropriate 
 
 To maintain interpretability and avoid overfitting, the analysis includes a limited set of theoretically and empirically important predictors identified in earlier analyses. We are going to explore the results of a baseline model and than add more independent variables in stages to see if the model improves. This will help us decipher how each variable impacts / improves predictability and strength of association.
 
-There are a number of independent variables that showed a relationship to our dependent variables in the bivariate analysis. We will start exploring those that were statistically significant and will go through a process to eliminate redundant or problematic variables before we begin modeling. Here are the indepedent variables that were associated with our dependent variables in earlier analysis;
+There are a number of independent variables that showed a relationship to our dependent variables in the bivariate analysis. We will start exploring those that were statistically significant and will go through a process to eliminate redundant or problematic variables before we begin modeling. Here are the independent variables that were associated with our dependent variables in earlier analysis;
 
-**Demographics**
+| Variable | Model 1 (grad.year.5, full) | Model 2 (grad.year.5, completers) | Model 3 (ps.grad) | Model 4 (location) | Model 5 (sub-bacc) |
+|------------|------------|------------|------------|------------|------------|
+| Gender | Optional (weak, V=0.081) | Optional | Yes | Yes | Yes |
+| economic.status | Yes | Yes | Yes | Yes | Yes |
+| RaceEthnicity | Yes | Yes | Yes | Yes | Yes |
+| SpecialEdStatus | Yes | Yes | Yes | Yes | Yes |
+| english.learner | No | No | Yes | Yes | Yes |
+| non.english.home | No | No | Optional | Optional | Optional |
+| Dem_Desc | Yes | Yes | No | No | No |
+| edr | Yes (confirm def.) | Yes (confirm def.) | Yes (confirm def.) | Yes (confirm def.) | Yes (confirm def.) |
+| avg.unemp.rate | Optional (moderate) | Optional | No | No | No |
+| avg.wage.pct.state | Yes (moderate) | Yes | Optional | Optional | Optional |
+| took.ACT | No (weak for this DV) | No | Yes | Yes | Yes |
+| ACTCompositeScore | Yes (strong) | Yes | Sensitivity check only | Sensitivity check only | Sensitivity check only |
+| MCA-R | Yes (moderate) | Yes | Yes | Yes | Yes |
+| MCA-M | Yes (moderate) | Yes | No (redundant) | No | No |
+| MCA-S | Unclear — see note | Unclear | No | No | No |
+| pseo.participant | Yes | Yes | Yes | Yes | Yes |
+| ap.exam | No (weak for this DV) | No | Yes | Yes | Yes |
+| sat.taken | No | No | No | No | No |
+| cte.achievement | Yes (moderate) | Yes | Yes | Yes | Yes |
+| total.cte.courses.taken | Optional (redundant w/ achievement) | Optional | No | No | No |
+| attended.ps | Yes | N/A (constant) | No (redundant) | N/A | N/A |
+| ps.grad | Yes | N/A (constant) | DV | N/A | N/A |
+| ps.grad.InstitutionSector | Consider adding | Consider adding | N/A | N/A | N/A |
+| highest.cred.level | No | Yes | N/A | Optional | DV |
+| ps.grad.location | No | Yes | N/A | DV | Optional |
 
-- `Gender`
-- `RaceEthnicty`
-- `economic.status`
-- `SpecialEdStatus`
-- `english.learner`
-- `non.english.home`
+### Independent Variable Screening Approach: Persistent Non-Sustained Employment and Persistent No-Record Status
 
-**High school characteristics**
+Before fitting the multivariate confirmation models, each of the 20 candidate independent variables is screened for missing data and collinearity. This screening is conducted independently for each dependent variable — persistent non-sustained employment and persistent no-record status — since the two models may ultimately retain different final variable sets even though they begin from the same shared candidate list. Any variable dropped, recoded, or handled differently between the two models will be documented with the specific statistical or methodological reason driving that decision.
 
-- `Dem_Desc`
-- `edr`
-- `avg.unemployment.rate`
-- `avg.wages.pct.state`
+**Step 1: Missing Data Assessment**
 
-**High school accomplishments**
+Each candidate variable is assessed for missingness within the analytic population, and the underlying mechanism behind that missingness is identified before any handling strategy is applied. This includes:
 
-- `took.ACT`
+- Calculating the percentage of missing values for each candidate variable individually.
 
-- `ACTCompositeScore`
+- Calculating the population retained under naive listwise deletion across the full candidate set, to quantify the cost of doing nothing.
 
-- `pseo.participant`
+- Determining whether missingness is structural (tied to a known, real-world reason, such as not taking the ACT), cohort-based (a known data collection gap, such as the PSEO tracking issue), or related to another variable already in the candidate set (such as MCA missingness’s established link to English learner status).
 
-- `ap.exam`
+- Applying the appropriate handling strategy based on the mechanism identified — fill-and-flag for structurally missing variables, population restriction for cohort-based gaps, or, where a variable’s missingness pattern would systematically bias the modeled population toward or away from a subgroup already of interest, closer consideration of whether to retain, recode, or exclude it.
 
-- `cte.achievement`
+**Step 2: Collinearity Screening**
 
-- `total.cte.courses.taken`
+Once missingness is addressed, remaining candidate variables are checked for redundancy in three groups, consistent with their measurement type:
 
-- `MCA.M`
+- Categorical-by-categorical: Cramér’s V calculated pairwise across all categorical predictors.
 
-- `MCA.R`
+- Continuous-by-continuous: correlation matrix calculated across all continuous predictors.
 
-- `MCA.S`
+- Categorical-by-continuous: eta-squared or point-biserial correlation calculated as appropriate.
 
-**Post-secondary**
+Pairs or clusters showing high collinearity (as a general guide, Cramér’s V or correlation above roughly 0.5 warrants closer inspection, and above roughly 0.7–0.8 is treated as a near-certain problem) are flagged for a decision: keep both and monitor, drop one, or combine into a single measure. These decisions are made using the same standard applied earlier in this project — conceptual redundancy considered alongside the statistical evidence, not statistics alone.
 
-- `attended.ps`
-- `ps.grad`
-- `highest.cred.level`
-- `ps.grad.location`
-- 
+**Step 3: Full-Model Variance Inflation Check**
 
-Variables were selected based on:
+After addressing pairwise collinearity, the full candidate model is fit for each dependent variable, and variance inflation factors (VIF) are calculated to catch any multi-variable collinearity that pairwise screening alone would miss. For categorical predictors with more than two levels, GVIF\^(1/(2×df)) is used in place of raw VIF, to allow fair comparison across predictors with differing numbers of levels. A VIF above roughly 5 is investigated further, and a VIF above roughly 10 is treated as a clear problem requiring resolution.
 
-1\. Strength of association in prior bivariate analyses\
-2. Policy relevance\
-3. Conceptual clarity\
-4. Avoidance of redundant or highly collinear measures
+**Step 4: Decision and Documentation**
 
-### Independent Variable Screening: Missing Data Assessment
-
-Before finalizing the independent variables for the multivariate confirmation analysis, each candidate variable was assessed for missingness, and the mechanism behind that missingness was evaluated to determine the appropriate handling strategy. A listwise-deletion check across the full 23-variable candidate set showed that naive complete-case modeling would reduce the population from 65,650 to 35,560 — a loss of roughly 46 percent — making it necessary to understand and address the sources of missingness rather than accept this reduction by default.
-
-```{r}
-candidate_ivs <- c(
-  # Demographics
-  "Gender",
-  "economic.status",
-  "SpecialEdStatus",
-  "RaceEthnicity",
-  "non.english.home",
-  "english.learner",
-  
-  # High school characteristics
-  "Dem_Desc",
-  "edr",
-  "avg.unemp.rate",
-  "avg.wages.pct.state",
-  
-  # High school accomplishments
-  "pseo.participant",
-  "took.ACT",
-  "ACTCompositeScore",
-  "ap.exam",
-  "MCA.R",
-  "MCA.S",
-  "MCA.M",
-  "cte.achievement",
-  "total.cte.courses.taken",
-  
-  # Postsecondary
-  "attended.ps",
-  "ps.grad",
-  "highest.cred.level",
-  "ps.grad.location"
-)
-
-data <- master %>%
-  select(all_of(candidate_ivs)) %>%
-  summarise(across(everything(), ~mean(is.na(.)) * 100)) %>%
-  pivot_longer(everything(), names_to = "variable", values_to = "pct_missing") %>%
-  arrange(desc(pct_missing))
-
-data
-
-# And critically: what N survives listwise deletion across the FULL candidate set?
-master %>% select(all_of(candidate_ivs)) %>% drop_na() %>% nrow()
-
-master %>%
-  mutate(grad_cohort_affected = grad.year %in% 2008:2010) %>%
-  count(grad_cohort_affected) %>%
-  mutate(pct = n / sum(n) * 100)
-
-master %>%
-  group_by(english.learner) %>%
-  summarise(pct_missing_MCA.S = mean(is.na(MCA.S)) * 100,
-            pct_missing_MCA.R = mean(is.na(MCA.R)) * 100,
-            pct_missing_MCA.M = mean(is.na(MCA.M)) * 100,
-            n = n())
-
-# Correlation between ACT composite and each MCA subject (among those tested in both)
-master %>%
-  filter(took.ACT == "Yes") %>%
-  summarise(
-    r_ACT_MCA.R = cor(ACTCompositeScore, MCA.R, use = "complete.obs"),
-    r_ACT_MCA.M = cor(ACTCompositeScore, MCA.M, use = "complete.obs"),
-    r_ACT_MCA.S = cor(ACTCompositeScore, MCA.S, use = "complete.obs")
-  )
-```
-
-<br>
-
-**ACT Composite Score**
-
-ACT composite score showed 32.3 percent missingness, driven entirely by students who did not take the ACT. Because this missingness is structural rather than random, the score was recoded as ACTCompositeScore.filled, assigning a value of 0 to non-takers. This filled score was retained alongside the existing took.ACT indicator, allowing the two variables to jointly capture participation (via took.ACT) and performance among test-takers (via the filled score, which contributes zero to the model for non-takers regardless of coefficient). This approach assumes that the relationship between other independent variables and the outcome does not differ meaningfully between ACT-takers and non-takers; given the confirmatory, non-causal purpose of this analysis, that assumption was judged acceptable.
-
-**PSEO Participation**
-
-PSEO participation showed 19.9 percent missingness, resulting from a data collection gap affecting all individuals who graduated between 2008 and 2010 — approximately 20.1 percent of the full cohort. Because this missingness reflects an absence of data collection rather than any individual-level pattern, filling these values was not appropriate. Instead, graduates from the 2008–2010 cohorts were excluded from the modeling population entirely. This exclusion was applied upstream, before any other missingness handling or modeling steps, so that the resulting population is consistent across all variables and all models built from this dataset going forward.
-
-**MCA Scores (Reading, Math, Science)**
-
-MCA Reading, Math, and Science scores showed missingness of 4.62 percent, 3.75 percent, and 18.0 percent, respectively. Further investigation revealed that this missingness is not random: among English learner students, missingness rates were substantially higher across all three subjects — 22.4 percent for Reading (6.3 times the rate for non-English learners), 21.6 percent for Math (8.1 times higher), and 27.3 percent for Science (1.6 times higher). Listwise deletion using these variables would therefore disproportionately exclude English learner students from the modeling population, undermining the ability to draw reliable conclusions about a group already shown to have significant associations with postsecondary and workforce outcomes throughout this analysis.
-
-Given this risk, combined with prior experience in other regional analyses where MCA missingness proved difficult to resolve cleanly, and given that MCA scores were already suspected to overlap substantially with ACT composite score, a correlation check was conducted among ACT-tested individuals. ACT composite score correlated with MCA Reading (r = 0.568), MCA Math (r = 0.516), and MCA Science (r = 0.660) — correlations in the moderate-to-strong range for standardized academic achievement measures. This confirms that MCA scores capture substantially overlapping information with ACT composite score, which is already retained in the model.
-
-Based on this combination of missingness risk and conceptual redundancy, all three MCA variables (MCA.R, MCA.M, MCA.S) were dropped from the candidate independent variable list.
-
-**Attending post-secondary**
-
-This factor is redundant and isn't as important to the full population or college completers only. This factor wil be come more important when we analyze non-college completers in a later analysis.
-
-**Summary of Decisions**
-
-Population restriction: Individuals who graduated between 2008 and 2010 are excluded from the modeling population due to a structural data gap in PSEO participation records.
-
-Recoded variable: ACTCompositeScore is replaced with ACTCompositeScore.filled (0 for non-takers), retained alongside the existing took.ACT indicator.
-
-Dropped variables: MCA.R, MCA.M, and MCA.S are removed from the candidate independent variable list due to their disproportionate missingness among English learner students and their substantial correlation with ACT composite score, which remains in the model.
-
-These decisions reduce the candidate independent variable list from 23 to 20 variables and are expected to meaningfully improve the usable modeling population relative to the 35,560 individuals retained under naive listwise deletion across the original candidate set. A revised missingness audit and listwise-deletion population count should be run against the updated candidate list and restricted population before proceeding to collinearity screening.
-
-```{r}
-final_ivs <- c(
-  # Demographics
-  "Gender",
-  "economic.status",
-  "SpecialEdStatus",
-  "RaceEthnicity",
-  "non.english.home",
-  "english.learner",
-  
-  # High school characteristics
-  "Dem_Desc",
-  "edr",
-  "avg.unemp.rate",
-  "avg.wages.pct.state",
-  
-  # High school accomplishments
-  "pseo.participant",
-  "took.ACT",
-  "ACTCompositeScore",
-  "ap.exam",
-  "cte.achievement",
-  "total.cte.courses.taken",
-  
-  # Postsecondary
-  "ps.grad",
-  "highest.cred.level",
-  "ps.grad.location"
-)
-```
+Every exclusion, recode, or population restriction made during this screening process is documented individually, along with the specific evidence supporting it (missingness rate and mechanism, correlation or Cramér’s V value, VIF value). Because this screening is conducted separately for each of the two dependent variables, any point at which the final variable sets diverge between the non-sustained and no-record models is noted explicitly, since that divergence is itself substantively meaningful given this analysis’s purpose of testing whether the two disconnection mechanisms are genuinely distinct.
 
 <br>
 
@@ -432,10 +311,176 @@ Findings will be described as associations holding other included variables cons
 
 # **Prep DV1a data**
 
-The first thing I need to do is setup my dataset for modeling. I’m going to create the workforce participation into a binary and will use grad.year.5 as my modeling year.
+Let's start by screening the independent variables here.
 
 ```{r}
 
+
+# screen_ivs(): one-call implementation of the Step 1-3 screening process
+# (missingness -> collinearity -> VIF) established earlier in this project.
+# Run once per DV/population combination instead of hand-coding each step.
+#
+# Usage:
+#   result <- screen_ivs(
+#     data              = DV1.data,
+#     dv                = "grad.year.5.binary",   # 0/1 outcome column name
+#     candidate_ivs     = DV1.var.initial,
+#     categorical_vars  = c("Gender","economic.status","RaceEthnicity","SpecialEdStatus",
+#                            "Dem_Desc","edr","took.ACT","cte.achievement","ps.grad"),
+#     continuous_vars   = c("avg.unemp.rate","avg.wages.pct.state","ACTCompositeScore",
+#                            "MCA.M","MCA.R","MCA.S","total.cte.courses.taken")
+#   )
+#
+# Returns a list (missingness, cramer, cor, eta, vif) invisibly, so you can
+# inspect any piece afterward (e.g., result$vif) without re-running.
+
+library(dplyr)
+library(tidyr)
+library(rcompanion)   # cramerV
+library(effectsize)   # eta_squared
+library(car)          # vif
+
+screen_ivs <- function(data,
+                       dv,
+                       candidate_ivs,
+                       categorical_vars,
+                       continuous_vars,
+                       cor_flag = 0.5,
+                       cor_problem = 0.7,
+                       vif_flag = 5,
+                       vif_problem = 10) {
+  
+  cat("=====", dv, "=====\n\n")
+  
+  ## --- Step 1: Missingness ---------------------------------------------
+  cat("-- Step 1: Missingness --\n")
+  missing_summary <- data %>%
+    select(all_of(candidate_ivs)) %>%
+    summarise(across(everything(), ~ mean(is.na(.)) * 100)) %>%
+    pivot_longer(everything(), names_to = "variable", values_to = "pct_missing") %>%
+    arrange(desc(pct_missing))
+  print(missing_summary)
+  
+  n_full <- nrow(data)
+  n_complete <- data %>% select(all_of(candidate_ivs)) %>% drop_na() %>% nrow()
+  cat("\nFull population:", n_full, "\n")
+  cat("Complete-case population:", n_complete,
+      "(", round(n_complete / n_full * 100, 1), "% )\n\n")
+  
+  ## --- Step 2a: Categorical x Categorical (Cramer's V) ------------------
+  cat("-- Step 2a: Cramer's V (categorical x categorical) --\n")
+  cramer_matrix <- matrix(NA, nrow = length(categorical_vars), ncol = length(categorical_vars),
+                          dimnames = list(categorical_vars, categorical_vars))
+  for (i in seq_along(categorical_vars)) {
+    for (j in seq_along(categorical_vars)) {
+      if (i < j) {
+        tbl <- table(data[[categorical_vars[i]]], data[[categorical_vars[j]]])
+        v <- suppressWarnings(cramerV(tbl))
+        cramer_matrix[i, j] <- v
+        cramer_matrix[j, i] <- v
+      }
+    }
+  }
+  flagged_cat <- which(cramer_matrix > cor_flag, arr.ind = TRUE)
+  flagged_cat <- flagged_cat[flagged_cat[, 1] < flagged_cat[, 2], , drop = FALSE]
+  if (nrow(flagged_cat) > 0) {
+    print(data.frame(
+      var1 = categorical_vars[flagged_cat[, 1]],
+      var2 = categorical_vars[flagged_cat[, 2]],
+      cramers_v = round(cramer_matrix[flagged_cat], 3)
+    ))
+  } else {
+    cat("No categorical pairs above", cor_flag, "\n")
+  }
+  
+  ## --- Step 2b: Continuous x Continuous (correlation) --------------------
+  cat("\n-- Step 2b: Correlation (continuous x continuous) --\n")
+  cor_matrix <- data %>% select(all_of(continuous_vars)) %>% cor(use = "complete.obs")
+  print(round(cor_matrix, 3))
+  
+  ## --- Step 2c: Categorical x Continuous (eta-squared) --------------------
+  cat("\n-- Step 2c: Eta-squared (categorical x continuous), flagged above",
+      cor_flag^2, "(~ r >", cor_flag, ") --\n")
+  eta_results <- data.frame(categorical = character(), continuous = character(),
+                            eta_squared = numeric())
+  for (cat_var in categorical_vars) {
+    for (cont_var in continuous_vars) {
+      f <- as.formula(paste(cont_var, "~", cat_var))
+      m <- aov(f, data = data)
+      eta <- eta_squared(m)$Eta2[1]
+      eta_results <- rbind(eta_results,
+                           data.frame(categorical = cat_var, continuous = cont_var,
+                                      eta_squared = eta))
+    }
+  }
+  eta_results <- eta_results %>% arrange(desc(eta_squared))
+  print(eta_results %>% filter(eta_squared > cor_flag^2))
+  
+  ## --- Step 3: Full-model VIF --------------------------------------------
+  cat("\n-- Step 3: Full-model VIF --\n")
+  f <- as.formula(paste(dv, "~", paste(candidate_ivs, collapse = " + ")))
+  model_data <- data %>% select(all_of(candidate_ivs), all_of(dv)) %>% drop_na()
+  full_model <- glm(f, family = binomial, data = model_data)
+  vif_result <- vif(full_model)
+  print(vif_result)
+  
+  cat("\n(Flag thresholds: correlation/Cramer's V >", cor_flag, "= inspect, >", cor_problem,
+      "= near-certain problem. VIF/GVIF^(1/(2*Df)) >", vif_flag, "= inspect, >", vif_problem,
+      "= clear problem.)\n")
+  
+  invisible(list(
+    missingness = missing_summary,
+    cramer = cramer_matrix,
+    cor = cor_matrix,
+    eta = eta_results,
+    vif = vif_result
+  ))
+}
+
+DV1.data <- DV1.data %>%
+  mutate(grad.year.5 = as_factor(grad.year.5))
+  mutate(grad.year.5.binary = ifelse(grad.year.5 == "Meaningful emp region", 1, 0))
+
+result_DV1 <- screen_ivs(
+  data              = DV1.data,
+  dv                = "grad.year.5.binary",
+  candidate_ivs     = DV1.var.initial,
+  categorical_vars  = c("Gender", "economic.status", "RaceEthnicity", "SpecialEdStatus",
+                        "Dem_Desc", "edr", "took.ACT", "cte.achievement", "ps.grad"),
+  continuous_vars   = c("avg.unemp.rate", "avg.wages.pct.state", "ACTCompositeScore",
+                        "MCA.M", "MCA.R", "MCA.S", "total.cte.courses.taken")
+)
+```
+
+<br>
+
+```{r}
+DV1.var.initial <- c(
+  # Demographics
+  "Gender",
+  "economic.status",
+  "RaceEthnicity",
+  "SpecialEdStatus",
+  
+  # High school characteristics
+  "Dem_Desc",
+  "edr",
+  "avg.unemp.rate",
+  "avg.wage.pct.state",
+  
+  # High school accomplishments
+  "ACTCompositeScore",
+  "took.ACT"
+  "MCA.M",
+  "MCA.R",
+  "MCA.S",
+  "pseo.participant",
+  "cte.achievement",
+  "total.cte.courses.taken",
+  
+  # College completion
+  "ps.grad"
+)
 
 master.model <- master %>%
   filter(grad.year > 2010) %>%
