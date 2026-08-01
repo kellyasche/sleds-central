@@ -132,7 +132,7 @@ The next dataset to merge with the master is the enrollment in AP courses. I'm f
 <br>
 
 ```{r ap original data}
-ap.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/AP/AdvancedPlacementSATPSAT_AP.csv') %>%
+ap.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/AP/AdvancedPlacementSATPSAT_AP.csv') %>%
   mutate(PersonID = as.integer(PersonID)) %>%
   drop_na(PersonID)
 

@@ -134,7 +134,7 @@ Next up is to join the ACT data. I'll first load the entire ACT dataset, clean i
 <br>
 
 ```{r act original data}
-act.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/ACT/ACT.csv') %>%
+act.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/ACT/ACT.csv') %>%
   mutate(PersonID = as.integer(PersonID))
 
 kable(head(act.original))

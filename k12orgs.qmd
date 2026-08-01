@@ -126,7 +126,7 @@ mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasch
   ms_simplify(keep = .01, keep_shapes = TRUE) %>%
   rename(countyfp = FIPS_CODE)
 
-k12.county.codes <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12-county-codes.csv")
+k12.county.codes <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12-county-codes.csv")
 ```
 
 # Data prep
@@ -152,12 +152,12 @@ The one metric that wasn't included when I joined the enrollment data with the o
 <br>
 
 ```{r enrollment joined with n years attended}
-enrollment.original <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/K12 Enrollment/K12Enrollment.csv")  %>%
+enrollment.original <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/K12 Enrollment/K12Enrollment.csv")  %>%
   mutate(PersonID = as.integer(PersonID),
          K12OrganizationID = as.integer(K12OrganizationID)) %>%
   drop_na(PersonID)
 
-k12.org.original <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12Organization-updated.csv") %>%
+k12.org.original <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12Organization-updated.csv") %>%
   distinct(K12OrganizationID, .keep_all = TRUE) %>%
   drop_na(K12OrganizationID) %>%
   mutate(K12OrganizationID = as.integer(K12OrganizationID))
@@ -259,20 +259,20 @@ girafe(ggobj = k12.org.summary.county.map) %>%
 
 The following analysis looks to see if there are any statistical differences due to rural-ness and geographic location of the high school for the following graduate demographics;
 
--   Were eligible for free or reduced lunch at some point in the dataset
--   Are Female
--   Have been homeless at some point in the dataset
--   Had limited english proficiency at some point in the dataset
--   Had non english speakders in home at some point in the dataset
--   Participated in a PSEO course at some point in the dataset.
+- Were eligible for free or reduced lunch at some point in the dataset
+- Are Female
+- Have been homeless at some point in the dataset
+- Had limited english proficiency at some point in the dataset
+- Had non english speakders in home at some point in the dataset
+- Participated in a PSEO course at some point in the dataset.
 
 Lets start with the cross-tabs based on RUCA categories.
 
 The cross-tabs below indicate that there are 4 demographic variables that have proportions statistically different across RUCA categories. Each of the variables are indicated with an asterisk.
 
--   Free or reduced lunch: a statistically significant higher percentage of graduates from high schools in entirely rural mix counties receive free or reduced lunch.
--   Homeless: as a school district becomes more urban, the percentage of it's graduates indicating they experienced homeslessness at some point increases significantly.
--   PSEO: a siginficantly lower percentage of graduates from entirely rural districts participated in a PSEO program.
+- Free or reduced lunch: a statistically significant higher percentage of graduates from high schools in entirely rural mix counties receive free or reduced lunch.
+- Homeless: as a school district becomes more urban, the percentage of it's graduates indicating they experienced homeslessness at some point increases significantly.
+- PSEO: a siginficantly lower percentage of graduates from entirely rural districts participated in a PSEO program.
 
 ::: panel-tabset
 ### RUCA Free or Reduced Lunch

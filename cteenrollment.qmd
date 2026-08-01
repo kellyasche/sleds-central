@@ -132,7 +132,7 @@ The next dataset is individuals that were enrolled in CTE courses. I'm first goi
 <br>
 
 ```{r cte enrollment original}
-cte.enrollment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/CTEEnrollment/CTEEnrollment.csv') %>%
+cte.enrollment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/CTEEnrollment/CTEEnrollment.csv') %>%
   mutate(PersonID = as.integer(PersonID)) %>%
   filter(FiscalYearTimeID != "NULL") %>%
   mutate(CareerCluster = ifelse(CareerCluster == "26" & CareerClusterName == "Diversified Youth Apprenticeship", "25", CareerCluster),
@@ -141,7 +141,7 @@ cte.enrollment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/Goog
          CareerCluster = as.integer(CareerCluster))
 
 
-career.cluster.codes.names.original <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/CTEEnrollment/career-cluster-codes-names_from SLEDS_March2025.xlsx') %>%
+career.cluster.codes.names.original <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/CTEEnrollment/career-cluster-codes-names_from SLEDS_March2025.xlsx') %>%
   mutate(cte.year = ifelse(Introduced > 2020, 2021, Discontinued),
          cte.year = ifelse(is.na(Introduced) & is.na(Discontinued), 2021, cte.year),
          cte.year = ifelse(is.na(cte.year), 2020, cte.year),

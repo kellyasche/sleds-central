@@ -148,28 +148,28 @@ kable(names(employment.original))
 
 In the original dataset we have `r employment.original %>% nrow()` rows and `r employment.original %>% ncol()` columns. Below is a description of each variable.
 
--   PersonID: Every individual that graduated from a Central MN high school and was found within the large employment spreadsheet.
--   TimeID: Last day of fiscal quarter
--   EmploymentOrganizationID: An internal identification for each employer.
--   EmployeeQuarterlyHoursWorked: The total number of hours worked by an employee at an employer's location during a specific calendar quarter
--   EmployeeQuarterlyWages: The total wages earned by an employee at an employer's location during a specific calendar quarter
--   EmployeeTenure: The total number of quarters a worker has been employeed by an organization at a specific location, up to an including the current calendar quarter
--   IndustryID: Auto generated ID code for a record in the Industry dimension.
--   USIndustryCode: Six-digit North American Industrial Classification System (NAICS) code
--   GroupCode: Four-digit North American Industrial Classification System (NAICS) code
--   OwnershipCode: A classification system based upon the controlling interest of the establishment primarily designed to distinguish between governmental and non-governmental establishments
-    -   10 = Federal government
-    -   20 = State government
-    -   30 = Local government
-    -   50 = Private
--   EmployerLocationTotalWagesPaid: The total wages paid to all workers employeed by an organization at a specific location during a specific calendar quarter
--   QuarterlyAverageEmployment: The average number of workers employeed by an organization at a specific location during a specific calendar quarter
--   County: Minnesota county code to which this institution belongs. This can be used as a foreign key into the Geography dimension on MNCounty.
-    -   [Link to codes](https://sleds.mn.gov/dataDictionary/658)
--   CountyName: The name of the county corresponding to the County and MNCounty Codes for this Location.
--   MNCounty: County Code for this location as assigned by the state of Minnesota.
-    -   [Link to codes](https://sleds.mn.gov/dataDictionary/663) City: All of the city data is NA
--   City: this is blank so I will eliminate
+- PersonID: Every individual that graduated from a Central MN high school and was found within the large employment spreadsheet.
+- TimeID: Last day of fiscal quarter
+- EmploymentOrganizationID: An internal identification for each employer.
+- EmployeeQuarterlyHoursWorked: The total number of hours worked by an employee at an employer's location during a specific calendar quarter
+- EmployeeQuarterlyWages: The total wages earned by an employee at an employer's location during a specific calendar quarter
+- EmployeeTenure: The total number of quarters a worker has been employeed by an organization at a specific location, up to an including the current calendar quarter
+- IndustryID: Auto generated ID code for a record in the Industry dimension.
+- USIndustryCode: Six-digit North American Industrial Classification System (NAICS) code
+- GroupCode: Four-digit North American Industrial Classification System (NAICS) code
+- OwnershipCode: A classification system based upon the controlling interest of the establishment primarily designed to distinguish between governmental and non-governmental establishments
+  - 10 = Federal government
+  - 20 = State government
+  - 30 = Local government
+  - 50 = Private
+- EmployerLocationTotalWagesPaid: The total wages paid to all workers employeed by an organization at a specific location during a specific calendar quarter
+- QuarterlyAverageEmployment: The average number of workers employeed by an organization at a specific location during a specific calendar quarter
+- County: Minnesota county code to which this institution belongs. This can be used as a foreign key into the Geography dimension on MNCounty.
+  - [Link to codes](https://sleds.mn.gov/dataDictionary/658)
+- CountyName: The name of the county corresponding to the County and MNCounty Codes for this Location.
+- MNCounty: County Code for this location as assigned by the state of Minnesota.
+  - [Link to codes](https://sleds.mn.gov/dataDictionary/663) City: All of the city data is NA
+- City: this is blank so I will eliminate
 
 The next thing I want to do is put in the EDR and region of each of these employment instances. I will convert the "County" column to a 3 width character format and then match it with my counties.regions.1 list.
 
@@ -200,9 +200,9 @@ So all the previous datasets we structured and filtered so that each observation
 
 First, we want to figure out who from our master dataset has a MN employment record at each of the time instances being measured - graduation year, and graduation year +2, graduation year +7. Here are the columns I want when finished;
 
--   PersonID has no MN employment record (Grad year, grad year +2, grad year +7)
-    -   No MN emp record - Has never worked in Minnesota
-    -   After 2023 - the grad year +X is after 2023.
+- PersonID has no MN employment record (Grad year, grad year +2, grad year +7)
+  - No MN emp record - Has never worked in Minnesota
+  - After 2023 - the grad year +X is after 2023.
 
 <br>
 
@@ -261,11 +261,11 @@ This will be a couple step process.
 
 We will end with the following columns and labels;
 
--   PersonID has had meaningful employment since graduating high school (Grad year, grad year +2, grad year +7)
-    -   No MN emp record - Has no MN emp record
-    -   No meaningful emp - Has MN emp record but never
-    -   Meaningful emp - Has MN emp record and is meaningful
-    -   After 2023 - the grad year +X is after 2023.
+- PersonID has had meaningful employment since graduating high school (Grad year, grad year +2, grad year +7)
+  - No MN emp record - Has no MN emp record
+  - No meaningful emp - Has MN emp record but never
+  - Meaningful emp - Has MN emp record and is meaningful
+  - After 2023 - the grad year +X is after 2023.
 
 <br>
 
@@ -395,12 +395,12 @@ Now, we want to determine if the locations of meaningful employment match the co
 
 Here are the columns and labels that I need;
 
--   PersonID has had meaningful employment within the county/region (Grad year, grad year +2, grad year +7)
-    -   No MN emp record - has no MN employment record
-    -   No meaningful emp - Has MN emp record but not meaningful
-    -   No location match - Has MN emp record, had meaningful employment, but no match with region
-    -   Location match - Has MN emp record, had meaningful employment, and had meaningful employment in county/region
-    -   After 2023 - the grad year +X is After 2023
+- PersonID has had meaningful employment within the county/region (Grad year, grad year +2, grad year +7)
+  - No MN emp record - has no MN employment record
+  - No meaningful emp - Has MN emp record but not meaningful
+  - No location match - Has MN emp record, had meaningful employment, but no match with region
+  - Location match - Has MN emp record, had meaningful employment, and had meaningful employment in county/region
+  - After 2023 - the grad year +X is After 2023
 
 <br>
 
@@ -536,7 +536,7 @@ Next we need to find a way to compare the CTE careerclusters with the actual ind
 <br>
 
 ```{r career cluster and naics crosswalk table}
-careercluster.naics.cw <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/Employment/career-cluster-naics.xlsx') %>%
+careercluster.naics.cw <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/Employment/career-cluster-naics.xlsx') %>%
   rename(cw.CareerCluster = `Career cluster code`,
          cw.CareerClusterName = `Career Cluster`,
          cw.emp.ind.code = 3,
@@ -554,12 +554,12 @@ There is one industry in which two career clusters will have to be marged - Huma
 
 Here are the columns and labels that I will use;
 
--   PersonID has had meaningful employment in industry from a CTE course taken (Grad year, grad year +2, grad year +7)
-    -   No MN emp record - has no MN employment record
-    -   No meaningful emp - Has MN emp record nut not meaningful
-    -   No ind match - Has MN emp record, was meaningful, but industry does not match CTE course taken
-    -   Ind match - Has MN emp record, was meaningful, and industry and cTE course match.
-    -   After 2023 - the grad year +X is After 2023
+- PersonID has had meaningful employment in industry from a CTE course taken (Grad year, grad year +2, grad year +7)
+  - No MN emp record - has no MN employment record
+  - No meaningful emp - Has MN emp record nut not meaningful
+  - No ind match - Has MN emp record, was meaningful, but industry does not match CTE course taken
+  - Ind match - Has MN emp record, was meaningful, and industry and cTE course match.
+  - After 2023 - the grad year +X is After 2023
 
 Step 1 is to determine the industry codes for each PersonID that experienced meaningful employment for each of their "grad years".
 
@@ -1103,11 +1103,11 @@ Next, let's check the differences by RUCA category.
 
 Crosstabs indicate a relationship.
 
--   hs.grad.year: The more rural a district is, the higher the percentage of graduates that have meaningful employment in the high school county - 14.1% for town/rural mix vs. 8.9% for entirely urban.
+- hs.grad.year: The more rural a district is, the higher the percentage of graduates that have meaningful employment in the high school county - 14.1% for town/rural mix vs. 8.9% for entirely urban.
 
--   hs.grad.year.2: The increasing percentage for rural districts continues - 18.8% for town/rural mix districts vs. 11.3% for entirely urban.
+- hs.grad.year.2: The increasing percentage for rural districts continues - 18.8% for town/rural mix districts vs. 11.3% for entirely urban.
 
--   hs.grad.year.7: Same as previous years - 19.5% for town/rural mix vs. 10.3% for entirely urban.
+- hs.grad.year.7: Same as previous years - 19.5% for town/rural mix vs. 10.3% for entirely urban.
 
 <br>
 
@@ -1183,7 +1183,7 @@ Next, let's check the differences by EDR.
 
 Crosstabs indicate a relationship. The biggest differnce is that EDR 7E has a significantly lower percentage of graduates that have meaninful employment in their county each year after graduating high school. By 7 years after graduating, only 11.6% have meaningful employment in their county compared to 20% in EDR 5, and 19% in EDR 7W.
 
--   <br>
+- <br>
 
 ::: panel-tabset
 #### EDR - Chart pct

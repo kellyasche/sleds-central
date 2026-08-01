@@ -139,7 +139,7 @@ Alright, now we are going to determine who graduated. Let's see what this data l
 graduates <- read_csv("Data/SLEDS/Masters/Master-9.csv") %>%
   select(PersonID)
 
-nsccompletions.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/NSCCompletions/NCS_Completions.csv') %>%
+nsccompletions.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/NSCCompletions/NCS_Completions.csv') %>%
   rename(PersonID = 1) %>%
   mutate(PersonID = as.integer(PersonID),
          OPEID = str_pad(OPEID, width = 8, side = "left", pad = "0"),
@@ -159,23 +159,23 @@ kable(names(nsccompletions.original))
 
 This dataset has `r comma(nsccompletions.original %>% nrow(), accuracy = 1)` rows and `r comma(nsccompletions.original %>% ncol(), accuracy = 1)` columns. Here are explanations of the rows:
 
--   Graduated: Whether the student graduated. This dataset only provides students that have a "Y" in the column.
--   GraduationTimeID: Provides the yearmonthday of the PersonID graduation.
--   OPEID: ID of the institution which has been converted to an 8 long string padded with "0" on the left.
--   InstitutionName: Name of the institution from which the PersonID graduated.
--   DegreeTitle: The Degree Title the PersonID graduated with. This column is a shitshow - some have values of BA, while others have it written out - Bachelor of Arts. I will need to fix this.
--   Major - Major the PersonID graduated with.
--   OPEID.6 - this is the OPEID with a string length of 6 so that it matches up with our IPEDS dataset.
+- Graduated: Whether the student graduated. This dataset only provides students that have a "Y" in the column.
+- GraduationTimeID: Provides the yearmonthday of the PersonID graduation.
+- OPEID: ID of the institution which has been converted to an 8 long string padded with "0" on the left.
+- InstitutionName: Name of the institution from which the PersonID graduated.
+- DegreeTitle: The Degree Title the PersonID graduated with. This column is a shitshow - some have values of BA, while others have it written out - Bachelor of Arts. I will need to fix this.
+- Major - Major the PersonID graduated with.
+- OPEID.6 - this is the OPEID with a string length of 6 so that it matches up with our IPEDS dataset.
 
 The main characteristics from this dataset that I want to add to the master dataset/model are the following;
 
--   Confirmation that they graduated from a post secondary institution
--   The year they graduated from their first post secondary institution
--   The year they graduated from their last post-secondary institution
--   The sector of the institution(s) from which they graduated
--   The highest level of degree obtained by the PersonID
--   The degrees earned
--   Whether the institution(s) from which they graduated are in the same RUCA category, EDR, planning region, and state as their high school
+- Confirmation that they graduated from a post secondary institution
+- The year they graduated from their first post secondary institution
+- The year they graduated from their last post-secondary institution
+- The sector of the institution(s) from which they graduated
+- The highest level of degree obtained by the PersonID
+- The degrees earned
+- Whether the institution(s) from which they graduated are in the same RUCA category, EDR, planning region, and state as their high school
 
 Okay, lets first create a dataset with a unique PersonID and a column confirming that they graduated from a post secondary institution. However, we don't want to include any students that never had a chance to complete their post-secondary institution. For example, if an individual has graduated by 2023 (the last year of the data), but is attending, then they shouldn't be counted against the region for not having that person not "graduated".
 
@@ -187,14 +187,14 @@ Essentially, what we want to identify is that in 2023, has the individual;
 
 To do this, I will need to import the NSC enrollment data, filter to 2023, and double check to see if anyone in our graduate list was attending post-secondary that year. Then ps.grad can be categorized as the following;
 
--   ps.grad: graduated from a post-secondary institution by 2023
--   ps.attending: attending post-secondary as of 2023
--   not.ps.grad: never graduated from a post-secondary institution and wasn't enrolled in one as of 2023.
+- ps.grad: graduated from a post-secondary institution by 2023
+- ps.attending: attending post-secondary as of 2023
+- not.ps.grad: never graduated from a post-secondary institution and wasn't enrolled in one as of 2023.
 
 <br>
 
 ```{r confirmed gradauted ps}
-ps.enrollment <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/NSCEnrollment/NSC_Enrollments.csv") %>%
+ps.enrollment <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/NSCEnrollment/NSC_Enrollments.csv") %>%
   mutate(PersonID = as.integer(PersonID),
          OPEID = str_pad(OPEID, width = 8, side = "left", pad = "0"),
          OPEID.6 = str_sub(OPEID, 1, 6)) %>%
@@ -251,23 +251,23 @@ As expected, this dataset has `r comma(year.first.last.graduated %>% nrow(), acc
 
 Next we will determine the sector(s) of the institution(s) from which they graduated. If they graduated from multiple institutions with different sectors than a new category will be created defined as "Graduated from multiple institution sectors". This will be coded as "10". I will use the IPEDS sector data. Here are the definitions of the institution sector;
 
--   0 - Administrative Unit\
--   1 - Public, 4-year or above\
--   2 - Private not-for-profit, 4-year or above\
--   3 - Private for-profit, 4-year or above\
--   4 - Public, 2-year\
--   5 - Private not-for-profit, 2-year\
--   6 - Private for-profit, 2-year\
--   7 - Public, less-than 2-year\
--   8 - Private not-for-profit, less-than 2-year\
--   9 - Private for-profit, less-than 2-year\
--   10 - Multiple sectors
--   99 - Sector unknown (not active)
+- 0 - Administrative Unit\
+- 1 - Public, 4-year or above\
+- 2 - Private not-for-profit, 4-year or above\
+- 3 - Private for-profit, 4-year or above\
+- 4 - Public, 2-year\
+- 5 - Private not-for-profit, 2-year\
+- 6 - Private for-profit, 2-year\
+- 7 - Public, less-than 2-year\
+- 8 - Private not-for-profit, less-than 2-year\
+- 9 - Private for-profit, less-than 2-year\
+- 10 - Multiple sectors
+- 99 - Sector unknown (not active)
 
 <br>
 
 ```{r grad institution sector}
-ipeds.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/IPEDS/IPEDS.csv') 
+ipeds.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/IPEDS/IPEDS.csv') 
 
 ipeds.sector <- ipeds.original %>%
   filter(!is.na(OPEID)) %>%
@@ -303,27 +303,27 @@ This dataset has `r comma(grad.institution.sector %>% nrow(), accuracy = 1)` row
 
 Next we will create a subset that provides the highest credential earned by each PersonID. As mentioned earlier, the DegreeTitle column is a mess, so I'm going to import a crosswalk table that will match the strings inputted by institutions into 9 categories. They are
 
--   AD - Associate Degree
--   BD - Bachelors Degree
--   CR - Certificate
--   DP - Doctoral-Professional
--   DR - Doctorate Research
--   MD - Masters Degree
--   PC - PostBach Certificate
--   PD - Diploma
--   UC - Certificate
+- AD - Associate Degree
+- BD - Bachelors Degree
+- CR - Certificate
+- DP - Doctoral-Professional
+- DR - Doctorate Research
+- MD - Masters Degree
+- PC - PostBach Certificate
+- PD - Diploma
+- UC - Certificate
 
 I'm going to combine these into just a few categories.
 
--   Less than associate degree = CR, PD, UC
--   Associate degree = AD
--   Bachelors Degree = BD, PC
--   Higher than Bachelors Degree = MD, DP, DR
+- Less than associate degree = CR, PD, UC
+- Associate degree = AD
+- Bachelors Degree = BD, PC
+- Higher than Bachelors Degree = MD, DP, DR
 
 <br>
 
 ```{r highest credential earned}
-clean.degree <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/NSC/NSC_Degree_Title_Cleaned.xlsx', sheet = 1) %>%
+clean.degree <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/NSC/NSC_Degree_Title_Cleaned.xlsx', sheet = 1) %>%
   drop_na(`CREDENTIAL_TITLE_REPORTED_TO_NSC`)
 
 highest.credential.code <- nsccompletions.original %>%
@@ -355,9 +355,9 @@ As expected, we have `r comma(highest.credential.code %>% nrow(), accuracy = 1)`
 
 Next we will determine whether they graduated from a post-secondary institution inside or outside of the planning region, outside their EDR, or outside of Minnesota. Since many of the PersonID in the dataset have attended multiple institutions, we will categorize it in the following way in order to capture the combinations of attendance;
 
--   Graduated inside region only (planning region, EDR, RUCA, State)
--   Graduated inside and outside region (planning region, EDR, RUCA, state)
--   Graduated outside region only (planning region, EDR, RUCA, state)
+- Graduated inside region only (planning region, EDR, RUCA, State)
+- Graduated inside and outside region (planning region, EDR, RUCA, state)
+- Graduated outside region only (planning region, EDR, RUCA, state)
 
 In order to do this we will need to combine our planning region and EDR joining documents with the nsccompletions.ipeds dataset. We will also need to join the master dataset with it to determine the location of the PersonID's high school graduation location. Lastly, we will need to join up the RUCA categories for counties outside of Minnesota. Then we can start the categorization process.
 
@@ -836,7 +836,7 @@ First, let's look at it from a total dataset. Of the over 90,000 individuals tha
 <br>
 
 ```{r table grad sector total}
-sectors <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/NSC/IPEDS/institution-sectors.xlsx')
+sectors <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/NSC/IPEDS/institution-sectors.xlsx')
 
 grad.sector.total <- master.10 %>%
   group_by(ps.grad.InstitutionSector) %>%

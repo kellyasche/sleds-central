@@ -126,7 +126,7 @@ mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasch
   ms_simplify(keep = .01, keep_shapes = TRUE) %>%
   rename(countyfp = FIPS_CODE)
 
-k12.county.codes <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12-county-codes.csv")
+k12.county.codes <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12-county-codes.csv")
 
 
 
@@ -139,7 +139,7 @@ This dataset is of all the individuals that have graduated from a high school in
 <br>
 
 ```{r import original dataset}
-enrollment.original <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/K12 Enrollment/K12Enrollment.csv")  %>%
+enrollment.original <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/K12 Enrollment/K12Enrollment.csv")  %>%
   mutate(PersonID = as.integer(PersonID),
          K12OrganizationID = as.integer(K12OrganizationID)) %>%
   drop_na(PersonID)
@@ -158,7 +158,7 @@ Next we need to create a dataset that only has students who graduated from a hig
 <br>
 
 ```{r k12org original data}
-k12.org.original <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12Organization.csv") %>%
+k12.org.original <- read_csv("~/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/K12 Orgs/K12Organization.csv") %>%
   distinct(K12OrganizationID, .keep_all = TRUE) %>%
   drop_na(K12OrganizationID) %>%
   mutate(K12OrganizationID = as.integer(K12OrganizationID)) %>%
@@ -218,19 +218,19 @@ The dataset now has `r comma(nrow(enrollment.org.central))` instances that provi
 
 My goal is to end up with a dataset where each observation (row) represents a unique (unduplicated) individual that's tied to the school from which they graduated. Here's how I will do that.
 
--   PersonID: change to integer
--   K12OrganizationID: change to integer.
--   K12EnrTimeID: Change so it's only the year
--   Grade: eliminate - unimportant since we are mostly concerned about whether they graduated.
--   EconomicStatusIndicator: I will change this to two categories. Whether they were ever eligible for reduce priced or free meal will be coded as 1 (eligible = codes 1, 2, 4, 5) at any point in the dataset. The remaining will be coded as 0.
--   FederalRaceIndicator: eliminate - I'm going to use the RaceEthnicity column instead.
--   PSEO columns: I'm most concerned about whether they participated in PSEO or not. A new column will be created indicated whether there was a "Y" coded for either the "PSEOConcurrentEnrollmentIndicator" or "PostSecondaryEnrollmentOptionsIndicator" columns at any point in the dataset. The two original columns will be eliminated.
--   StatusEnd: I will only include individuals that have StatusEnd coded as an 8 or 9.
--   Gender: included and not changed.
--   SpecialEdStatus: I will split this into two categories. The first is that a student did not require special education services (codes 1-2) at any point in the dataset. The other category will be that they require special education (codes 4 - 9) at any point in the dataset.
--   Limited English: keep with no changes.
--   Primary language: I'm going to create two categories. One being that English is the primary language while the other will be that English is NOT the primary language at any point in the dataset.
--   Homeless: Keep with no changes.
+- PersonID: change to integer
+- K12OrganizationID: change to integer.
+- K12EnrTimeID: Change so it's only the year
+- Grade: eliminate - unimportant since we are mostly concerned about whether they graduated.
+- EconomicStatusIndicator: I will change this to two categories. Whether they were ever eligible for reduce priced or free meal will be coded as 1 (eligible = codes 1, 2, 4, 5) at any point in the dataset. The remaining will be coded as 0.
+- FederalRaceIndicator: eliminate - I'm going to use the RaceEthnicity column instead.
+- PSEO columns: I'm most concerned about whether they participated in PSEO or not. A new column will be created indicated whether there was a "Y" coded for either the "PSEOConcurrentEnrollmentIndicator" or "PostSecondaryEnrollmentOptionsIndicator" columns at any point in the dataset. The two original columns will be eliminated.
+- StatusEnd: I will only include individuals that have StatusEnd coded as an 8 or 9.
+- Gender: included and not changed.
+- SpecialEdStatus: I will split this into two categories. The first is that a student did not require special education services (codes 1-2) at any point in the dataset. The other category will be that they require special education (codes 4 - 9) at any point in the dataset.
+- Limited English: keep with no changes.
+- Primary language: I'm going to create two categories. One being that English is the primary language while the other will be that English is NOT the primary language at any point in the dataset.
+- Homeless: Keep with no changes.
 
 We first need to create a list of all individuals with the StatusEnd code of 8 or 9 (graduated). In addition, we need to remove any student that graduated before 2008. This is because we will not have their full Sophmore - Senior records which is especially important when attempting to identify whether the number of CTE courses taken predicts migration.
 
@@ -256,10 +256,10 @@ graduates <- enrollment.org.central %>%
 
 Next we need to create new columns for the variables that will indicate a certain status has been met at any point in the dataset for each PersonID. For example, we want a column that indicates a PersonID was enrolled in PSEO at some point in the dataset. The variables that need a new column created are;
 
--   EconomicStatusIndicator
--   PostSecondaryEnrollmentOptionsIndicator & PSEOConcurrentEnrollmentIndicator
--   SpecialEdStatus
--   HomeprimaryLanguage
+- EconomicStatusIndicator
+- PostSecondaryEnrollmentOptionsIndicator & PSEOConcurrentEnrollmentIndicator
+- SpecialEdStatus
+- HomeprimaryLanguage
 
 <br>
 
@@ -365,13 +365,13 @@ The prepped enrollment data has `r comma(nrow(k12.enrollment.master), accuracy =
 
 Below is the percentage of total observations that;
 
--   Were eligible for free or reduced lunch at some point in the dataset
--   Are Female
--   Have been homeless at some point in the dataset
--   Had limited english proficiency at some point in the dataset
--   Had non english speakders in home at some point in the dataset
--   Participated in a PSEO course at some point in the dataset.
--   Pct non white
+- Were eligible for free or reduced lunch at some point in the dataset
+- Are Female
+- Have been homeless at some point in the dataset
+- Had limited english proficiency at some point in the dataset
+- Had non english speakders in home at some point in the dataset
+- Participated in a PSEO course at some point in the dataset.
+- Pct non white
 
 As expected, nearly half (49.9%) of the observations are female. Nearly a third (31.6%) of the observations have been eligible for free or reduced lunch at some point in the dataset. Also, over a third (36.3%) of observations participated in a PSEO course. Just over 25% are non-white students , 14% are categorized as needing special education, 4% have non-english speakers at home, 1.5% have limited english proficiency and nearly 1% were categorized as homeless at some point between Sophmore and Senior year.
 

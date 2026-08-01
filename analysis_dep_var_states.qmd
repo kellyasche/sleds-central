@@ -177,11 +177,11 @@ kable(names(master.emp.states.yearly))
 
 The employment states dataset has `r comma(nrow(master.emp.states.yearly))` rows and `r comma(ncol(master.emp.states.yearly))` columns providing the year they graduated high school, the subsequent year title after graduating high school (grad.year.0, grad.year.1, grad.year.2 ..... grad.year.x) and the employment state for each PersonID and grad.year.x. The employment states for each geography location and grad.year.x are;
 
--   Meaningful employment - geography match
--   Meaningful employment - no geographic match
--   Has MN emp record - not meaningful employment
--   Has no MN employment record
--   the grad.year.x is after 2023.
+- Meaningful employment - geography match
+- Meaningful employment - no geographic match
+- Has MN emp record - not meaningful employment
+- Has no MN employment record
+- the grad.year.x is after 2023.
 
 Ultimately we want a dataset that has this information paired together with whether the PersonID was attending a post-secondary institution at each grad.year.x. So let's prep that data.
 
@@ -197,7 +197,7 @@ Okay, lets check out the National Student Clearinghouse enrollment data.
 grads <- read_csv("Data/SLEDS/Masters//After analysis/Master-final-after-mca.csv") %>%
   select(PersonID)
 
-nsc.enrollment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/NSCEnrollment/NSC_Enrollments.csv') %>%
+nsc.enrollment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/NSCEnrollment/NSC_Enrollments.csv') %>%
   mutate(PersonID = as.integer(PersonID),
          OPEID = str_pad(OPEID, width = 8, side = "left", pad = "0"),
          OPEID.6 = str_sub(OPEID, 1, 6)) %>%
@@ -214,25 +214,25 @@ kable(names(nsc.enrollment.original))
 
 The dataset has `r comma(nsc.enrollment.original %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.original %>% ncol(), accuracy = 1)` columns. Here are the columns and their definitions.
 
--   EnrollmentBeginTimeID: Begin date for the student's period of attendance.
--   EnrollmentEndTimeID: End date for the student's period of attendance.
--   OPEID: Office of Postsecondary Education (OPE)/FICE code of the college that the student attended (Foreign Key to IPEDSCharacteristics).
--   InstitutionName: Name of institution
--   EnrollmentStatus: The last enrollment status reported for the student. This field will have 'N/A' or "NULL" if the reporting college has not defined the student's enrollment status as directory information. Here are the code definitions;
-    -   F: Full-time
-    -   Q: Three-quarter time
-    -   H: Half-time
-    -   L: Less than half-time
-    -   A: Leave of absence
-    -   W: Withdrawn
-    -   D: Deceased
+- EnrollmentBeginTimeID: Begin date for the student's period of attendance.
+- EnrollmentEndTimeID: End date for the student's period of attendance.
+- OPEID: Office of Postsecondary Education (OPE)/FICE code of the college that the student attended (Foreign Key to IPEDSCharacteristics).
+- InstitutionName: Name of institution
+- EnrollmentStatus: The last enrollment status reported for the student. This field will have 'N/A' or "NULL" if the reporting college has not defined the student's enrollment status as directory information. Here are the code definitions;
+  - F: Full-time
+  - Q: Three-quarter time
+  - H: Half-time
+  - L: Less than half-time
+  - A: Leave of absence
+  - W: Withdrawn
+  - D: Deceased
 
 Essentially, this dataset provides semester-based information - each observation is a semester/single period with the institutional information and beginning and end time of that single period (usually a semester). For example, if an individual attended South Dakota State University, attended in a "typical" fashion (fall and spring semesters), and graduated in 4 years, there would be 8 observations for that PersonID - one observation per semester.
 
 The primary pieces of information I want from this dataset is each year a PersonID was attending a post-secondary institution. So let's shrink the dataset down to just the following columns;
 
--   PersonID
--   unique year attending a post-secondary institution
+- PersonID
+- unique year attending a post-secondary institution
 
 The PersonID will be filtered using the EnrollmentStatus variable equaling full-time, three-quarter time, half-time, and less than half-time.
 

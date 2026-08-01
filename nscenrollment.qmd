@@ -134,7 +134,7 @@ Okay, lets check out the National Student Clearinghouse enrollment data. I will 
 <br>
 
 ```{r nsc enrollment originals}
-nsc.enrollment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/NSCEnrollment/NSC_Enrollments.csv') %>%
+nsc.enrollment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/NSCEnrollment/NSC_Enrollments.csv') %>%
   mutate(PersonID = as.integer(PersonID),
          OPEID = str_pad(OPEID, width = 8, side = "left", pad = "0"),
          OPEID.6 = str_sub(OPEID, 1, 6)) %>%
@@ -150,18 +150,18 @@ kable(names(nsc.enrollment.original))
 
 The dataset has `r comma(nsc.enrollment.original %>% nrow(), accuracy = 1)` rows and `r comma(nsc.enrollment.original %>% ncol(), accuracy = 1)` columns. Here are the columns and their definitions.
 
--   EnrollmentBeginTimeID: Begin date for the student's period of attendance.
--   EnrollmentEndTimeID: End date for the student's period of attendance.
--   OPEID: Office of Postsecondary Education (OPE)/FICE code of the college that the student attended (Foreign Key to IPEDSCharacteristics).
--   InstitutionName: Name of institution
--   EnrollmentStatus: The last enrollment status reported for the student. This field will have 'N/A' or "NULL" if the reporting college has not defined the student's enrollment status as directory information. Here are the code definitions;
-    -   F: Full-time
-    -   Q: Three-quarter time
-    -   H: Half-time
-    -   L: Less than half-time
-    -   A: Leave of absence
-    -   W: Withdrawn
-    -   D: Deceased
+- EnrollmentBeginTimeID: Begin date for the student's period of attendance.
+- EnrollmentEndTimeID: End date for the student's period of attendance.
+- OPEID: Office of Postsecondary Education (OPE)/FICE code of the college that the student attended (Foreign Key to IPEDSCharacteristics).
+- InstitutionName: Name of institution
+- EnrollmentStatus: The last enrollment status reported for the student. This field will have 'N/A' or "NULL" if the reporting college has not defined the student's enrollment status as directory information. Here are the code definitions;
+  - F: Full-time
+  - Q: Three-quarter time
+  - H: Half-time
+  - L: Less than half-time
+  - A: Leave of absence
+  - W: Withdrawn
+  - D: Deceased
 
 Essentially, this dataset provides semester-based information - each observation is a semester/single period with the institutional information and beginning and end time of that single period (usually a semester). For example, if an individual attended South Dakota State University, attended in a "typical" fashion (fall and spring semesters), and graduated in 4 years, there would be 8 observations for that PersonID - one observation per semester.
 
@@ -183,7 +183,7 @@ The IPEDS data and the NSC data will only match using the first 6 digits of the 
 <br>
 
 ```{r prep ipeds}
-ipeds.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/IPEDS/IPEDS.csv') 
+ipeds.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/IPEDS/IPEDS.csv') 
 
 ipeds.sector <- ipeds.original %>%
   filter(!is.na(OPEID)) %>%
@@ -283,17 +283,17 @@ As expected, we have `r comma(nsc.enrollment.n.institutions %>% nrow(), accuracy
 
 Next, we will create a dataset indicating the type of college the PersonID attended first. I will use the IPEDS sector data. Here are the definitions of the institution sector;
 
--   0 - Administrative Unit\
--   1 - Public, 4-year or above\
--   2 - Private not-for-profit, 4-year or above\
--   3 - Private for-profit, 4-year or above\
--   4 - Public, 2-year\
--   5 - Private not-for-profit, 2-year\
--   6 - Private for-profit, 2-year\
--   7 - Public, less-than 2-year\
--   8 - Private not-for-profit, less-than 2-year\
--   9 - Private for-profit, less-than 2-year\
--   99 - Sector unknown (not active)
+- 0 - Administrative Unit\
+- 1 - Public, 4-year or above\
+- 2 - Private not-for-profit, 4-year or above\
+- 3 - Private for-profit, 4-year or above\
+- 4 - Public, 2-year\
+- 5 - Private not-for-profit, 2-year\
+- 6 - Private for-profit, 2-year\
+- 7 - Public, less-than 2-year\
+- 8 - Private not-for-profit, less-than 2-year\
+- 9 - Private for-profit, less-than 2-year\
+- 99 - Sector unknown (not active)
 
 <br>
 
@@ -347,9 +347,9 @@ As expected, we have `r comma(nsc.enrollment.institution.types %>% nrow(), accur
 
 Next we will determine whether they attended a post-secondary institution inside or outside of the planning region, outside their EDR, or outside of Minnesota. Since many of the PersonID in the dataset have attended multiple institutions, we will categorize it in the following way in order to capture the combinations of attendance;
 
--   Attended inside region only (planning region, EDR, RUCA, State)
--   Attended inside and outside region (planning region, EDR, RUCA, state)
--   Attended outside region only (planning region, EDR, RUCA, state)
+- Attended inside region only (planning region, EDR, RUCA, State)
+- Attended inside and outside region (planning region, EDR, RUCA, state)
+- Attended outside region only (planning region, EDR, RUCA, state)
 
 In order to do this we will need to combine our planning region and EDR joining documents with the nsc.enrollment.ipeds dataset. I need to remember that the way I arranged the regions are going to be different than the official planning region. We will also need to join the master dataset with it to determine the location of the PersonID's high school graduation location. Lastly, we will need to join up the RUCA categories for counties outside of Minnesota. Then we can start the categorization process.
 
@@ -556,16 +556,16 @@ kable(names(master.9))
 
 As expected, we have the same number of rows as the original master dataset - `r comma(master.9 %>% nrow(), accrucay = 1)` rows. Here are the explanations of all the new columns added to the master dataset.
 
--   attended.ps - this is a confirmation that the PersonID attended a post-secondary institution at some point after graduating high school.
--   attended.ps.years.hsgrad - the number of years after graduation that a PersonID attended a post-secondary education. In some cases, the value is negative indicating that the PersonID attended a post-secondary institution before graduating high school.
--   attended.ps.within.first.year.hsgrad - did the PersonID attend a post-secondary education institution within 1 year or less from graduating high school.
--   n.institutions - how many post-secondary institutions the PersonID attended
--   first.InstitutionSector - the sector of the first post-secondary institution attended.
--   InstitutionSector - The sector of the post-secondary institution attended (could be multiple)
--   ps.in.same.ruca - did the PersonID attend a post-secondary institution in the same RUCA category as their high school
--   ps.in.same.edr - did the PersonID attend a post-secondary institution in the same economic development region as high school
--   ps.in.same.pr - did the PersonID attend a post-secondary institution in the same planning region as high school
--   ps.in.MN = did the PersonID attend a post-secondary institution in Minnesota.
+- attended.ps - this is a confirmation that the PersonID attended a post-secondary institution at some point after graduating high school.
+- attended.ps.years.hsgrad - the number of years after graduation that a PersonID attended a post-secondary education. In some cases, the value is negative indicating that the PersonID attended a post-secondary institution before graduating high school.
+- attended.ps.within.first.year.hsgrad - did the PersonID attend a post-secondary education institution within 1 year or less from graduating high school.
+- n.institutions - how many post-secondary institutions the PersonID attended
+- first.InstitutionSector - the sector of the first post-secondary institution attended.
+- InstitutionSector - The sector of the post-secondary institution attended (could be multiple)
+- ps.in.same.ruca - did the PersonID attend a post-secondary institution in the same RUCA category as their high school
+- ps.in.same.edr - did the PersonID attend a post-secondary institution in the same economic development region as high school
+- ps.in.same.pr - did the PersonID attend a post-secondary institution in the same planning region as high school
+- ps.in.MN = did the PersonID attend a post-secondary institution in Minnesota.
 
 <br>
 
@@ -783,7 +783,7 @@ The chart below provides the percentage of students in the entire dataset that a
 <br>
 
 ```{r total college types}
-sectors <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/NSC/IPEDS/institution-sectors.xlsx')
+sectors <- read_xlsx('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/NSC/IPEDS/institution-sectors.xlsx')
 
 college.type.summary.total <- master.9 %>%
   filter(attended.ps == "Yes") %>%

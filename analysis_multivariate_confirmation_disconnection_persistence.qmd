@@ -1,0 +1,1061 @@
+---
+title: "Multivariate Confirmation Analysis on Persistent Disconnection"
+editor: visual
+---
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(sf)
+library(ggrepel)
+library(scales)
+library(shiny)
+library(shinycssloaders)
+library(ggiraph)
+library(kableExtra)
+library(rmapshaper)
+library(cowplot)
+library(DT)
+library(htmlwidgets)
+library(RColorBrewer)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(systemfonts)
+reset_font_cache()
+library(ggtext)
+library(gmodels)
+library(fastDummies)
+library(car)
+library(glmnet)
+library(glmnetUtils)
+library(pscl)
+library(sjPlot)
+library(ggforce)
+library(openxlsx)
+```
+
+```{r themes and shapefiles, include=FALSE}
+theme_bar <- theme_bw() +
+  theme(panel.grid.major = element_line(color = "grey70", linewidth  = 0.1),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.key.size = unit(1, "lines"),
+        legend.margin = margin(0,0,0,0),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+theme_line <- theme_bw() +
+  theme(legend.background = element_rect(fill = "transparent", color = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(margin = margin(l = 2)),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "grey70", linewidth = 0.1),
+        axis.ticks = element_blank(),
+        axis.text = element_text(face = "bold"),
+        panel.border = element_blank(),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+
+theme_sf <- theme_bw() +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_line(color = "white"),
+        panel.border = element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(margin = margin(l = 2)),
+        legend.margin = margin(0,0,0,0),
+        legend.key.size = unit(1, "lines"),
+        text = element_text(family = "Arial") ,
+        plot.title.position = "plot",
+        plot.title = element_text(face = "bold"))
+
+regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  select(5,6) %>%
+  unique() %>%
+  mutate(edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"))
+
+counties.regions <- read_csv("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Join docs/county_regions.csv") %>%
+  rename(mif = `MIF Region`) %>%
+  mutate(countyfp = formatC(countyfp, width = 3, flag = "0"),
+         Name = str_to_title(Name),
+         Name = str_replace(Name, "Q", "q"),
+         Name = str_replace(Name, "Of The", "of the"),
+         Name = str_replace(Name, "Mcleod", "McLeod"),
+         Dem_Desc = ifelse(Name == "Minnesota", "Minnesota", Dem_Desc) ,
+         edr = str_replace(edr, "  ", " "),
+         planning.region = str_replace(planning.region, " Minnesota", ""),
+         planning.region = fct_relevel(planning.region, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southeast"),
+         edr = fct_relevel(edr, "EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 3 - Arrowhead", "EDR 4 - West Central", "EDR 5 - North Central", "EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 7E- East Central", "EDR 7W- Central", "EDR 8 - Southwest", "EDR 9 - South Central", "EDR 10 - Southeast", "EDR 11 - 7 County Twin Cities", "Minnesota"),
+         Dem_Desc = fct_relevel(Dem_Desc, "Entirely rural", "Town/rural mix", "Urban/town/rural mix", "Entirely urban"))
+
+counties.regions.1 <- counties.regions %>%
+  mutate(statefp = "27",
+         project.pr = ifelse(edr %in% c("EDR 1 - Northwest", "EDR 2 - Headwaters", "EDR 4 - West Central"), "Northwest",
+                             ifelse(edr == "EDR 3 - Arrowhead", "Northeast",
+                                    ifelse(edr %in% c("EDR 5 - North Central", "EDR 7E- East Central", "EDR 7W- Central"), "Central",
+                                           ifelse(edr %in% c("EDR 6E- Southwest Central", "EDR 6W- Upper Minnesota Valley", "EDR 8 - Southwest"), "Southwest",
+                                                  ifelse(edr %in% c("EDR 9 - South Central", "EDR 10 - Southeast"), "Southern", as.character(planning.region)))))),
+         project.pr = fct_relevel(project.pr, "Northwest", "Northeast", "Central", "Seven County Mpls-St Paul", "Southwest", "Southern"))
+
+
+color.ruca <- c("Entirely rural" = "#009933", "Town/rural mix" = "#99CC33", "Urban/town/rural mix" = "#CC9966", "Entirely urban" = "#754C29", "Minnesota" = "black")
+
+color.pr <- c("Northwest" = 	"#4575b4", "Northeast" = "grey", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black")
+
+color.edr <- c("EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365", "Minnesota" = "black")
+
+color.edr.simple <- c("EDR 1" = "#b3cde3", "EDR 2" = "#8c96c6", "EDR 3" = "#fe9929", "EDR 4" = "#8856a7", "EDR 5" = "#810f7c", "EDR 6E" = "#e5f5f9", "EDR 6W" = "#bdc9e1", "EDR 7E" = "#99d8c9", "EDR 7W" = "#2ca25f", "EDR 8" = "#74a9cf", "EDR 9" = "#0570b0", "EDR 10" = "#d7301f", "EDR 11" = "#d8b365", "Minnesota" = "black")
+
+color.pr.edr <- c ("Northwest" = "#4575b4","Northeast" = "#e0f3f8", "Central" = "#fee090", "Seven County Mpls-St Paul" = "#d73027", "Southwest" = "#91bfdb", "Southeast" = "#fc8d59", "Minnesota" = "black", "EDR 1 - Northwest" = "#b3cde3", "EDR 2 - Headwaters" = "#8c96c6", "EDR 3 - Arrowhead" = "#fe9929", "EDR 4 - West Central" = "#8856a7", "EDR 5 - North Central" = "#810f7c", "EDR 6E- Southwest Central" = "#e5f5f9", "EDR 6W- Upper Minnesota Valley" = "#bdc9e1", "EDR 7E- East Central" = "#99d8c9", "EDR 7W- Central" = "#2ca25f", "EDR 8 - Southwest" = "#74a9cf", "EDR 9 - South Central" = "#0570b0", "EDR 10 - Southeast" = "#d7301f", "EDR 11 - 7 County Twin Cities" = "#d8b365")
+
+mn_counties <- st_read("/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Data Prep/R Projects/Shapefiles/County shapefiles/MNCounties_MNDOT.shp", quiet = TRUE) %>%
+  ms_simplify(keep = .01, keep_shapes = TRUE) %>%
+  rename(countyfp = FIPS_CODE)
+```
+
+```{r master}
+master.original <- read_csv("Data/SLEDS/Masters/Master-non-college-grads-disconnection.csv") 
+
+kable(names(master.original))
+
+kable(head(master.original))
+```
+
+# Multivariate Confirmation Analysis: Disconnection Persistence Among Non–Postsecondary Graduates
+
+## Introduction
+
+The bivariate analysis of workforce disconnection among non-college graduates identified two distinct disconnection mechanisms operating within a single combined measure. Non-sustained employment (working, but below the sustained-employment threshold) and absence of any Minnesota employment record behave as structurally different phenomena: the former is front-loaded and largely resolves within five years, while the latter is bimodal and behaves as a durable end-state once established. Separating these two mechanisms revealed that different demographic and high-school-accomplishment variables predict each one — most notably, Special Education status and English learner status appeared to drive no-record persistence specifically, while Economic status and Gender appeared to drive non-sustained persistence specifically, and different racial/ethnic groups showed disparities concentrated in one mechanism or the other.
+
+This multivariate analysis exists to confirm whether that mechanism-split pattern holds once all variables are considered simultaneously, rather than one at a time. This step is necessary because earlier work in this project has shown that bivariate relationships — particularly those involving English learner status — can substantially attenuate or shift once other variables, especially missing-data patterns in academic assessment scores, are accounted for in the same model. Before this mechanism-split finding is presented as a confirmed result, it should be tested under the same conditions.
+
+## Methodology
+
+### Study Population
+
+The analytic sample is restricted to individuals who did **not** complete a postsecondary credential, consistent with the non-college-graduate population used throughout this project. The sample is further restricted to individuals who graduated (or exited postsecondary attendance, for those who attended without completing) after 2010, consistent with the cohort restriction applied elsewhere in this project to avoid the PSEO participation tracking gap present in earlier cohorts.
+
+### Dependent Variables
+
+This analysis models two outcomes, each derived from the disconnection-persistence categories established in the bivariate analysis. Each graduate's workforce status was tracked across the first five years after exiting formal education (high school for direct-to-workforce graduates, or postsecondary attendance for those who attended without completing).
+
+- **Persistent non-sustained employment** — binary (1 = non-sustained workforce participation in 4 or 5 of the first 5 years, 0 = otherwise). This isolates the instability mechanism identified in the bivariate work.
+- **Persistent no-record status** — binary (1 = no Minnesota employment record in 4 or 5 of the first 5 years, 0 = otherwise). This isolates the disappearance-from-the-system mechanism identified in the bivariate work.
+
+Each outcome is modeled separately, in its own specification, rather than as levels of a single combined variable. This mirrors the logic of the bivariate analysis: combining the two mechanisms into one model would risk re-obscuring the distinction this analysis is specifically designed to confirm.
+
+### Independent Variables
+
+The following indepdent variables were confirmed associated to our dependent variables in the bivariate analysis. These will all be considered for use in the modeling.
+
+**Demographics**
+
+- `Gender`
+- `RaceEthnicity`
+- `economic.status`
+- `SpecialEdStatus`
+- `english.learner`
+
+**High school characteristics**
+
+- `edr`
+- `avg.unemp.rate`
+- `avg.wages.pct.state`
+
+**High school accomplishments**
+
+- `pseo.participant`
+- `ap.exam`
+- `took.ACT`
+- `ACTCompositeScore` (recoded to 0 for non-test-takers, entered alongside `took.ACT`, per the missing-indicator approach established earlier in this project)
+- `cte.achievement`
+- `total.cte.courses.taken`
+- `sat.taken`
+
+**Postsecondary variable**
+
+- `attended.ps` — included specifically because it was the single strongest predictor of overall disconnection in the bivariate analysis, and it is the one variable found to meaningfully affect both disconnection mechanisms rather than only one.
+
+### Modeling Approach
+
+Each outcome (persistent non-sustained status, persistent no-record status) is modeled using a staged block-entry sequence, consistent with the modeling structure used throughout this project's other multivariate confirmation analyses. Predictors are introduced in four stages to make attenuation of any individual variable's effect visible and attributable to a specific block, rather than only observable in a single final specification.
+
+**Model 1: Demographics**
+
+- Demographics: `Gender`, `RaceEthnicity`, `economic.status`, `SpecialEdStatus`, `english.learner`, `non.english.home`
+
+**Model 2: add High School Characteristics**
+
+- High school characteristics: `edr`, `avg.unemp.rate`, `avg.wages.pct.state`
+
+**Model 3: Add High School Accomplishments**
+
+- Adds: `pseo.participant`, `took.ACT`, `ACTCompositeScore.filled`, `ap.exam`, `cte.achievement`, `total.cte.courses.taken`, `sat.taken`
+
+**Model 4: Add Postsecondary Attempt**
+
+- Adds: `attended.ps`
+
+Each model is compared to the prior one using a likelihood ratio test to confirm it adds significant explanatory power, with AIC tracked across the sequence to summarize overall model improvement. This staged structure is applied identically to both outcomes, allowing direct comparison of how each mechanism's predictors evolve across the same three blocks.
+
+### Evaluation Criteria
+
+Results will be reported using odds ratios, 95% confidence intervals, and statistical significance levels. Interpretation will focus specifically on whether the demographic variables identified as mechanism-specific in the bivariate analysis (Special Education and English learner status for no-record persistence; Economic status and Gender for non-sustained persistence; racial/ethnic groups for whichever mechanism their bivariate disparity was concentrated in) remain significant, attenuate, or reverse once the full variable set is included. Findings will be described as associations holding other included variables constant. No causal claims will be made.
+
+<br>
+
+# Prepping the data
+
+The modeling dataset begins from the merged file containing both the disconnection-persistence categories (established in the bivariate analysis) and the full set of demographic, high school, and postsecondary variables used throughout this project. Three preparation steps are applied before modeling.
+
+**Cohort restriction.** The sample is restricted to graduates from 2011 onward (`grad.year > 2010`). This mirrors the cohort restriction applied throughout this project's other analyses of non-college graduates: PSEO participation was not reliably tracked prior to 2011 (missingness runs 92-100% in the 2008-2010 cohorts, dropping to near-zero by 2014), and including those cohorts would risk misclassifying untracked PSEO participants as confirmed non-participants.
+
+**Reference level assignment.** Categorical variables are releveled to match the reference categories used consistently throughout this project (male, White, non-economically-disadvantaged, non-Special-Education, non-English-learner, EDR 5 - North Central, no CTE involvement, non-participant/non-test-taker for the binary accomplishment variables). This keeps odds ratios in this analysis directly comparable in direction and interpretation to every other model built in this project.
+
+**Missing-indicator recodes for two variables with structural or correlated missingness:**
+
+- **ACT composite score.** Students who did not take the ACT have no composite score by definition — confirmed here to be a fully deterministic relationship with `took.ACT` (zero mismatches between the two). `ACTCompositeScore` is recoded to 0 for non-test-takers and entered into the model alongside `took.ACT`, so that `took.ACT` absorbs the effect of test participation itself while the filled score captures the achievement gradient among test-takers only.
+
+**Dependent variable construction.** The two outcomes tested in this analysis are built directly from the bivariate persistence categories, collapsed to binary indicators:
+
+- `persistent.non_sustained` — 1 if the graduate was non-sustained in 4 or 5 of their first 5 years post-education-exit, 0 otherwise.
+
+- `persistent.no_record` — 1 if the graduate had no Minnesota employment record in 4 or 5 of those years, 0 otherwise.
+
+```{r}
+final_ivs <- c(
+  # Demographics
+  "Gender",
+  "RaceEthnicity",
+  "economic.status",
+  "SpecialEdStatus",
+  "english.learner",
+  "non.english.home",
+  
+  # High school characteristics
+  "edr",
+  "avg.unemp.rate",
+  "avg.wages.pct.state",
+  
+  # High school accomplishments
+  "pseo.participant",
+  "took.ACT",
+  "ACTCompositeScore",
+  "ap.exam",
+  "sat.taken",
+  "cte.achievement",
+  "total.cte.courses.taken",
+  
+  # Postsecondary
+  "attended.ps"
+)
+master.disc <- master.original %>%
+  filter(grad.year > 2010,
+         !is.na(pseo.participant),
+         grad.year < 2020,
+         RaceEthnicity != "Unknown") %>%
+  select(PersonID, all_of(final_ivs), non_sustained.cat, no_record.cat) %>%
+  mutate(
+    Gender              = fct_relevel(Gender, "M"),
+    RaceEthnicity       = fct_relevel(RaceEthnicity, "White"),
+    economic.status = as_factor(economic.status),
+    economic.status     = fct_relevel(economic.status, "0"),
+    SpecialEdStatus = as_factor(SpecialEdStatus),
+    SpecialEdStatus     = fct_relevel(SpecialEdStatus, "0"),
+    english.learner = as_factor(english.learner),
+    english.learner     = fct_relevel(english.learner, "0"),
+    non.english.home = as_factor(non.english.home),
+    non.english.home = fct_relevel(non.english.home, "0"),
+    edr = fct_relevel(edr, "EDR 5 - North Central"),
+    pseo.participant = as_factor(pseo.participant),
+    pseo.participant    = fct_relevel(pseo.participant, "0"),
+    took.ACT            = fct_relevel(took.ACT, "No"),
+    ap.exam = as_factor(ap.exam),
+    ap.exam             = fct_relevel(ap.exam, "0"),
+    sat.taken = as_factor(sat.taken),
+    sat.taken = fct_relevel(sat.taken, "0"),
+    cte.achievement     = fct_relevel(cte.achievement, "No CTE"),
+    attended.ps         = fct_relevel(attended.ps, "No"),
+    ACTCompositeScore.filled = ifelse(is.na(ACTCompositeScore), 0, ACTCompositeScore),
+    persistent.non_sustained = ifelse(non_sustained.cat == "Persistently non-sustained", 1, 0),
+    persistent.no_record     = ifelse(no_record.cat == "Persistently no-record", 1, 0)
+  ) 
+
+nrow(master.disc)
+
+kable(names(master.disc))
+
+kable(head(master.disc))
+```
+
+<br>
+
+# Modeling: persistent non-sustained WF
+
+## Model 1: Demographics
+
+Sample: N = 27,669 \| AIC: 22,484.98 \| Pseudo R² (McFadden-style): 0.0177
+
+As expected for a demographics-only baseline, model fit is minimal — this is the reference point for tracking whether the mechanism-specific bivariate findings hold once every demographic variable is considered simultaneously.
+
+**Coefficient Interpretation**
+
+*Gender and Economic Status — the two variables the bivariate work flagged as "genuinely about job instability"*
+
+- Female non-completers show **significantly higher odds** of persistent non-sustained employment (OR = 1.57, 95% CI 1.46–1.68) — this directly confirms the bivariate finding that Gender's disconnection disadvantage is concentrated in job instability specifically, now holding up with every other demographic variable controlled.
+- Economically disadvantaged non-completers also show **significantly higher odds** (OR = 1.21, CI 1.13–1.30) — likewise confirming the bivariate finding for this variable.
+
+*English Learner and Non-English Home — the mechanism split resolves cleanly here*
+
+- **English learner status shows essentially no relationship at all** (OR = 1.00, CI 0.88–1.13, p = 0.982) — this is about as clean a null result as this analysis could produce, and it directly confirms the bivariate finding that EL's overall disconnection disadvantage has nothing to do with non-sustained employment specifically.
+- **Non-English home is significant and *protective*** (OR = 0.65, CI 0.52–0.80) — non-completers from non-English-speaking homes show notably *lower* odds of persistent non-sustained employment. This is a strong, direct confirmation of the bivariate finding that this group showed *better*-than-average non-sustained outcomes despite a dramatically *worse* no-record outcome. Seeing this protective direction hold up in a fully controlled multivariate model, rather than just a simple cross-tab, meaningfully strengthens confidence in the mechanism-split interpretation from the bivariate stage.
+
+*Race/Ethnicity — partial confirmation*
+
+- **Black shows a large, highly significant disadvantage** (OR = 1.86, CI 1.58–2.19) — the strongest race/ethnicity coefficient in this model, directly confirming the bivariate finding that Black graduates show real, elevated non-sustained-employment risk (one of the two groups, alongside American Indian, whose disadvantage operates through both mechanisms rather than concentrating in no-record status alone).
+- American Indian shows a positive but only **borderline-significant** effect (OR = 1.20, CI 0.98–1.47, p = 0.069) — directionally consistent with the bivariate finding, though weaker than expected once other demographics are controlled simultaneously.
+- Asian/Pacific Islander (OR = 0.88, CI 0.64–1.19, p = 0.434) and Hispanic (OR = 1.08, CI 0.86–1.34, p = 0.510) are **both not significant**. The point estimate for Asian/Pacific Islander trends in the "protective" direction the bivariate analysis identified (this group showed *better*-than-White non-sustained outcomes), but doesn't reach significance here — worth watching whether this sharpens once HS context and accomplishments are added in later blocks, since the bivariate racial split was one of the more striking findings in the earlier work.
+
+**Multicollinearity Check**
+
+Looks good — all GVIF\^(1/(2·Df)) values are low, with the highest being non-English home (1.27) and English learner (1.27), both well under the \~2.0–2.5 concern threshold. As expected given their conceptual overlap, these two show the highest (though still low) correlation of any pair in the model.
+
+**Substantive Pattern**
+
+This baseline model delivers a strong first confirmation of the bivariate mechanism-split hypothesis this analysis exists to test. Four of the five demographic variables behave exactly as predicted: Gender and economic status show real, significant disadvantage specifically for non-sustained employment; English learner status shows no relationship at all; and non-English home shows a significant *protective* effect, matching its bivariate direction precisely. Race/ethnicity is only partially confirmed at this stage — Black graduates show the predicted large disadvantage, but American Indian is only borderline and Asian/Pacific Islander and Hispanic don't yet reach significance, though their point estimates trend in the expected directions. This is a promising start for the confirmatory design; the real test will be whether these patterns persist once HS characteristics and accomplishments are added.
+
+```{r}
+model1_non_sustained <- glm(
+  persistent.non_sustained ~
+    Gender +
+    RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    english.learner +
+    non.english.home,
+  family = binomial,
+  data = master.disc
+)
+
+model1_non_sustained
+
+summary(model1_non_sustained)
+
+nobs(model1_non_sustained)
+AIC(model1_non_sustained)
+exp(cbind(OR = coef(model1_non_sustained), confint(model1_non_sustained)))
+1 - (model1_non_sustained$deviance / model1_non_sustained$null.deviance)
+
+vif(model1_non_sustained)
+```
+
+<br>
+
+## Model 2: Add High School Characteristics
+
+Sample: N = 27,669 (unchanged from Model 1) \| AIC: 22,469.78 (down from 22,484.98) \| Pseudo R² (McFadden-style): 0.0188 (up from 0.0177)
+
+Likelihood ratio test vs. Model 1: Δdeviance = 23.20 on 4 df, p \< 0.001 — this block adds significant explanatory power, though modestly compared to the demographics block itself.
+
+**Coefficient Interpretation**
+
+*Gender, Economic Status, English Learner, and Non-English Home — all confirm Model 1*
+
+- Gender (OR = 1.57) and economic status (OR = 1.22) both remain essentially unchanged and highly significant, continuing to confirm the bivariate finding that these two variables are genuinely about job instability.
+- English learner remains **essentially exactly null** (OR = 0.99, p = 0.840), confirming Model 1 with a slightly larger sample of controls.
+- Non-English home remains significant and **protective** (OR = 0.66), essentially unchanged from Model 1 (0.65) — this stability across two blocks strengthens confidence that this is a real, robust finding rather than a baseline artifact.
+
+*Race/Ethnicity*
+
+- **Black remains the largest and most significant race/ethnicity coefficient** (OR = 1.85, p \< 0.001), essentially unchanged from Model 1 (1.86) — HS characteristics don't explain this disparity at all.
+- **American Indian is now significant** (OR = 1.24, p = 0.039), crossing the threshold from Model 1's borderline result (p = 0.069) — consistent with the bivariate prediction that this group's disadvantage operates through the non-sustained mechanism.
+- Asian/Pacific Islander remains **not significant** (OR = 0.88, p = 0.405), continuing to trend in the bivariate-predicted protective direction without reaching significance.
+- Hispanic remains **not significant** (OR = 1.07, p = 0.556).
+
+*Regional and Local Labor Market Context*
+
+- **EDR 7E is significant and positive** (OR = 1.25, p \< 0.001) — non-completers from EDR 7E high schools show higher odds of persistent non-sustained employment relative to EDR 5. This is a new finding not previously tested in the bivariate stage for this specific mechanism.
+- EDR 7W is **not significant** (OR = 1.08, p = 0.178).
+- Neither `avg.wages.pct.state` (OR = 0.92, p = 0.849) nor `avg.unemp.rate` (OR = 0.98, p = 0.144) is significant — consistent with the earlier bivariate finding that local labor-market conditions showed only a weak, threshold-like relationship with non-sustained employment specifically (as opposed to their much stronger relationship with no-record status).
+
+**Multicollinearity Check**
+
+Looks good — all GVIF\^(1/(2·Df)) values are low, with the highest being `avg.wages.pct.state` at 1.45 and `english.learner`/`non.english.home` both around 1.28 (expected given their conceptual overlap). All well under the \~2.0–2.5 concern threshold.
+
+**Substantive Pattern**
+
+This block adds one genuinely new finding (EDR 7E's positive association with non-sustained employment) while otherwise reinforcing every pattern established in Model 1. The mechanism-split hypothesis continues to hold up well: Gender, economic status, English learner, and non-English home all behave exactly as the bivariate analysis predicted, and American Indian's disadvantage has now crossed into clear significance. The one remaining open question is whether Asian/Pacific Islander and Hispanic will show any movement once accomplishments are added in Model 3, or whether they'll remain null throughout this non-sustained-specific sequence — which would itself be a meaningful confirmatory finding, since the bivariate work suggested these two groups' disadvantage was concentrated almost entirely in the no-record mechanism instead.
+
+```{r}
+model2_non_sustained <- glm(
+  persistent.non_sustained ~
+    Gender +
+    RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    english.learner +
+    non.english.home +
+    edr +
+    avg.wages.pct.state +
+    avg.unemp.rate, 
+  family = binomial,
+  data = master.disc
+)
+
+model2_non_sustained
+
+nobs(model2_non_sustained)
+
+AIC(model2_non_sustained)
+
+summary(model2_non_sustained)
+
+exp(cbind(OR = coef(model2_non_sustained), confint(model2_non_sustained)))
+
+anova(model1_non_sustained, model2_non_sustained, test = "Chisq")
+
+1 - (model2_non_sustained$deviance / model2_non_sustained$null.deviance)
+
+vif(model2_non_sustained)
+```
+
+<br>
+
+## Model 3: Add High School Accomplishments
+
+Sample: N = 27,669 (unchanged from Models 1–2) \| AIC: 22,422.82 (down from 22,469.78) \| Pseudo R² (McFadden-style): 0.0215 (up from 0.0188)
+
+Likelihood ratio test vs. Model 2: Δdeviance = 62.96 on 8 df, p \< 2.2e-10 — significant, and the largest single-block improvement in this sequence so far.
+
+**Coefficient Interpretation** (recall: OR \> 1 = higher odds of the *bad* outcome, persistent non-sustained employment)
+
+*Gender, Economic Status, English Learner, and Non-English Home — all remain stable*
+
+- Gender (OR = 1.55) and economic status (OR = 1.23) both remain essentially unchanged and highly significant.
+- English learner remains **exactly null** (OR = 1.00, p = 0.962).
+- Non-English home remains significant and protective (OR = 0.65), essentially unchanged across all three models now — this is a genuinely robust, stable finding.
+
+*Race/Ethnicity*
+
+- **Black remains essentially unchanged and highly significant** (OR = 1.84, vs. 1.85 in Model 2) — accomplishments explain none of this disparity, consistent with the pattern established throughout this entire project.
+- American Indian **slips back to borderline** (OR = 1.21, p = 0.067, vs. p = 0.039 in Model 2) — some of this coefficient's Model 2 significance appears to run through the accomplishment variables now added.
+- Asian/Pacific Islander (OR = 0.86, p = 0.353) and Hispanic (OR = 1.04, p = 0.697) both remain **not significant** — continuing to confirm the bivariate prediction that these two groups' disconnection disadvantage is concentrated in the no-record mechanism, not non-sustained employment.
+
+*Regional and Local Labor Market Context*
+
+- **EDR 7E strengthens further** (OR = 1.29, up from 1.25 in Model 2) — non-completers from EDR 7E high schools continue to show meaningfully higher odds of persistent non-sustained employment.
+- EDR 7W remains not significant.
+- `avg.wages.pct.state` remains not significant (OR = 0.89, p = 0.779).
+- **`avg.unemp.rate` becomes significant here** (OR = 0.97, p = 0.006) — and notably in the *protective* direction: higher local unemployment is associated with *lower* odds of persistent non-sustained employment. This is worth connecting directly back to the bivariate ANOVA finding for this variable, which showed a genuinely non-monotonic relationship with `non_sustained.cat` — Intermittent and Broadly non-sustained individuals lived in higher-unemployment areas than the "Never" group, but Persistently non-sustained individuals were *not* significantly different from "Never." This multivariate result is consistent with that earlier finding: once other variables are controlled, higher local unemployment doesn't predict the most severe, persistent form of non-sustained employment — if anything, it's mildly protective against it.
+
+*High School Accomplishments — the ACT/CTE threshold pattern reconfirms directly*
+
+- **`took.ACT` is significant and protective** (OR = 0.61, p \< 0.001) — simply taking the ACT is associated with substantially lower odds of persistent non-sustained employment, directly consistent with the "took.ACT positive for good outcomes" pattern established throughout this project.
+- **`ACTCompositeScore.filled` is significant and *harmful*** (OR = 1.02 per point, p = 0.001) — among ACT-takers specifically, a higher score is associated with *higher* odds of persistent non-sustained employment. This is the same threshold pattern (participation protective, score itself harmful) that has appeared repeatedly throughout this project, now confirmed directly in a model isolating the non-sustained mechanism specifically.
+- **Both `cte.achievement` categories are significant and protective**: Concentrator/Completer (OR = 0.85) and Participant (OR = 0.89) — confirming CTE's established role as a protective factor against workforce instability. `total.cte.courses.taken` trends the same protective direction but doesn't reach significance here (OR = 0.99, p = 0.136).
+- `pseo.participant` is **not significant** (OR = 0.93, p = 0.113) — trending protective but not reaching significance, consistent with the bivariate finding that PSEO's clearest benefit for this population is regional-employment-specific rather than about non-sustained employment broadly.
+- `ap.exam` is **borderline** (OR = 1.13, p = 0.074), trending toward *harmful* — consistent with the "college-ambition" pattern, though it doesn't clear significance here, matching its weak bivariate relationship with this specific mechanism.
+- `sat.taken` remains **not significant** (OR = 1.13, p = 0.542) — directly confirming the bivariate finding that SAT-taking has essentially no relationship with non-sustained employment specifically (its large bivariate disadvantage was concentrated almost entirely in no-record status).
+
+**Multicollinearity Check**
+
+`took.ACT` and `ACTCompositeScore.filled` are elevated as expected (3.71 and 3.93) given their coding design. Everything else remains comfortably under the \~2.0–2.5 threshold, including `avg.wages.pct.state` (1.46) and `total.cte.courses.taken` (1.44). Overall, looks good.
+
+**Substantive Pattern**
+
+This model provides strong, direct confirmation of the mechanism-split hypothesis this analysis exists to test. Every demographic prediction from the bivariate stage continues to hold: Gender, economic status, and Black graduates show real, stable disadvantage specific to non-sustained employment; English learner shows none; non-English home remains protective; and Asian/Pacific Islander and Hispanic remain null, exactly as expected if their disadvantage is concentrated in the no-record mechanism instead. The accomplishment variables reproduce the project's established "two pathways" pattern cleanly and directly: CTE engagement and simply taking the ACT both protect against instability, while a higher ACT score (conditional on taking it) and AP exam participation both trend toward harm — and SAT-taking, once again, shows no relationship at all, reinforcing that its dramatic bivariate disadvantage belongs entirely to the no-record mechanism this model doesn't test.
+
+```{r}
+model3_non_sustained <- glm(
+  persistent.non_sustained ~
+    Gender +
+    RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    english.learner +
+    non.english.home +
+    edr +
+    avg.wages.pct.state +
+    avg.unemp.rate +
+    pseo.participant +
+    took.ACT +
+    ACTCompositeScore.filled +
+    ap.exam +
+    sat.taken +
+    cte.achievement +
+    total.cte.courses.taken,
+  family = binomial,
+  data = master.disc
+)
+
+model3_non_sustained
+
+nobs(model3_non_sustained)
+
+AIC(model3_non_sustained)
+
+summary(model3_non_sustained)
+
+exp(cbind(OR = coef(model3_non_sustained), confint(model3_non_sustained)))
+
+# likelihood ratio test comparing Model 2 to Model 3
+anova(model1_non_sustained, model2_non_sustained, model3_non_sustained, test = "Chisq")
+
+1 - (model3_non_sustained$deviance / model3_non_sustained$null.deviance)
+
+vif(model3_non_sustained)
+
+```
+
+<br>
+
+## Model 4: Add Post-secondary
+
+Sample: N = 27,669 (unchanged from Models 1–3) \| AIC: 22,333.81 (down from 22,422.82) \| Pseudo R² (McFadden-style): 0.0255 (up from 0.0215)
+
+Likelihood ratio test vs. Model 3: Δdeviance = 91.02 on 1 df, p \< 2.2e-16 — `attended.ps` adds substantial explanatory power, the largest single-block improvement in this sequence.
+
+**Coefficient Interpretation** (recall: OR \> 1 = higher odds of persistent non-sustained employment)
+
+*Gender, Economic Status, English Learner, and Non-English Home — all remain stable*
+
+- Gender (OR = 1.57) and economic status (OR = 1.21) remain essentially unchanged and highly significant.
+- English learner remains exactly null (OR = 0.99, p = 0.917).
+- Non-English home remains significant and protective (OR = 0.65), stable across all four models — this is now a fully confirmed, robust finding across the entire sequence.
+
+*Race/Ethnicity*
+
+- **Black strengthens further rather than attenuating** (OR = 1.91, up from 1.84 in Model 3) — postsecondary attendance does not explain this disparity; if anything, controlling for it reveals a slightly larger gap. This continues the now-familiar pattern across this entire project where the Black-White gap never narrows and frequently widens once additional controls are added.
+- **American Indian drops to fully non-significant** (OR = 1.18, p = 0.121) — down from Model 2's clear significance and Model 3's borderline result. Across this 4-model sequence, American Indian's relationship with persistent non-sustained employment has steadily eroded (Model 1: p = 0.069 → Model 2: p = 0.039 → Model 3: p = 0.067 → Model 4: p = 0.121), ending not significant. This is worth reporting as a genuinely unstable, inconclusive finding for this specific group and mechanism, rather than either a confirmed disadvantage or a confirmed null.
+- Asian/Pacific Islander and Hispanic remain not significant, continuing to confirm across all four models that their disconnection disadvantage is concentrated in the no-record mechanism rather than this one.
+
+*Regional and Local Labor Market Context*
+
+- EDR 7E remains significant (OR = 1.28), essentially unchanged from Model 3.
+- **`avg.unemp.rate` drops to non-significance here** (OR = 0.99, p = 0.624) — was significant and protective in Model 3 (p = 0.006). Some of that relationship appears to run through postsecondary attendance, suggesting local unemployment's earlier association with lower persistent-non-sustained risk was partly capturing where people who go on to attend postsecondary education tend to live, rather than a fully independent labor-market effect.
+- `avg.wages.pct.state` remains not significant.
+
+*High School Accomplishments*
+
+- `took.ACT` (OR = 0.62), `ACTCompositeScore.filled` (OR = 1.02 per point), and both `cte.achievement` categories (OR = 0.85 and 0.90) all remain essentially stable and significant, continuing to confirm the established two-pathway pattern.
+- `ap.exam` is now **borderline** (OR = 1.14, p = 0.051) — just short of significance, continuing its consistent trend toward the "harmful" direction across every model in this sequence without ever quite crossing the threshold.
+- `sat.taken` and `pseo.participant` remain not significant, unchanged from Model 3.
+- `total.cte.courses.taken` remains not significant (OR = 0.99, p = 0.162).
+
+*Postsecondary Attendance*
+
+- **Having attended some postsecondary education is significant and strongly protective** (OR = 0.67, CI 0.61–0.73) — non-completers who attended some postsecondary program show meaningfully lower odds of persistent non-sustained employment. This directly confirms, in a fully controlled multivariate model, the bivariate finding that `attended.ps` was the strongest predictor of overall disconnection, with a genuine, independent, non-sustained-specific component to its benefit (alongside its no-record-specific component, to be tested in the next sequence).
+
+**Multicollinearity Check**
+
+`took.ACT` and `ACTCompositeScore.filled` remain elevated as expected (3.69 and 3.92). `attended.ps` itself is low (1.07). Everything else remains comfortably under the \~2.0–2.5 threshold.
+
+**Substantive Pattern**
+
+This completes the planned 4-model sequence for persistent non-sustained employment, and the confirmatory design has succeeded on nearly every count the bivariate analysis predicted. Gender, economic status, and Black graduates show real, stable, non-attenuating disadvantage specific to this mechanism; English learner shows none; non-English home is protective, exactly as the bivariate work found; and Asian/Pacific Islander and Hispanic remain null throughout, consistent with their disadvantage being concentrated in the no-record mechanism instead. The one prediction that didn't hold up cleanly is American Indian, whose significance eroded steadily across the four blocks to a final null result — worth flagging as a genuinely inconclusive finding rather than forcing it into either the "confirmed" or "disconfirmed" bucket. The accomplishment variables reproduce the project's established two-pathway story exactly, and `attended.ps` closes the sequence as a strong, independent protective factor, setting up a direct point of comparison against its role in the persistent no-record model to come.
+
+```{r}
+model4_non_sustained <- glm(
+  persistent.non_sustained ~
+    Gender +
+    RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    english.learner +
+    non.english.home +
+    edr +
+    avg.wages.pct.state +
+    avg.unemp.rate +
+    pseo.participant +
+    took.ACT +
+    ACTCompositeScore.filled +
+    ap.exam +
+    sat.taken +
+    cte.achievement +
+    total.cte.courses.taken +
+    attended.ps,
+  family = binomial,
+  data = master.disc
+)
+
+model4_non_sustained
+
+nobs(model4_non_sustained)
+
+AIC(model4_non_sustained)
+
+summary(model4_non_sustained)
+
+exp(cbind(OR = coef(model4_non_sustained), confint(model4_non_sustained)))
+
+# likelihood ratio test comparing Model 2 to Model 3
+anova(model1_non_sustained, model2_non_sustained, model3_non_sustained, model4_non_sustained, test = "Chisq")
+
+1 - (model4_non_sustained$deviance / model4_non_sustained$null.deviance)
+
+vif(model4_non_sustained)
+```
+
+<br>
+
+## Summary: Multivariate Confirmation — Persistent Non-Sustained Employment
+
+### Overview
+
+Across all four models, fit improved steadily and modestly (AIC: 22,485 → 22,470 → 22,423 → 22,334; pseudo-R²: 0.018 → 0.019 → 0.022 → 0.026), with each block adding significant explanatory power. This is a confirmatory analysis, and on nearly every count, it succeeded: the demographic mechanism-split identified in the bivariate work holds up once every variable is considered simultaneously.
+
+### The bivariate predictions that held up cleanly
+
+- **Gender** (OR ≈ 1.55–1.57 across all four models) and **economic status** (OR ≈ 1.21–1.23) both show real, stable, non-attenuating disadvantage specific to non-sustained employment — exactly as the bivariate analysis predicted for the two variables identified as "genuinely about job instability."
+- **English learner status** was essentially exactly null in every single model (p ranging from 0.84 to 0.98) — a clean, complete confirmation that this variable's overall disconnection disadvantage has nothing to do with non-sustained employment specifically.
+- **Non-English home** was significant and *protective* in every model (OR ≈ 0.65–0.66) — directly confirming the bivariate finding that this group shows *better*-than-average non-sustained outcomes despite a dramatically worse no-record outcome. This consistency across four fully-controlled models meaningfully strengthens confidence in what was, at the bivariate stage, a single cross-tabulation.
+- **Black graduates** showed a large, highly significant disadvantage in every model (OR ranging from 1.84 to 1.91) that never attenuated — and, consistent with the pattern seen throughout this entire project, actually *widened slightly* once postsecondary attendance was added in Model 4. This is the same non-attenuating Black-White gap that has now appeared in every single outcome and population examined across this entire body of work.
+- **Asian/Pacific Islander and Hispanic** were not significant in any of the four models — confirming the bivariate prediction that these two groups' disconnection disadvantage is concentrated almost entirely in the no-record mechanism, not this one.
+
+### The one prediction that didn't hold up cleanly
+
+**American Indian** showed a genuinely unstable trajectory across the sequence — borderline in Model 1 (p = 0.069), significant in Model 2 (p = 0.039), back to borderline in Model 3 (p = 0.067), and fully non-significant by Model 4 (p = 0.121). This is worth reporting honestly as an inconclusive finding rather than forcing it into either the "confirmed disadvantage" or "confirmed null" bucket — the coefficient's significance appears sensitive to exactly which other variables are in the model, which is itself a meaningful result about the fragility of this particular relationship.
+
+### High school characteristics and local labor market context
+
+**EDR 7E** emerged as a new, previously-untested finding: non-completers from EDR 7E high schools show significantly higher odds of persistent non-sustained employment across every model from Model 2 onward, strengthening slightly as accomplishments were added. **`avg.unemp.rate`** showed an interesting, non-monotonic story — not significant in Model 2, briefly significant and *protective* in Model 3 (consistent with the bivariate ANOVA's finding that this variable relates to intermittent/broad non-sustained status but not the most severe persistent form), then reverting to non-significant once `attended.ps` was added in Model 4, suggesting some of that Model 3 relationship ran through postsecondary attendance rather than being a fully independent labor-market effect. `avg.wages.pct.state` was not significant anywhere in this sequence, consistent with its weak bivariate relationship with non-sustained employment specifically.
+
+### The accomplishments story: the project's "two pathways" pattern reconfirmed directly
+
+The ACT threshold pattern that has run through this entire project reappeared exactly as expected: `took.ACT` was significant and protective in both Models 3 and 4 (OR ≈ 0.61–0.62), while `ACTCompositeScore.filled` was significant and harmful (OR ≈ 1.02–1.02 per point) — participation helps, but a higher score among test-takers specifically predicts worse outcomes. Both `cte.achievement` categories were significant and protective throughout (OR ≈ 0.85–0.90), confirming CTE's established role. `sat.taken` was never significant in any model — directly confirming the bivariate finding that SAT's dramatic overall disadvantage belongs entirely to the no-record mechanism this analysis doesn't test. `ap.exam` trended toward harm in every model but never quite crossed significance (closest at Model 4, p = 0.051). `pseo.participant` was never significant, consistent with the bivariate finding that PSEO's clearest benefit is regional-employment-specific rather than about avoiding non-sustained employment broadly.
+
+### Postsecondary attendance
+
+`attended.ps` was strongly significant and protective once added in Model 4 (OR = 0.67), confirming a genuine, independent non-sustained-specific component to what was the single strongest predictor of overall disconnection in the bivariate analysis.
+
+### Bottom line
+
+This confirmatory analysis validated the core mechanism-split hypothesis for four of five demographic variables and for every accomplishment variable tested, with American Indian's status left genuinely unresolved rather than confirmed either way. The clearest headline finding remains the Black-White gap: unmoved and slightly widening across every block, in a fifth distinct population/outcome combination now confirming this same pattern across the entire project. Ready to move to the `persistent.no_record` sequence, where several of these same variables — particularly non-English home, Asian/Pacific Islander, Hispanic, and the ACT/AP/SAT college-ambition signals — should reappear with their predicted effects reversed or strengthened.
+
+<br>
+
+# Modeling: persistent No MN emp record
+
+## Model 1: Demographics
+
+Sample: N = 27,669 \| AIC: 23,756.44 \| Pseudo R² (McFadden-style): 0.0134
+
+This is the mirror-image test of Model 1 from the non-sustained sequence, and the results are striking — this model largely reverses the demographic story just established, exactly as the bivariate analysis predicted.
+
+**Coefficient Interpretation** (recall: OR \> 1 = higher odds of persistent no-record status, the *bad* outcome)
+
+*Gender — the clearest confirmation in this model*
+
+- **Gender is essentially exactly null** (OR = 0.98, p = 0.613) — a complete reversal of its strong, significant role in the non-sustained model (OR ≈ 1.55–1.57 there). This directly confirms the bivariate prediction that Gender's overall disconnection disadvantage is entirely about non-sustained employment and has nothing to do with disappearing from the record.
+
+*English Learner and Non-English Home — both confirm dramatically*
+
+- **English learner is significant and harmful here** (OR = 1.24, p \< 0.001) — a complete reversal from its null result in the non-sustained model. This is a clean, direct confirmation that EL's disadvantage operates specifically through the no-record mechanism.
+- **Non-English home shows the largest effect in this entire model** (OR = 2.20, CI 1.85–2.62) — more than double the odds of persistent no-record status, and a complete reversal from its *protective* role in the non-sustained model (OR ≈ 0.65 there). This directly confirms the single largest bivariate finding from the earlier disconnection analysis: non-English-home students are not more likely to hold unstable jobs — they are dramatically more likely to disappear from Minnesota's employment record.
+
+*Economic Status — a genuinely new, reversed finding*
+
+- **Economic status is significant and *protective*** (OR = 0.81, CI 0.76–0.87) — not just weaker than its non-sustained role, but reversed in direction. Economically disadvantaged non-completers show *lower* odds of persistent no-record status. This wasn't clearly anticipated by the bivariate cross-tab (which showed only a modest relationship for this variable and mechanism), and is worth flagging as a genuinely new multivariate finding: one plausible reading is that economically disadvantaged individuals have fewer resources to relocate out of state or otherwise disengage from Minnesota's formal system, keeping them more likely to remain traceable in the employment record even without stable work. This is a substantive interpretation the data can't confirm directly, but it's a coherent story worth raising in any final report.
+
+*SpecialEdStatus*
+
+- **SpecialEdStatus is significant and harmful here too** (OR = 1.25, p \< 0.001) — unlike Gender, this variable shows real disadvantage in *both* mechanisms (it was also significant and harmful in every non-sustained model). This confirms the bivariate finding that SpecialEdStatus's disadvantage splits fairly evenly across both channels rather than concentrating in one.
+
+*Race/Ethnicity — the mechanism split resolves almost perfectly, with one important nuance*
+
+- **Asian/Pacific Islander** (OR = 1.33, p = 0.017) and **Hispanic** (OR = 1.30, p = 0.007) are both **significant and harmful here**, a complete reversal from their null results in the non-sustained model. This is a precise, direct confirmation of the bivariate prediction that these two groups' disadvantage is concentrated almost entirely in the no-record mechanism.
+- **American Indian remains significant and harmful** (OR = 1.59, CI 1.30–1.92) — the largest race/ethnicity coefficient in this model, confirming this group's disadvantage operates through both mechanisms (as it showed instability but trended harmful in the non-sustained sequence, and now shows clear, strong harm here).
+- **Black shows a genuine reversal worth flagging carefully.** In the raw bivariate cross-tab, Black graduates showed a *modestly elevated* no-record rate (18.2% vs. White's 16.1%). Here, in the fully controlled multivariate model, **Black is significant and *protective*** (OR = 0.82, CI 0.68–0.98) — the opposite direction from the simple bivariate comparison. This is exactly the kind of shift this analysis's own methodology introduction warned could happen once other variables are controlled simultaneously, and it should be reported as a genuine multivariate finding rather than assumed to match the earlier bivariate direction: once other demographics (especially non-English home and English learner status, which likely correlate with race/ethnicity to some degree) are accounted for, Black graduates show a small but real *protective* association with staying visible in Minnesota's employment record — even though, as the non-sustained model showed, Black graduates remain considerably more likely to experience unstable employment specifically.
+
+**Multicollinearity Check**
+
+Overall still fine, but worth a brief note: `RaceEthnicity` (GVIF\^(1/(2·Df)) = 1.08) and `non.english.home` (1.42) are both somewhat higher here than in the equivalent non-sustained model (1.06 and 1.28, respectively), consistent with some correlation between race/ethnicity, English learner status, and non-English home. Still comfortably under the \~2.0–2.5 concern threshold, so no action needed, but worth keeping in mind if any of these coefficients seem unstable across later blocks.
+
+**Substantive Pattern**
+
+This model delivers close to a perfect mirror image of the non-sustained sequence, exactly as the bivariate mechanism-split hypothesis predicted: Gender flips from strongly harmful to null, English learner flips from null to strongly harmful, non-English home flips from protective to the single largest harmful effect in the model, and Asian/Pacific Islander and Hispanic both flip from null to significantly harmful. The one finding that doesn't fit a clean mirror-image story is Black graduates, whose bivariate no-record disadvantage reverses to a protective, multivariate-adjusted effect — a genuinely important nuance that should be reported as its own finding rather than assumed away, and a useful illustration of exactly the kind of bivariate-to-multivariate shift this analysis was designed to check for.
+
+```{r}
+model1_no_record <- glm(
+  persistent.no_record ~
+    Gender +
+    RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    english.learner +
+    non.english.home,
+  family = binomial,
+  data = master.disc
+)
+
+summary(model1_no_record)
+nobs(model1_no_record)
+AIC(model1_no_record)
+exp(cbind(OR = coef(model1_no_record), confint(model1_no_record)))
+
+1 - (model1_no_record$deviance / model1_no_record$null.deviance)
+
+vif(model1_no_record)
+```
+
+<br>
+
+## Model 2: Add High School Characteristics
+
+Sample: N = 27,669 (unchanged from Model 1) \| AIC: 23,736.46 (down slightly from 23,756.44) \| Pseudo R² (McFadden-style): 0.0146 (up from 0.0134)
+
+Likelihood ratio test vs. Model 1: Δdeviance = 27.98 on 4 df, p \< 0.001 — significant, though modest, similar in scale to the equivalent non-sustained block.
+
+**Coefficient Interpretation** (recall: OR \> 1 = higher odds of persistent no-record status)
+
+*Gender — remains the clearest confirmation*
+
+- Gender remains **exactly null** (OR = 0.98, p = 0.582), unchanged from Model 1, continuing to confirm this variable's disadvantage is entirely non-sustained-specific.
+
+*Economic Status, SpecialEdStatus, English Learner, and Non-English Home — all remain stable*
+
+- Economic status remains significant and **protective**, essentially unchanged (OR = 0.79, vs. 0.81 in Model 1).
+- SpecialEdStatus remains significant and harmful (OR = 1.25), unchanged.
+- English learner remains significant and harmful (OR = 1.25), unchanged — continuing to confirm the mirror-image relationship to its null non-sustained result.
+- **Non-English home remains the largest coefficient in the model** (OR = 2.23, CI 1.87–2.66), essentially unchanged from Model 1 (2.20) — this finding is proving completely robust across HS-context controls.
+
+*Race/Ethnicity*
+
+- American Indian **attenuates somewhat but remains significant** (OR = 1.49, down from 1.59 in Model 1).
+- Asian/Pacific Islander and Hispanic both remain significant and harmful (OR = 1.37 and 1.33, respectively), essentially unchanged — continuing to confirm the bivariate prediction cleanly.
+- **Black's protective effect weakens to non-significance** (OR = 0.87, p = 0.133, up from a significant 0.82 in Model 1). Some of Model 1's protective association appears to run through HS characteristics — worth watching whether this returns, strengthens, or stays null once accomplishments are added in Model 3, since Model 1's reversal-from-bivariate finding was itself a notable result worth tracking carefully.
+
+*Regional and Local Labor Market Context — a new, coherent finding*
+
+- **Both EDR 7E (OR = 0.86, p = 0.001) and EDR 7W (OR = 0.78, p \< 0.001) are significant and protective** relative to EDR 5 — non-completers from either region show meaningfully lower odds of persistent no-record status than those from EDR 5. This is directly consistent with the bivariate `edr` table, which showed EDR 5 as the clear laggard specifically for no-record status (worse than both EDR 7E and EDR 7W), now confirmed in a fully controlled multivariate model.
+- Neither `avg.wages.pct.state` (OR = 1.47, p = 0.354) nor `avg.unemp.rate` (OR = 1.01, p = 0.542) is significant here — this is a genuine departure from the sustained-employment analysis, where local wages showed an extremely dramatic relationship with regional employment specifically. Here, in this general non-completer population predicting no-record status directly, neither continuous labor-market variable shows an independent effect once demographics and region are controlled — consistent with the bivariate ANOVA finding that both variables showed only a modest, threshold-type relationship with `no_record.cat` (distinguishing "any exposure" from "none," but with a small overall effect size).
+
+**Multicollinearity Check**
+
+Looks good — all GVIF\^(1/(2·Df)) values are low, with the highest being `non.english.home` (1.42) and `avg.wages.pct.state` (1.45), both comfortably under the \~2.0–2.5 concern threshold. No issues in this block.
+
+**Substantive Pattern**
+
+`edr`'s finding here is the clean, new confirmation this block adds: EDR 5 is specifically disadvantaged for no-record status, exactly as the bivariate table showed, while EDR 7E and EDR 7W are both protective by comparison. This nicely complements (without duplicating) the sustained-employment analysis, where `edr`'s pattern looked completely different depending on which mechanism was being measured — here, focused directly on no-record status alone, the regional story is cleaner and matches the bivariate prediction precisely. The one coefficient worth continued attention is Black graduates, whose protective Model 1 finding weakened to non-significance here; whether this represents a genuine, small protective effect that HS characteristics partially explain, or whether Model 1's result was itself somewhat fragile, should become clearer once accomplishments are added.
+
+```{r}
+model2_no_record <- glm(
+  persistent.no_record ~
+    Gender +
+    RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    english.learner +
+    non.english.home +
+    edr +
+    avg.wages.pct.state +
+    avg.unemp.rate,
+  family = binomial,
+  data = master.disc
+)
+
+nobs(model2_no_record)
+
+AIC(model2_no_record)
+
+summary(model2_no_record)
+
+exp(cbind(OR = coef(model2_no_record), confint(model2_no_record)))
+
+model2_no_record
+
+anova(model1_no_record, model2_no_record, test = "Chisq")
+
+1 - (model2_no_record$deviance / model2_no_record$null.deviance)
+
+vif(model2_no_record)
+
+
+```
+
+<br>
+
+## Model 3: Add High School Accomplishments
+
+Sample: N = 27,669 (unchanged from Models 1–2) \| AIC: 23,414.98 (down substantially from 23,736.46) \| Pseudo R² (McFadden-style): 0.0286 (up from 0.0146)
+
+Likelihood ratio test vs. Model 2: Δdeviance = 337.48 on 8 df, p \< 2.2e-16 — the largest single-block improvement in either sequence so far, more than five times the equivalent non-sustained block (62.96).
+
+**Coefficient Interpretation** (recall: OR \> 1 = higher odds of persistent no-record status)
+
+*Gender, Economic Status, SpecialEdStatus, English Learner, and Non-English Home*
+
+- Gender remains not significant (OR = 0.96, p = 0.207).
+- Economic status remains significant and protective (OR = 0.78), essentially unchanged.
+- SpecialEdStatus remains significant and harmful but **attenuates somewhat** (OR = 1.16, down from 1.25 in Model 2) — some of its effect runs through accomplishments, consistent with its dual-mechanism role established in the earlier three-way bivariate comparison.
+- English learner remains significant and harmful (OR = 1.27), essentially unchanged.
+- **Non-English home remains the largest coefficient in the model** (OR = 2.12, CI 1.78–2.53), barely moved across three blocks now — this finding is proving completely robust to every control tested.
+
+*Race/Ethnicity*
+
+- American Indian remains significant (OR = 1.43), modestly attenuated from Model 2.
+- Asian/Pacific Islander and Hispanic both remain significant and harmful (OR = 1.38 and 1.29), continuing to confirm the mechanism split cleanly.
+- **Black remains not significant** (OR = 0.87, p = 0.144) — Model 1's protective finding has not returned; this coefficient appears to have been a Model-1-specific result that attenuates once HS context and accomplishments are both accounted for.
+
+*Regional and Local Labor Market Context*
+
+- **EDR 7E is no longer significant** (OR = 0.93, p = 0.152) — attenuated from Model 2's significant result; some of its protective association runs through accomplishments.
+- EDR 7W remains significant and protective (OR = 0.72).
+- `avg.wages.pct.state` remains not significant.
+- **`avg.unemp.rate` becomes significant here** (OR = 0.96, p \< 0.001) — a genuine "emerges once accomplishments are controlled" pattern, protective in direction, distinct from its null result in Model 2.
+
+*High School Accomplishments — the mechanism split's clearest confirmation*
+
+- **`took.ACT` is dramatically stronger here than in the non-sustained model** (OR = 0.31, CI 0.24–0.40, vs. 0.61 non-sustained) — simply taking the ACT is associated with a nearly 70% reduction in odds of persistent no-record status, roughly twice the protective magnitude seen for non-sustained employment.
+- **`ACTCompositeScore.filled` shows a stronger harmful effect here too** (OR = 1.042 per point, vs. 1.021 non-sustained) — confirming the earlier three-way bivariate finding that ACT score's relationship with disconnection is concentrated overwhelmingly in the no-record mechanism.
+- **`sat.taken` flips from completely null in the non-sustained model to strongly significant and harmful here** (OR = 1.99, CI 1.44–2.71, vs. 1.13, p = 0.542 non-sustained). This is the single cleanest confirmation of the entire mechanism-split hypothesis in this whole two-part analysis: SAT-taking's dramatic bivariate disconnection disadvantage — the largest raw gap found anywhere in the earlier bivariate work — is confirmed here, in a fully controlled multivariate model, to be almost entirely a no-record phenomenon. Non-completers who took the SAT are essentially twice as likely to disappear from Minnesota's employment record, with no corresponding relationship to job instability.
+- `ap.exam` is **not significant here** (OR = 0.93, p = 0.310) — a modest reversal from its borderline-harmful trend in the non-sustained model, though neither reaches clear significance in either mechanism.
+- Both `cte.achievement` categories remain significant and protective, similar magnitude to the non-sustained model (OR = 0.81 and 0.83).
+- **`total.cte.courses.taken` is significant here** (OR = 0.96 per course, p \< 0.001) — unlike its non-significant result in the non-sustained model (p = 0.136), confirming the earlier three-way bivariate finding that this variable's relationship with disconnection concentrates more in the no-record dimension.
+- `pseo.participant` remains **not significant** (OR = 0.97, p = 0.570) — notably, PSEO's real bivariate relationships with both isolated mechanisms (each significant at the bivariate stage) don't survive full multivariate control in either sequence, worth flagging as a case where the bivariate finding didn't replicate once fully adjusted.
+
+**Multicollinearity Check**
+
+`took.ACT` and `ACTCompositeScore.filled` are elevated as expected (3.79 and 4.03), slightly higher than the equivalent non-sustained model. Everything else remains comfortably under the \~2.0–2.5 threshold, including `avg.wages.pct.state` (1.47) and `total.cte.courses.taken` (1.45).
+
+**Substantive Pattern**
+
+This model is the strongest evidence in this entire two-part analysis for the original bivariate mechanism-split hypothesis. Every "college-ambition" accomplishment variable — ACT score, and especially SAT-taking — shows a considerably stronger, or in SAT's case entirely newly-emerged, relationship with no-record status compared to non-sustained employment, precisely mirroring the earlier bivariate three-way comparison. CTE variables continue to confirm their dual-channel protective role. The one finding that didn't hold up as cleanly is PSEO participation, whose real bivariate relationships with each mechanism separately don't survive once demographics, region, and other accomplishments are controlled simultaneously — a useful reminder that this confirmatory stage exists precisely to catch results like this.
+
+```{r}
+model3_no_record <- glm(
+  persistent.no_record ~
+    Gender +
+    RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    english.learner +
+    non.english.home +
+    edr +
+    avg.wages.pct.state +
+    avg.unemp.rate +
+    pseo.participant +
+    took.ACT +
+    ACTCompositeScore.filled +
+    ap.exam +
+    sat.taken +
+    cte.achievement +
+    total.cte.courses.taken,
+  family = binomial,
+  data = master.disc
+)
+
+nobs(model3_no_record)
+
+AIC(model3_no_record)
+
+summary(model3_no_record)
+
+model3_no_record
+
+exp(cbind(OR = coef(model3_no_record), confint(model3_no_record)))
+
+# likelihood ratio test comparing Model 2 to Model 3
+anova(model1_no_record, model2_no_record, model3_no_record, test = "Chisq")
+
+1 - (model3_no_record$deviance / model3_no_record$null.deviance)
+
+vif(model3_no_record)
+```
+
+<br>
+
+## Model 4: Add Postsecondary
+
+Sample: N = 27,669 (unchanged from Models 1–3) \| AIC: 23,278.38 (down from 23,414.98) \| Pseudo R² (McFadden-style): 0.0344 (up from 0.0286)
+
+Likelihood ratio test vs. Model 3: Δdeviance = 138.60 on 1 df, p \< 2.2e-16 — the largest single-block improvement anywhere in either sequence, larger even than `attended.ps`'s equivalent contribution to the non-sustained model (91.02).
+
+**Coefficient Interpretation** (recall: OR \> 1 = higher odds of persistent no-record status)
+
+*Gender, Economic Status, SpecialEdStatus, English Learner, and Non-English Home*
+
+- Gender remains not significant.
+- Economic status remains significant and protective (OR = 0.77), essentially unchanged.
+- SpecialEdStatus remains significant but continues to weaken (OR = 1.12, p = 0.019, down from 1.16 in Model 3) — some of its effect continues to run through postsecondary attendance.
+- English learner remains significant and harmful (OR = 1.27), unchanged.
+- **Non-English home remains the largest coefficient in the model** (OR = 2.10, CI 1.76–2.50), stable across all four blocks — the single most robust finding in this entire two-part project.
+
+*Race/Ethnicity*
+
+- American Indian, Asian/Pacific Islander, and Hispanic all remain significant and harmful (OR = 1.38, 1.38, and 1.30), essentially unchanged from Model 3.
+- **Black remains not significant** (OR = 0.92, p = 0.359) — confirming Model 3's finding that the Model 1 protective effect does not survive full multivariate control.
+
+*Regional and Local Labor Market Context*
+
+- EDR 7E remains **borderline** (OR = 0.92, p = 0.089).
+- EDR 7W remains significant and protective (OR = 0.74).
+- `avg.wages.pct.state` remains not significant.
+- **`avg.unemp.rate` drops to non-significance here** (OR = 0.99, p = 0.377, down from a significant 0.96 in Model 3) — some of that effect runs through postsecondary attendance, exactly mirroring the identical pattern seen in the non-sustained sequence at this same step. This parallel between both sequences is a useful, reassuring consistency check: the same mechanism (unemployment's relationship partly running through `attended.ps`) shows up independently in both mechanism-specific models.
+
+*High School Accomplishments*
+
+- `took.ACT` (OR = 0.32), `ACTCompositeScore.filled` (OR = 1.045 per point), and `sat.taken` (OR = 2.00) all remain essentially unchanged from Model 3 — confirming these are genuine, stable, independent relationships that survive controlling for postsecondary attendance.
+- Both `cte.achievement` categories and `total.cte.courses.taken` remain significant and protective, essentially stable.
+- `pseo.participant` and `ap.exam` both remain not significant, consistent with Model 3.
+
+*Postsecondary Attendance*
+
+- **Having attended some postsecondary education is significant and strongly protective** (OR = 0.61, CI 0.56–0.67) — and notably, this is a **stronger effect than its counterpart in the non-sustained model** (OR = 0.67 there). This directly confirms and even sharpens the bivariate three-way finding that `attended.ps`'s benefit splits almost evenly between the two mechanisms with a slight edge toward no-record status (the bivariate gaps were 5.1 points for non-sustained vs. 5.6 points for no-record) — now shown here as a genuinely stronger, fully independent protective effect for no-record status specifically, even after every other variable in the model is controlled.
+
+**Multicollinearity Check**
+
+`took.ACT` and `ACTCompositeScore.filled` remain elevated as expected (3.77 and 4.01). `attended.ps` itself is low (1.07). Everything else remains comfortably under the \~2.0–2.5 threshold.
+
+**Substantive Pattern**
+
+This completes the planned 4-model sequence for persistent no-record status. `attended.ps` closes out both sequences as a genuinely dual-mechanism protective factor, exactly as the bivariate work predicted — real and significant in both models, with a modest edge toward the no-record mechanism specifically. The parallel attenuation of `avg.unemp.rate` once `attended.ps` enters, appearing independently in both sequences, adds confidence that this is a real, reproducible dynamic rather than a coincidence in either individual model. Combined with Model 3's SAT-taking reversal, this analysis has now delivered strong, direct multivariate confirmation of nearly every mechanism-specific prediction the bivariate stage produced.
+
+```{r}
+model4_no_record <- glm(
+  persistent.no_record ~
+    Gender +
+    RaceEthnicity +
+    economic.status +
+    SpecialEdStatus +
+    english.learner +
+    non.english.home +
+    edr +
+    avg.wages.pct.state +
+    avg.unemp.rate +
+    pseo.participant +
+    took.ACT +
+    ACTCompositeScore.filled +
+    ap.exam +
+    sat.taken +
+    cte.achievement +
+    total.cte.courses.taken +
+    attended.ps,
+  family = binomial,
+  data = master.disc
+)
+
+nobs(model4_no_record)
+
+AIC(model4_no_record)
+
+summary(model4_no_record)
+
+model4_no_record
+
+exp(cbind(OR = coef(model4_no_record), confint(model4_no_record)))
+
+# likelihood ratio test comparing Model 2 to Model 3
+anova(model1_no_record, model2_no_record, model3_no_record, model4_no_record, test = "Chisq")
+
+1 - (model4_no_record$deviance / model4_no_record$null.deviance)
+
+vif(model4_no_record)
+```
+
+<br>
+
+## Summary: Multivariate Confirmation — Persistent No Minnesota Employment Record
+
+### Overview
+
+Fit improved substantially and consistently across all four models (AIC: 23,756 → 23,736 → 23,415 → 23,278; pseudo-R²: 0.013 → 0.015 → 0.029 → 0.034), with the accomplishments block and the postsecondary-attendance block both producing the two largest single-block improvements of either sequence in this entire two-part analysis. This confirmatory analysis validated nearly every mechanism-specific prediction from the bivariate stage, with one clear exception and one genuinely new finding worth flagging.
+
+### The predictions that held up, several dramatically
+
+- **Non-English home** was the largest, most stable coefficient in every single model (OR ranging from 2.10 to 2.23 across all four blocks) — barely moving despite every control added. This is now the single most robust individual finding across this entire two-part analysis, confirming the bivariate result that non-English-home students are dramatically more likely to disappear from Minnesota's employment record specifically, with essentially no relationship to job instability.
+- **English learner status** was significant and harmful in every model (OR ≈ 1.25–1.27) — a complete, consistent mirror image of its null role in the non-sustained sequence, confirming EL's disadvantage operates specifically through the no-record mechanism.
+- **Gender** was not significant in any of the four models — the complete opposite of its strong, stable role in the non-sustained sequence, confirming this variable's disadvantage is entirely about job instability and has nothing to do with disappearing from the record.
+- **Asian/Pacific Islander and Hispanic** were both significant and harmful in every model (OR ranging roughly 1.29–1.38) — a clean reversal from their null role in the non-sustained sequence, directly confirming the bivariate prediction that these two groups' disadvantage concentrates in the no-record mechanism.
+- **American Indian** remained significant and harmful throughout, though it attenuated somewhat as HS characteristics and accomplishments were added (OR moving from 1.59 down to 1.38), confirming this group's disadvantage — unlike Asian/Pacific Islander and Hispanic — operates through both mechanisms.
+- **Economic status** was significant and *protective* in every model (OR ≈ 0.77–0.81) — a genuinely new finding not clearly anticipated by the bivariate cross-tab, worth reporting as its own result: economically disadvantaged non-completers appear less likely to disappear from Minnesota's employment record, plausibly reflecting fewer resources to relocate or disengage from the formal system, though this interpretation can't be confirmed directly from the data.
+- **`took.ACT`, `ACTCompositeScore.filled`, and especially `sat.taken`** all showed dramatically stronger relationships here than in the non-sustained sequence — `sat.taken` in particular flipped from completely null (p = 0.542) to strongly significant (OR ≈ 1.99–2.00) once no-record status was the outcome. This is the single cleanest confirmation of the entire mechanism-split hypothesis in this whole two-part analysis: SAT-taking's dramatic bivariate disadvantage — the largest raw gap found anywhere in the earlier work — is now confirmed, in a fully controlled multivariate model, to be almost entirely about disappearing from the employment record.
+- **`attended.ps`** was strongly protective (OR ≈ 0.61), and notably *stronger* here than in the non-sustained sequence (OR ≈ 0.67 there) — confirming and sharpening the bivariate finding that this variable's benefit splits nearly evenly between both mechanisms with a slight edge toward no-record status.
+- **`total.cte.courses.taken`** was significant here (unlike its null result in the non-sustained sequence), confirming the earlier three-way bivariate finding that its relationship with disconnection concentrates more in the no-record dimension. `cte.achievement`'s two categories remained protective in both sequences, confirming CTE's dual-mechanism role.
+
+### The one clear exception: Black graduates
+
+Black graduates showed a significant, *protective* association in Model 1 (OR = 0.82) — a genuine reversal from the raw bivariate cross-tab, which showed a modestly elevated no-record rate for this group. This protective effect weakened to non-significance once HS characteristics were added in Model 2 and remained null through Models 3 and 4. This should be reported honestly as an unstable, largely null finding for this group and mechanism specifically — distinct from the group's strong, non-attenuating disadvantage in the non-sustained sequence, and distinct from the consistent, non-attenuating Black-White gap seen throughout the rest of this project's outcomes.
+
+### A finding that didn't survive full control: PSEO
+
+PSEO participation showed real, independent bivariate relationships with both non-sustained employment and no-record status when tested separately in the earlier three-way comparison. In this fully controlled multivariate model, however, `pseo.participant` was not significant in any of the four no-record models (nor in the parallel non-sustained sequence). This is worth reporting as exactly the kind of result this confirmatory analysis was designed to catch: a real bivariate relationship that doesn't survive once demographics, HS context, and other accomplishments are all controlled simultaneously.
+
+### A reproducible cross-sequence pattern worth highlighting
+
+`avg.unemp.rate` emerged as significant and protective once accomplishments were added in Model 3, then dropped back to non-significance once `attended.ps` was added in Model 4 — and this exact same pattern (emerge in Model 3, disappear in Model 4) also occurred independently in the parallel non-sustained sequence. This consistency across both otherwise-separate models adds confidence that it reflects a real, reproducible dynamic (unemployment's apparent effect substantially running through postsecondary attendance) rather than noise specific to either individual model.
+
+### Bottom line
+
+This sequence delivered the strongest, cleanest confirmatory results of this entire two-part analysis. Nearly every demographic and accomplishment variable behaved exactly as the bivariate mechanism-split hypothesis predicted, with SAT-taking's complete reversal (null for non-sustained, strongly significant for no-record) standing out as the single most decisive piece of evidence for treating these as genuinely distinct mechanisms. The two departures from expectation — Black graduates' unstable, ultimately-null coefficient, and PSEO's failure to survive full multivariate control in either sequence — are both worth reporting explicitly as honest, informative null results rather than smoothed over.
+
+<br>
+
+# Multivariate Confirmation: Side-by-Side Comparison of the Two Disconnection Mechanisms
+
+## Variable Screening Table
+
+| Variable | Bivariate Expectation | Confirmed for Non-Sustained? | Confirmed for No-Record? |
+|------------------|------------------|------------------|------------------|
+| Gender | Non-sustained mechanism (primarily) | **Yes** (OR = 1.57, harmful for women) | **No** — null in every model (OR = 0.96, p = 0.298) |
+| RaceEthnicity | Both, subgroup-specific (AI/Black → both; Asian-PI/Hispanic → no-record only) | **Yes** for Black (OR = 1.91); American Indian unstable across blocks, ends null | **Yes** for American Indian (1.38), Asian/PI (1.38), Hispanic (1.30); **Black did not confirm** (null, after an unstable Model 1 reversal) |
+| economic.status | Non-sustained mechanism (primarily) | **Yes** (OR = 1.21, harmful) | **Yes, opposite direction** (OR = 0.77, protective) — a stronger, more consequential no-record finding than the bivariate stage suggested |
+| SpecialEdStatus | Both mechanisms | **Yes** (OR = 1.52, stable across all four models) | **Yes, but weaker and attenuating** (OR = 1.12, weakened at every block) |
+| english.learner | No-record mechanism (primarily) | **No** — null in every model | **Yes** (OR = 1.27, harmful) |
+| non.english.home | Both, opposite directions | **Yes** (OR = 0.65, protective) | **Yes — strongest predictor in either sequence** (OR = 2.10, harmful) |
+| edr | Different regional signature per mechanism | **Yes** — EDR 7E harmful (OR = 1.28), EDR 7W null | **Partial** — EDR 7W protective (OR = 0.74), EDR 7E only borderline (p = 0.089) |
+| avg.wages.pct.state | Weak, no-record-leaning | **No** (p = 0.878) | **No** (p = 0.236) |
+| avg.unemp.rate | No-record mechanism (stronger bivariate) | **No** in final model — significant in Model 3 (p = 0.006), attenuated once `attended.ps` entered | **No** in final model — identical pattern: significant in Model 3 (p \< 0.001), attenuated once `attended.ps` entered |
+| pseo.participant | Both (weak, masked by combined measure) | **No** (p = 0.168) | **No** (p = 0.773) |
+| took.ACT | Both, no-record somewhat stronger | **Yes** (OR = 0.62, protective) | **Yes, considerably stronger** (OR = 0.32, protective) |
+| ACTCompositeScore.filled | No-record mechanism (bivariate was null for non-sustained, p = 0.393) | **Yes — emerged in multivariate** (OR = 1.025, harmful) despite a null bivariate relationship | **Yes** (OR = 1.045, harmful) |
+| ap.exam | No-record mechanism (weak, bivariate) | **No** — borderline only (p = 0.051) | **No — did not survive** (p = 0.417), despite a significant bivariate relationship |
+| sat.taken | No-record mechanism | **No** (p = 0.565) | **Yes, dramatically** (OR = 2.00, harmful) |
+| cte.achievement | Both, no-record somewhat stronger (bivariate) | **Yes**, both categories (OR = 0.85 / 0.90, protective) | **Yes**, both categories (OR = 0.81 / 0.84, protective) |
+| total.cte.courses.taken | Both, no-record notably stronger (bivariate) | **No** (p = 0.162) | **Yes** (OR = 0.96, protective) |
+| attended.ps | Both, roughly balanced (bivariate) | **Yes** (OR = 0.67, protective) | **Yes, slightly stronger** (OR = 0.61, protective) |
+
+## Description of the Analysis and Findings
+
+This analysis tested, via parallel four-block logistic regression sequences (demographics → high school characteristics → high school accomplishments → postsecondary attempt), whether the two disconnection mechanisms identified in the bivariate work — persistent non-sustained employment and persistent no-record status — remain genuinely distinct once all variables are considered simultaneously. Both models were fit on the same analytic population (N = 27,669 non-college graduates, 2011–2019 cohorts), using the same 17-variable candidate set.
+
+The results confirm the mechanism split clearly, though with more nuance than a simple "two separate systems" story would suggest. Of the 17 variables tested, 13 came back significant for at least one outcome, and — as in the bivariate stage — the pattern of *which* variable matters for *which* outcome is largely non-overlapping.
+
+**Non-English home is the single strongest and most consequential finding in this entire analysis.** It shows the largest coefficient found in either sequence (OR = 2.10 for no-record status) and a smaller but genuinely opposite-signed effect for non-sustained employment (OR = 0.65, protective). This is not a case of one mechanism mattering and the other being noise — both effects are large, stable, and move in opposite directions for the same population.
+
+**Gender and English learner status are the cleanest single-mechanism confirmations.** Gender is significant and harmful for non-sustained employment in every model and completely null for no-record status in every model. English learner status shows the exact mirror pattern. Neither variable shows any hint of "leaking" into the other mechanism, which is about as clean a confirmation as a variable screening exercise like this can produce.
+
+**Two variables — economic status and SpecialEdStatus — matter for both mechanisms, but in genuinely different ways.** Economic status is harmful for non-sustained employment and protective for no-record status — opposite directions for the same variable. SpecialEdStatus is harmful for both, but far more so for non-sustained employment, and its no-record effect weakens noticeably as accomplishments are added, while its non-sustained effect does not move at all.
+
+**CTE engagement is a genuine dual-mechanism finding, not a single-mechanism one as the earlier bivariate work might have suggested.** Both `cte.achievement` categories are significantly protective for *both* outcomes at similar magnitude. `total.cte.courses.taken`, however, resolves cleanly to a no-record-only finding — protective and significant there, but not significant for non-sustained employment. This distinction between the categorical and continuous CTE measures is worth carrying into any final report, since treating "CTE" as a single undifferentiated protective factor would obscure this split.
+
+**ACT composite score is the analysis's clearest example of a relationship that emerged only once other variables were controlled.** The bivariate analysis found this variable had no significant relationship with non-sustained employment at all (p = 0.393). Once demographics, HS context, and other accomplishments are held constant, it becomes clearly significant and harmful for non-sustained employment (OR = 1.025) — a textbook illustration of why this project's confirmatory stage exists. Combined with `took.ACT`'s protective effect (participation helps, but a higher score among test-takers is a modest risk factor), this "engagement helps, performance hurts" tension now replicates across both mechanisms.
+
+**Two bivariate findings did not survive full multivariate control.** `pseo.participant` showed real, independent relationships with both mechanisms at the bivariate stage but is not significant for either outcome in any of the eight models here. `ap.exam` showed a significant bivariate relationship with no-record status specifically, but that relationship disappears once the full variable set is included. Both are worth reporting explicitly as null results rather than smoothed over, since a confirmatory analysis that only reports what replicates isn't doing its job.
+
+**`attended.ps` and `avg.unemp.rate` both show a genuine cross-mechanism parallel worth flagging on its own.** `attended.ps` is strongly protective for both outcomes, with a slightly larger effect for no-record status — directly confirming the bivariate finding that this was the one variable operating through both channels roughly equally. `avg.unemp.rate`, meanwhile, becomes significant for *both* outcomes once accomplishments are added in Model 3, then loses significance for *both* once `attended.ps` enters in Model 4 — the identical pattern occurring independently in two separately-run models, which is a strong indication this reflects a real, reproducible dynamic (unemployment's apparent effect substantially running through postsecondary attendance) rather than coincidence in either individual sequence.
+
+## The Story the Data Tells
+
+Coming into this analysis, the working assumption — built from the bivariate stage — was that "disconnection" among non-college graduates might really be two problems wearing one label. This multivariate confirmation supports that assumption, but with an important refinement: it isn't a clean, symmetric split where each variable belongs entirely to one mechanism or the other. A meaningful subset of variables — non-English home, economic status, SpecialEdStatus, `attended.ps`, `took.ACT`, and `ACTCompositeScore` — matter for *both* mechanisms, sometimes in the same direction and sometimes in opposite ones. The real finding isn't "two separate systems with no overlap." It's that combining these two outcomes into a single measure would not just dilute several of these relationships — for non-English home and economic status specifically, it would actively cancel them out, since the same variable pushes in opposite directions depending on which mechanism is being measured.
+
+If you are a non-completer from a non-English-speaking home, the data says both risks apply to you, but very unevenly: you face a dramatically elevated risk of disappearing from Minnesota's employment record, even as you face a somewhat *lower* risk of unstable-but-visible employment once you're in the labor market at all. If you have a documented special education status, both risks apply too, but the instability risk is considerably larger and more durable than the record-disappearance risk, which fades noticeably once your high school accomplishments are accounted for. If your risk factor is gender or English-learner status specifically, only one mechanism applies to you at all — the other shows no relationship whatsoever, in either direction.
+
+This has a direct, practical implication for anyone designing an intervention around this population. Programs built around CTE course *completion levels* would show real, roughly equal protective results against both instability and disappearance. Programs built around CTE course *volume* specifically would show results only against disappearance from the record, with no measurable effect on job stability. Programs built around postsecondary attendance — even incomplete attendance — would help with both, more so than almost anything else tested. And any intervention built around a single, undifferentiated theory of "workforce disconnection" risks helping one population while doing essentially nothing for the other, or helping both populations through entirely different, non-substitutable mechanisms that need to be built and evaluated separately from the start.

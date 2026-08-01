@@ -134,7 +134,7 @@ Now I'm going to prep the CTE demographics dataset to join with the master. I wi
 <br>
 
 ```{r cte demographics original}
-cte.demographics.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/CTEDemographics/CTEDemographic.csv')  %>%
+cte.demographics.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/CTEDemographics/CTEDemographic.csv')  %>%
   mutate(PersonID = as.integer(PersonID)) 
 
 kable(head(cte.demographics.original))
@@ -149,10 +149,10 @@ The original dataset provides whether the student was a basic participant, basic
 
 In order to determine how I want to organize this data so that each observation represents the full characteristics of each PersonID I need to understand how these values are defined.
 
--   Basic Participant: Any grade 9-12 student who successfully completes one or more state-approved CTE course(s).
--   Basic Concentrator: this is the old standard for years and required the student complete 240 hours. Any student successfully enrolled in a single CTE field for more than 240 hours (successful is defined as passing grade).
--   Basic Completor: any concentrator who attains academic and technical knowledge and skills and graduates from high school.
--   Concentrator 150: This is the new standard - Any grade 9-12 student who successfully completes 150+ course hours (or more) as part of a state-approved secondary CTE program, within one career field.
+- Basic Participant: Any grade 9-12 student who successfully completes one or more state-approved CTE course(s).
+- Basic Concentrator: this is the old standard for years and required the student complete 240 hours. Any student successfully enrolled in a single CTE field for more than 240 hours (successful is defined as passing grade).
+- Basic Completor: any concentrator who attains academic and technical knowledge and skills and graduates from high school.
+- Concentrator 150: This is the new standard - Any grade 9-12 student who successfully completes 150+ course hours (or more) as part of a state-approved secondary CTE program, within one career field.
 
 Judging by these definitions, it seems that we will want three categories;
 
@@ -306,10 +306,10 @@ Lets take a look at the county map.
 
 The cross tabulations show that there is a statistically significant difference in the percent of graduates in each CTE category by county. The highest percentage of No CTE graduates is Sherburne County with 42.5% and Pine not far behind with 40%. The counties with the highest percentage of CTE completors/concentrators are;
 
--   Isanti: 56%
--   Chisago: 56%
--   Mille Lacs: 53%
--   Wadena: 53%.
+- Isanti: 56%
+- Chisago: 56%
+- Mille Lacs: 53%
+- Wadena: 53%.
 
 <br>
 

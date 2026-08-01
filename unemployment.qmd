@@ -135,7 +135,7 @@ The unemployment rate is from MN DEED LAUS website and includes the average, thr
 <br>
 
 ```{r original unemployment}
-unemployment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/Unemployment/Master-avg-unemp-rate-county.csv') 
+unemployment.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/Unemployment/Master-avg-unemp-rate-county.csv') 
 
 kable(head(unemployment.original))
 

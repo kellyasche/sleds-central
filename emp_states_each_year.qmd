@@ -148,28 +148,28 @@ kable(names(employment.original))
 
 In the original dataset we have `r employment.original %>% nrow()` rows and `r employment.original %>% ncol()` columns. Below is a description of each variable.
 
--   PersonID: Identification for all individuals across datasets.
--   TimeID: Last day of of fiscal quarter
--   EmploymentOrganizationID: An internal identification for each employer.
--   EmployeeQuarterlyHoursWorked: The total number of hours worked by an employee at an employer's location during a specific calendar quarter
--   EmployeeQuarterlyWages: The total wages earned by an employee at an employer's location during a specific calendar quarter
--   EmployeeTenure: The total number of quarters a worker has been employeed by an organization at a specific location, up to an including the current calendar quarter
--   IndustryID: Auto generated ID code for a record in the Industry dimension.
--   USIndustryCode: Six-digit North American Industrial Classification System (NAICS) code
--   GroupCode: Four-digit North American Industrial Classification System (NAICS) code
--   OwnershipCode: A classification system based upon the controlling interest of the establishment primarily designed to distinguish between governmental and non-governmental establishments
-    -   10 = Federal government
-    -   20 = State government
-    -   30 = Local government
-    -   50 = Private
--   EmployerLocationTotalWagesPaid: The total wages paid to all workers employeed by an organization at a specific location during a specific calendar quarter
--   QuarterlyAverageEmployment: The average number of workers employeed by an organization at a specific location during a specific calendar quarter
--   County: Minnesota county code to which this institution belongs. This can be used as a foreign key into the Geography dimension on MNCounty.
-    -   [Link to codes](https://sleds.mn.gov/dataDictionary/658)
--   CountyName: The name of the county corresponding to the County and MNCounty Codes for this Location.
--   MNCounty: County Code for this location as assigned by the state of Minnesota.
-    -   [Link to codes](https://sleds.mn.gov/dataDictionary/663) City: All of the city data is NA
--   City: City location, which are blank and will be eliminated.
+- PersonID: Identification for all individuals across datasets.
+- TimeID: Last day of of fiscal quarter
+- EmploymentOrganizationID: An internal identification for each employer.
+- EmployeeQuarterlyHoursWorked: The total number of hours worked by an employee at an employer's location during a specific calendar quarter
+- EmployeeQuarterlyWages: The total wages earned by an employee at an employer's location during a specific calendar quarter
+- EmployeeTenure: The total number of quarters a worker has been employeed by an organization at a specific location, up to an including the current calendar quarter
+- IndustryID: Auto generated ID code for a record in the Industry dimension.
+- USIndustryCode: Six-digit North American Industrial Classification System (NAICS) code
+- GroupCode: Four-digit North American Industrial Classification System (NAICS) code
+- OwnershipCode: A classification system based upon the controlling interest of the establishment primarily designed to distinguish between governmental and non-governmental establishments
+  - 10 = Federal government
+  - 20 = State government
+  - 30 = Local government
+  - 50 = Private
+- EmployerLocationTotalWagesPaid: The total wages paid to all workers employeed by an organization at a specific location during a specific calendar quarter
+- QuarterlyAverageEmployment: The average number of workers employeed by an organization at a specific location during a specific calendar quarter
+- County: Minnesota county code to which this institution belongs. This can be used as a foreign key into the Geography dimension on MNCounty.
+  - [Link to codes](https://sleds.mn.gov/dataDictionary/658)
+- CountyName: The name of the county corresponding to the County and MNCounty Codes for this Location.
+- MNCounty: County Code for this location as assigned by the state of Minnesota.
+  - [Link to codes](https://sleds.mn.gov/dataDictionary/663) City: All of the city data is NA
+- City: City location, which are blank and will be eliminated.
 
 The next thing I want to do is put in the EDR and region of each of these employment instances. I will convert the "County" column to a 3 width character format and then match it with my counties.regions.1 list.
 
@@ -243,9 +243,9 @@ The dataset above provides each unique PersonID from our master list along with 
 
 Here is the logic;
 
--   grad.year.x \> 2023: mn.emp.record == "After 2023",
--   if there's a MN employment record for the PersonID and the grad.year.x: mn.emp.record == "MN emp record"
--   if there's no MN employment record for the PersonID and the grad.year.x: mn.emp.record == "No MN emp record"
+- grad.year.x \> 2023: mn.emp.record == "After 2023",
+- if there's a MN employment record for the PersonID and the grad.year.x: mn.emp.record == "MN emp record"
+- if there's no MN employment record for the PersonID and the grad.year.x: mn.emp.record == "No MN emp record"
 
 There are `r comma(nrow(mn.emp.record))` rows in this dataset with `r comma(nrow(distinct(mn.emp.record, PersonID)))` individuals.
 
@@ -290,10 +290,10 @@ kable(names(meaningful.employer))
 
 This dataset has `r comma(nrow(meaningful.employer))` rows where each row represents a grad.year.x and whether the PersonID had the following;
 
--   meaningful employment
--   mn employment record but not meaningful employment
--   employment calendar year was after 2023, and
--   had no MN employment record.
+- meaningful employment
+- mn employment record but not meaningful employment
+- employment calendar year was after 2023, and
+- had no MN employment record.
 
 Along with each of these is the Employment Organization ID which we can now join to see the location of the meaningful employment.
 

@@ -132,7 +132,7 @@ Alright, lets see what this dataset looks like. I will first import the entire d
 <br>
 
 ```{r sat original}
-sat.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/SAT/AdvancedPlacementSATPSAT_SAT.csv') %>%
+sat.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/SAT/AdvancedPlacementSATPSAT_SAT.csv') %>%
   mutate(PersonID = as.integer(PersonID))
 
 kable(head(sat.original))
@@ -144,10 +144,10 @@ kable(names(sat.original))
 
 There are `r comma(sat.original %>% nrow(), accuracy = 1)` rows and `r comma(sat.original %>% ncol(), accuracy = 1)` columns. The definitions of the columns are;
 
--   SATTimeID: Time of the test
--   TestType: SAT
--   ExamSubject: subject
--   ExamGrade: Exam grades are all over the place here and there's no definition in the data dictionary.
+- SATTimeID: Time of the test
+- TestType: SAT
+- ExamSubject: subject
+- ExamGrade: Exam grades are all over the place here and there's no definition in the data dictionary.
 
 Okay, since I don't have any information related to how the grading system works, I will just utilize this dataset to code wither a PersonID has taken an SAT test.
 

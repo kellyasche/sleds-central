@@ -132,7 +132,7 @@ Okay, lets check out assessments. This is the entire assessment dataset, which I
 <br>
 
 ```{r ipeds original}
-assessments.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/SLEDS/Assessments/K12Assessment.csv')  %>%
+assessments.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/SLEDS/Assessments/K12Assessment.csv')  %>%
   mutate(PersonID = as.integer(PersonID),
          TestName = as.factor(TestName),
          Subject = as.factor(Subject),
@@ -148,36 +148,36 @@ kable(names(assessments.original))
 
 We have `r comma(assessments.original %>% nrow(), accuracy = 1)` rows and `r comma(assessments.original %>% ncol(), accuracy = 1)` columns in this dataset. Here are the descriptions for each of the columns.
 
--   K12AsstTimeID: Day, month, and year the assessment took place.
--   TestName: Name of the test taken. There are 12 different tests in the dataset -
-    -   ACCESS: English proficiency,
-    -   ALTACCESS: English proficiency for special education or meet requirements
-    -   MCA-II & MCA-III: Minnesota Comprehsensive Assessments (series 2 and 3)
-    -   MOD-II, MOD-III: Modified Comprehensive Assessment, used only until 2014
-    -   MTAS & MTAS-III: Minnesota Test of Academic Skills
-    -   MTELL: an alternate assessment for students learning English (like the MTAS or MOD). MTELL was only administered from 2007-2010 during the series-II of MCAs.
-    -   SOLOM: Minnesota Student Oral Language Observation Matrix
-    -   TEAE: one of two assessments that Minnesota used to meet the requirements to test ELs in all four domains of language (the other was SOLOM). TEAE was used 2002 until we changed to ACCESS in 2012. SOLOM was used 2004 until we changed to ACCESS in 2012.
--   Subject: Classifies each test that is given to a student based on the areas measured. There are 8 factors;
-    -   A: Aural (listening) - ACCESS & ALTACCESS only
-    -   C: Composite - ACCESS & ALTACCESS only
-    -   L: Listening/Speaking
-    -   M: Math
-    -   O: Oral - ACCESS & ALTACCESS only
-    -   R: Reading
-    -   S: Science
-    -   W: Writing
--   GradeTested: Grade student was enrolled in when performing assessment.
--   AchievementLevel: Used to count the number of students in each achievement level by group such as race, gender, and ethnicity. It must be calculated from other students at a similar graden and subject for a specific year.
-    -   ACCESS students are graded on a language proficiency scale of 1 through 6.
-    -   ALT-ACCESS students are graded using a P1 through P3 and A1 through A3 scale.
-    -   There are 4 different levels for the MCA test
-        -   D: Does not meet standards
-        -   E: Exceeds standards
-        -   M: Meets Standards
-        -   P: Partially meets standards
-    -   SOLOM tests are 1-5 scale with 5 being the highest
-    -   TEAE tests are 1-5 scale with 5 being the highest.
+- K12AsstTimeID: Day, month, and year the assessment took place.
+- TestName: Name of the test taken. There are 12 different tests in the dataset -
+  - ACCESS: English proficiency,
+  - ALTACCESS: English proficiency for special education or meet requirements
+  - MCA-II & MCA-III: Minnesota Comprehsensive Assessments (series 2 and 3)
+  - MOD-II, MOD-III: Modified Comprehensive Assessment, used only until 2014
+  - MTAS & MTAS-III: Minnesota Test of Academic Skills
+  - MTELL: an alternate assessment for students learning English (like the MTAS or MOD). MTELL was only administered from 2007-2010 during the series-II of MCAs.
+  - SOLOM: Minnesota Student Oral Language Observation Matrix
+  - TEAE: one of two assessments that Minnesota used to meet the requirements to test ELs in all four domains of language (the other was SOLOM). TEAE was used 2002 until we changed to ACCESS in 2012. SOLOM was used 2004 until we changed to ACCESS in 2012.
+- Subject: Classifies each test that is given to a student based on the areas measured. There are 8 factors;
+  - A: Aural (listening) - ACCESS & ALTACCESS only
+  - C: Composite - ACCESS & ALTACCESS only
+  - L: Listening/Speaking
+  - M: Math
+  - O: Oral - ACCESS & ALTACCESS only
+  - R: Reading
+  - S: Science
+  - W: Writing
+- GradeTested: Grade student was enrolled in when performing assessment.
+- AchievementLevel: Used to count the number of students in each achievement level by group such as race, gender, and ethnicity. It must be calculated from other students at a similar graden and subject for a specific year.
+  - ACCESS students are graded on a language proficiency scale of 1 through 6.
+  - ALT-ACCESS students are graded using a P1 through P3 and A1 through A3 scale.
+  - There are 4 different levels for the MCA test
+    - D: Does not meet standards
+    - E: Exceeds standards
+    - M: Meets Standards
+    - P: Partially meets standards
+  - SOLOM tests are 1-5 scale with 5 being the highest
+  - TEAE tests are 1-5 scale with 5 being the highest.
 
 There are two ways in which we are going to code our graduates.
 

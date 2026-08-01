@@ -134,7 +134,7 @@ We will use the BEA average wages and salaries. Average wages and salaries are w
 <br>
 
 ```{r avg wages}
-avg.wage.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY26/OHE Journey to meaningful employment/Data/Income/Master-avg-wages-county.csv')
+avg.wage.original <- read_csv('/Users/kellyasche/Library/CloudStorage/GoogleDrive-kasche@ruralmn.org/My Drive/Research/FY25-27/FY27/OHE Journey to meaningful employment/Data/Income/Master-avg-wages-county.csv')
 
 kable(names(avg.wage.original))
 
